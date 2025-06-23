@@ -153,7 +153,16 @@ const App = () => {
                   </>
                 ) : (
                   <>
-                    <Route path="/" element={<RSVPPage guestStats={weddingData.guestStats} />} />
+                    <Route path="/" element={
+                      <div className="space-y-8">
+                        <div className="text-center py-6">
+                          <h1 className="text-4xl font-bold text-gradient mb-4">Welcome {weddingData.coupleNames}</h1>
+                          <p className="text-xl text-gray-600">Event Company Dashboard</p>
+                          <p className="text-lg text-gray-500">Managing your special day - {weddingData.weddingDate}</p>
+                        </div>
+                        <RSVPPage guestStats={weddingData.guestStats} />
+                      </div>
+                    } />
                     <Route path="/rsvp" element={<RSVPPage guestStats={weddingData.guestStats} />} />
                     <Route path="/schedule" element={<SchedulePage />} />
                     <Route path="/guests" element={<GuestPage />} />

@@ -13,28 +13,27 @@ interface LoginFormProps {
 
 export const LoginForm = ({ onLogin }: LoginFormProps) => {
   const [userType, setUserType] = useState<'customer' | 'eventCompany'>('customer');
-  const [loginMethod, setLoginMethod] = useState<'email' | 'code'>('email');
   const [email, setEmail] = useState('');
   const [eventCode, setEventCode] = useState('');
   const { toast } = useToast();
 
   const handleLogin = () => {
-    if (loginMethod === 'email' && email) {
+    if (userType === 'customer' && email) {
       onLogin(userType);
       toast({
         title: "Welcome back!",
-        description: `You've successfully logged in as ${userType === 'customer' ? 'a customer' : 'an event company'}.`,
+        description: "You've successfully logged in to your customer dashboard.",
       });
-    } else if (loginMethod === 'code' && eventCode) {
+    } else if (userType === 'eventCompany' && eventCode) {
       onLogin(userType);
       toast({
         title: "Welcome!",
-        description: `You've successfully accessed your ${userType === 'customer' ? 'customer' : 'event company'} dashboard.`,
+        description: "You've successfully accessed the event company dashboard.",
       });
     } else {
       toast({
         title: "Please fill in the required field",
-        description: loginMethod === 'email' ? "Enter your email address" : "Enter your event code",
+        description: userType === 'customer' ? "Enter your email address" : "Enter your event code",
         variant: "destructive"
       });
     }
@@ -100,34 +99,10 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
                 <span>Event Company</span>
               </button>
             </div>
-
-            {/* Login Method Selection */}
-            <div className="flex rounded-xl bg-gray-100/80 p-1.5 backdrop-blur-sm">
-              <button
-                onClick={() => setLoginMethod('email')}
-                className={`flex-1 py-3 px-6 rounded-lg text-sm font-semibold transition-all duration-300 ${
-                  loginMethod === 'email'
-                    ? 'bg-white text-gray-900 shadow-lg transform scale-[1.02]'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
-                }`}
-              >
-                Email Login
-              </button>
-              <button
-                onClick={() => setLoginMethod('code')}
-                className={`flex-1 py-3 px-6 rounded-lg text-sm font-semibold transition-all duration-300 ${
-                  loginMethod === 'code'
-                    ? 'bg-white text-gray-900 shadow-lg transform scale-[1.02]'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
-                }`}
-              >
-                Event Code
-              </button>
-            </div>
           </CardHeader>
 
           <CardContent className="space-y-6">
-            {loginMethod === 'email' ? (
+            {userType === 'customer' ? (
               <div className="space-y-3">
                 <Label htmlFor="email" className="text-base font-semibold text-gray-700">Email Address</Label>
                 <Input
