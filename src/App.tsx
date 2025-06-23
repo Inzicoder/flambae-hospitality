@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -127,11 +126,12 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 via-purple-50 to-indigo-100">
+            <DashboardHeader onLogout={() => setIsLoggedIn(false)} />
             <Navigation 
               coupleNames={weddingData.coupleNames}
               onLogout={() => setIsLoggedIn(false)}
             />
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-32">
               <Routes>
                 <Route path="/" element={<Dashboard weddingData={weddingData} />} />
                 <Route path="/rsvp" element={<RSVPPage guestStats={weddingData.guestStats} />} />
