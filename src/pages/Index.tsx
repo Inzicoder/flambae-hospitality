@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -12,6 +13,9 @@ import { GuestManager } from "@/components/GuestManager";
 import { EventSchedule } from "@/components/EventSchedule";
 import { VendorManager } from "@/components/VendorManager";
 import { NotesCollaboration } from "@/components/NotesCollaboration";
+import { PhotoGallery } from "@/components/PhotoGallery";
+import { TravelAccommodation } from "@/components/TravelAccommodation";
+import { PaymentManager } from "@/components/PaymentManager";
 
 const Index = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -186,124 +190,20 @@ const Index = () => {
               <GuestManager />
             </TabsContent>
 
-            <TabsContent value="gallery">
-              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Camera className="h-6 w-6 text-purple-500" />
-                    <span>Memories & Gallery</span>
-                  </CardTitle>
-                  <CardDescription>Store and share your wedding photos</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-                    {weddingData.gallery.categories.map((category, index) => (
-                      <div key={index} className="p-4 border-2 border-dashed border-gray-300 rounded-lg text-center hover:border-rose-300 transition-colors cursor-pointer">
-                        <Camera className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-                        <p className="text-sm font-medium text-gray-600">{category}</p>
-                        <p className="text-xs text-gray-500">0 photos</p>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="flex space-x-4">
-                    <Button className="bg-purple-500 hover:bg-purple-600">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Upload Photos
-                    </Button>
-                    <Button variant="outline">
-                      <Share2 className="h-4 w-4 mr-2" />
-                      Share Gallery Link
-                    </Button>
-                    <Button variant="outline">Create Slideshow</Button>
-                  </div>
-                </CardContent>
-              </Card>
+            <TabsContent value="gallery" className="animate-fade-in-up">
+              <PhotoGallery gallery={weddingData.gallery} />
             </TabsContent>
 
-            <TabsContent value="notes">
+            <TabsContent value="notes" className="animate-fade-in-up">
               <NotesCollaboration />
             </TabsContent>
 
-            <TabsContent value="travel">
-              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Hotel className="h-6 w-6 text-indigo-500" />
-                    <span>Accommodation & Travel</span>
-                  </CardTitle>
-                  <CardDescription>Manage guest accommodations and travel arrangements</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div className="p-4 border rounded-lg">
-                      <h3 className="font-semibold mb-3">Hotel Bookings</h3>
-                      <div className="space-y-2 text-sm text-gray-600">
-                        <p>• Recommend nearby hotels to guests</p>
-                        <p>• Track group booking discounts</p>
-                        <p>• Manage check-in dates</p>
-                      </div>
-                    </div>
-                    <div className="p-4 border rounded-lg">
-                      <h3 className="font-semibold mb-3">Transportation</h3>
-                      <div className="space-y-2 text-sm text-gray-600">
-                        <p>• Shuttle schedules</p>
-                        <p>• Airport transfer arrangements</p>
-                        <p>• Parking information</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex space-x-4">
-                    <Button className="bg-indigo-500 hover:bg-indigo-600">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Hotel
-                    </Button>
-                    <Button variant="outline">
-                      <MapPin className="h-4 w-4 mr-2" />
-                      View Map
-                    </Button>
-                    <Button variant="outline">Send Travel Info</Button>
-                  </div>
-                </CardContent>
-              </Card>
+            <TabsContent value="travel" className="animate-fade-in-up">
+              <TravelAccommodation />
             </TabsContent>
 
-            <TabsContent value="payments">
-              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <FileText className="h-6 w-6 text-emerald-500" />
-                    <span>Invoice & Payment Manager</span>
-                  </CardTitle>
-                  <CardDescription>Track all invoices and payment statuses</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div className="text-center p-4 bg-green-50 rounded-lg">
-                      <p className="text-2xl font-bold text-green-600">$25,000</p>
-                      <p className="text-sm text-green-700">Paid</p>
-                    </div>
-                    <div className="text-center p-4 bg-yellow-50 rounded-lg">
-                      <p className="text-2xl font-bold text-yellow-600">$8,500</p>
-                      <p className="text-sm text-yellow-700">Pending</p>
-                    </div>
-                    <div className="text-center p-4 bg-red-50 rounded-lg">
-                      <p className="text-2xl font-bold text-red-600">$2,000</p>
-                      <p className="text-sm text-red-700">Overdue</p>
-                    </div>
-                  </div>
-                  <div className="flex space-x-4">
-                    <Button className="bg-emerald-500 hover:bg-emerald-600">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Invoice
-                    </Button>
-                    <Button variant="outline">
-                      <FileText className="h-4 w-4 mr-2" />
-                      Export Reports
-                    </Button>
-                    <Button variant="outline">Payment Reminders</Button>
-                  </div>
-                </CardContent>
-              </Card>
+            <TabsContent value="payments" className="animate-fade-in-up">
+              <PaymentManager />
             </TabsContent>
           </Tabs>
         </div>
