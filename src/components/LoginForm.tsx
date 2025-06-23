@@ -4,14 +4,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Heart, Sparkles } from "lucide-react";
+import { Heart, Sparkles, Users, Building2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface LoginFormProps {
-  onLogin: () => void;
+  onLogin: (userType: 'customer' | 'eventCompany') => void;
 }
 
 export const LoginForm = ({ onLogin }: LoginFormProps) => {
+  const [userType, setUserType] = useState<'customer' | 'eventCompany'>('customer');
   const [loginMethod, setLoginMethod] = useState<'email' | 'code'>('email');
   const [email, setEmail] = useState('');
   const [eventCode, setEventCode] = useState('');
@@ -19,16 +20,16 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
 
   const handleLogin = () => {
     if (loginMethod === 'email' && email) {
-      onLogin();
+      onLogin(userType);
       toast({
         title: "Welcome back!",
-        description: "You've successfully logged into your wedding dashboard.",
+        description: `You've successfully logged in as ${userType === 'customer' ? 'a customer' : 'an event company'}.`,
       });
     } else if (loginMethod === 'code' && eventCode) {
-      onLogin();
+      onLogin(userType);
       toast({
         title: "Welcome!",
-        description: "You've successfully accessed your wedding dashboard.",
+        description: `You've successfully accessed your ${userType === 'customer' ? 'customer' : 'event company'} dashboard.`,
       });
     } else {
       toast({
@@ -71,9 +72,36 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
           <CardHeader className="space-y-6 pb-8">
             <CardTitle className="text-center text-3xl font-bold text-gray-800">Welcome Back</CardTitle>
             <CardDescription className="text-center text-gray-600 text-lg">
-              Access your personalized wedding dashboard
+              Choose your account type to continue
             </CardDescription>
             
+            {/* User Type Selection */}
+            <div className="flex rounded-xl bg-gray-100/80 p-1.5 backdrop-blur-sm">
+              <button
+                onClick={() => setUserType('customer')}
+                className={`flex-1 py-3 px-4 rounded-lg text-sm font-semibold transition-all duration-300 flex items-center justify-center space-x-2 ${
+                  userType === 'customer'
+                    ? 'bg-white text-gray-900 shadow-lg transform scale-[1.02]'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
+                }`}
+              >
+                <Users className="h-4 w-4" />
+                <span>Customer</span>
+              </button>
+              <button
+                onClick={() => setUserType('eventCompany')}
+                className={`flex-1 py-3 px-4 rounded-lg text-sm font-semibold transition-all duration-300 flex items-center justify-center space-x-2 ${
+                  userType === 'eventCompany'
+                    ? 'bg-white text-gray-900 shadow-lg transform scale-[1.02]'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
+                }`}
+              >
+                <Building2 className="h-4 w-4" />
+                <span>Event Company</span>
+              </button>
+            </div>
+
+            {/* Login Method Selection */}
             <div className="flex rounded-xl bg-gray-100/80 p-1.5 backdrop-blur-sm">
               <button
                 onClick={() => setLoginMethod('email')}
@@ -129,12 +157,17 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
               onClick={handleLogin} 
               className="w-full h-12 bg-gradient-to-r from-rose-500 via-pink-500 to-purple-500 hover:from-rose-600 hover:via-pink-600 hover:to-purple-600 text-white font-semibold text-base rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300"
             >
-              Access Dashboard
+              Access {userType === 'customer' ? 'Customer' : 'Event Company'} Dashboard
             </Button>
 
-            <p className="text-sm text-gray-500 text-center mt-6 leading-relaxed">
-              Don't have access yet? Contact your wedding planner to get your login details.
-            </p>
+            <div className="text-xs text-gray-500 text-center mt-6 leading-relaxed">
+              <p className="mb-2">
+                <strong>Customer:</strong> Access all wedding planning features including budget tracking, todos, gallery, and more.
+              </p>
+              <p>
+                <strong>Event Company:</strong> Specialized tools for RSVP management, event scheduling, guest management, and travel coordination.
+              </p>
+            </div>
           </CardContent>
         </Card>
       </div>

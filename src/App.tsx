@@ -23,6 +23,7 @@ const queryClient = new QueryClient();
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userType, setUserType] = useState<'customer' | 'eventCompany'>('customer');
   
   // Sample data for demonstration
   const [weddingData, setWeddingData] = useState({
@@ -108,13 +109,18 @@ const App = () => {
     }));
   };
 
+  const handleLogin = (type: 'customer' | 'eventCompany') => {
+    setUserType(type);
+    setIsLoggedIn(true);
+  };
+
   if (!isLoggedIn) {
     return (
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <LoginForm onLogin={() => setIsLoggedIn(true)} />
+          <LoginForm onLogin={handleLogin} />
         </TooltipProvider>
       </QueryClientProvider>
     );
@@ -131,20 +137,29 @@ const App = () => {
             <Navigation 
               coupleNames={weddingData.coupleNames}
               onLogout={() => setIsLoggedIn(false)}
+              userType={userType}
             />
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-32">
               <Routes>
-                <Route path="/" element={<Dashboard weddingData={weddingData} />} />
-                <Route path="/rsvp" element={<RSVPPage guestStats={weddingData.guestStats} />} />
-                <Route path="/budget" element={<BudgetPage budget={weddingData.budget} onAddCategory={addBudgetCategory} />} />
-                <Route path="/todos" element={<TodoPage todos={weddingData.todos} onToggleTodo={toggleTodo} onAddTodo={addTodo} onDeleteTodo={deleteTodo} />} />
-                <Route path="/schedule" element={<SchedulePage />} />
-                <Route path="/guests" element={<GuestPage />} />
-                <Route path="/gallery" element={<GalleryPage gallery={weddingData.gallery} />} />
-                <Route path="/notes" element={<NotesPage />} />
-                <Route path="/travel" element={<TravelPage />} />
-                <Route path="/payments" element={<PaymentPage />} />
-                <Route path="/vendors" element={<div className="text-center py-8"><h1 className="text-2xl font-bold">Vendor Management</h1><p>Coming soon...</p></div>} />
+                {userType === 'customer' ? (
+                  <>
+                    <Route path="/" element={<Dashboard weddingData={weddingData} />} />
+                    <Route path="/budget" element={<BudgetPage budget={weddingData.budget} onAddCategory={addBudgetCategory} />} />
+                    <Route path="/todos" element={<TodoPage todos={weddingData.todos} onToggleTodo={toggleTodo} onAddTodo={addTodo} onDeleteTodo={deleteTodo} />} />
+                    <Route path="/gallery" element={<GalleryPage gallery={weddingData.gallery} />} />
+                    <Route path="/notes" element={<NotesPage />} />
+                    <Route path="/payments" element={<PaymentPage />} />
+                    <Route path="/vendors" element={<div className="text-center py-8"><h1 className="text-2xl font-bold">Vendor Management</h1><p>Coming soon...</p></div>} />
+                  </>
+                ) : (
+                  <>
+                    <Route path="/" element={<RSVPPage guestStats={weddingData.guestStats} />} />
+                    <Route path="/rsvp" element={<RSVPPage guestStats={weddingData.guestStats} />} />
+                    <Route path="/schedule" element={<SchedulePage />} />
+                    <Route path="/guests" element={<GuestPage />} />
+                    <Route path="/travel" element={<TravelPage />} />
+                  </>
+                )}
                 <Route path="/404" element={<NotFound />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
