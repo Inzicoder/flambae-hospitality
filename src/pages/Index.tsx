@@ -1,4 +1,3 @@
-// Update this page (the content is just a fallback if you fail to update the page)
 
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
@@ -8,8 +7,12 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Calendar, Heart, Users, DollarSign, CheckSquare, Camera, MapPin, MessageSquare, Hotel, FileText } from "lucide-react";
+import { Calendar, Heart, Users, DollarSign, CheckSquare, Camera, MapPin, MessageSquare, Hotel, FileText, Plus, Download, Share2, Bell, Edit, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { GuestManager } from "@/components/GuestManager";
+import { EventSchedule } from "@/components/EventSchedule";
+import { VendorManager } from "@/components/VendorManager";
+import { NotesCollaboration } from "@/components/NotesCollaboration";
 
 const Index = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -19,7 +22,7 @@ const Index = () => {
   const { toast } = useToast();
 
   // Sample data for demonstration
-  const weddingData = {
+  const [weddingData, setWeddingData] = useState({
     coupleNames: "Sarah & Michael",
     weddingDate: "June 15, 2024",
     guestStats: {
@@ -32,24 +35,31 @@ const Index = () => {
       total: 50000,
       spent: 32000,
       categories: [
-        { name: "Venue", estimated: 15000, actual: 15000, status: "paid" },
-        { name: "Catering", estimated: 12000, actual: 11500, status: "paid" },
-        { name: "Photography", estimated: 8000, actual: 8500, status: "partial" },
-        { name: "Decor", estimated: 6000, actual: 4000, status: "pending" },
-        { name: "Outfits", estimated: 4000, actual: 3000, status: "paid" },
-        { name: "Music", estimated: 3000, actual: 0, status: "pending" },
-        { name: "Flowers", estimated: 2000, actual: 2500, status: "paid" }
+        { id: 1, name: "Venue", estimated: 15000, actual: 15000, status: "paid" },
+        { id: 2, name: "Catering", estimated: 12000, actual: 11500, status: "paid" },
+        { id: 3, name: "Photography", estimated: 8000, actual: 8500, status: "partial" },
+        { id: 4, name: "Decor", estimated: 6000, actual: 4000, status: "pending" },
+        { id: 5, name: "Outfits", estimated: 4000, actual: 3000, status: "paid" },
+        { id: 6, name: "Music", estimated: 3000, actual: 0, status: "pending" },
+        { id: 7, name: "Flowers", estimated: 2000, actual: 2500, status: "paid" }
       ]
     },
     todos: [
-      { id: 1, task: "Send save the dates", completed: true, urgent: false },
-      { id: 2, task: "Book wedding photographer", completed: true, urgent: false },
-      { id: 3, task: "Order wedding cake", completed: false, urgent: true },
-      { id: 4, task: "Finalize menu with caterer", completed: false, urgent: true },
-      { id: 5, task: "Buy wedding rings", completed: false, urgent: false },
-      { id: 6, task: "Plan honeymoon", completed: false, urgent: false }
-    ]
-  };
+      { id: 1, task: "Send save the dates", completed: true, urgent: false, dueDate: "2024-01-15" },
+      { id: 2, task: "Book wedding photographer", completed: true, urgent: false, dueDate: "2024-02-01" },
+      { id: 3, task: "Order wedding cake", completed: false, urgent: true, dueDate: "2024-05-01" },
+      { id: 4, task: "Finalize menu with caterer", completed: false, urgent: true, dueDate: "2024-04-15" },
+      { id: 5, task: "Buy wedding rings", completed: false, urgent: false, dueDate: "2024-05-15" },
+      { id: 6, task: "Plan honeymoon", completed: false, urgent: false, dueDate: "2024-06-01" }
+    ],
+    gallery: {
+      categories: ["Pre-wedding", "Haldi", "Mehendi", "Wedding", "Reception"],
+      photos: []
+    }
+  });
+
+  const [newTodo, setNewTodo] = useState('');
+  const [newBudgetCategory, setNewBudgetCategory] = useState({ name: '', estimated: 0 });
 
   const handleLogin = () => {
     if (loginMethod === 'email' && email) {
@@ -71,6 +81,79 @@ const Index = () => {
         variant: "destructive"
       });
     }
+  };
+
+  const toggleTodo = (id: number) => {
+    setWeddingData(prev => ({
+      ...prev,
+      todos: prev.todos.map(todo => 
+        todo.id === id ? { ...todo, completed: !todo.completed } : todo
+      )
+    }));
+  };
+
+  const addTodo = () => {
+    if (newTodo.trim()) {
+      const newTask = {
+        id: Date.now(),
+        task: newTodo,
+        completed: false,
+        urgent: false,
+        dueDate: new Date().toISOString().split('T')[0]
+      };
+      setWeddingData(prev => ({
+        ...prev,
+        todos: [...prev.todos, newTask]
+      }));
+      setNewTodo('');
+      toast({
+        title: "Task added",
+        description: "New task has been added to your to-do list.",
+      });
+    }
+  };
+
+  const deleteTodo = (id: number) => {
+    setWeddingData(prev => ({
+      ...prev,
+      todos: prev.todos.filter(todo => todo.id !== id)
+    }));
+    toast({
+      title: "Task deleted",
+      description: "Task has been removed from your list.",
+    });
+  };
+
+  const addBudgetCategory = () => {
+    if (newBudgetCategory.name && newBudgetCategory.estimated > 0) {
+      const newCategory = {
+        id: Date.now(),
+        name: newBudgetCategory.name,
+        estimated: newBudgetCategory.estimated,
+        actual: 0,
+        status: "pending"
+      };
+      setWeddingData(prev => ({
+        ...prev,
+        budget: {
+          ...prev.budget,
+          categories: [...prev.budget.categories, newCategory]
+        }
+      }));
+      setNewBudgetCategory({ name: '', estimated: 0 });
+      toast({
+        title: "Budget category added",
+        description: "New budget category has been created.",
+      });
+    }
+  };
+
+  const shareRSVPLink = () => {
+    navigator.clipboard.writeText(`${window.location.origin}/rsvp/${eventCode || 'wedding123'}`);
+    toast({
+      title: "RSVP Link Copied!",
+      description: "Share this link with your guests to collect RSVPs.",
+    });
   };
 
   if (!isLoggedIn) {
@@ -184,13 +267,19 @@ const Index = () => {
                 <p className="text-sm text-gray-600">{weddingData.weddingDate}</p>
               </div>
             </div>
-            <Button 
-              variant="outline" 
-              onClick={() => setIsLoggedIn(false)}
-              className="border-gray-300"
-            >
-              Logout
-            </Button>
+            <div className="flex items-center space-x-3">
+              <Button variant="outline" size="sm">
+                <Bell className="h-4 w-4 mr-2" />
+                Notifications
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => setIsLoggedIn(false)}
+                className="border-gray-300"
+              >
+                Logout
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -300,15 +389,22 @@ const Index = () => {
                   </div>
                 </div>
                 
-                <div className="flex space-x-4">
-                  <Button className="bg-rose-500 hover:bg-rose-600">
+                <div className="flex flex-wrap gap-4">
+                  <Button onClick={shareRSVPLink} className="bg-rose-500 hover:bg-rose-600">
+                    <Share2 className="h-4 w-4 mr-2" />
                     Share RSVP Link
                   </Button>
                   <Button variant="outline">
+                    <Plus className="h-4 w-4 mr-2" />
                     Upload Guest List
                   </Button>
                   <Button variant="outline">
+                    <Plus className="h-4 w-4 mr-2" />
                     Add Guest Manually
+                  </Button>
+                  <Button variant="outline">
+                    <Download className="h-4 w-4 mr-2" />
+                    Export RSVP Data
                   </Button>
                 </div>
               </CardContent>
@@ -349,9 +445,9 @@ const Index = () => {
                   />
                 </div>
 
-                <div className="space-y-4">
-                  {weddingData.budget.categories.map((category, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div className="space-y-4 mb-6">
+                  {weddingData.budget.categories.map((category) => (
+                    <div key={category.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                       <div className="flex-1">
                         <div className="flex items-center justify-between mb-2">
                           <h3 className="font-semibold">{category.name}</h3>
@@ -374,11 +470,33 @@ const Index = () => {
                   ))}
                 </div>
 
-                <div className="mt-6 flex space-x-4">
+                <div className="flex items-center space-x-4 mb-4">
+                  <Input
+                    placeholder="Category name"
+                    value={newBudgetCategory.name}
+                    onChange={(e) => setNewBudgetCategory(prev => ({ ...prev, name: e.target.value }))}
+                    className="flex-1"
+                  />
+                  <Input
+                    type="number"
+                    placeholder="Estimated amount"
+                    value={newBudgetCategory.estimated || ''}
+                    onChange={(e) => setNewBudgetCategory(prev => ({ ...prev, estimated: Number(e.target.value) }))}
+                    className="w-40"
+                  />
+                  <Button onClick={addBudgetCategory}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Category
+                  </Button>
+                </div>
+
+                <div className="flex space-x-4">
                   <Button className="bg-green-500 hover:bg-green-600">
+                    <Plus className="h-4 w-4 mr-2" />
                     Add Expense
                   </Button>
                   <Button variant="outline">
+                    <Download className="h-4 w-4 mr-2" />
                     Download PDF Report
                   </Button>
                 </div>
@@ -410,6 +528,20 @@ const Index = () => {
                   />
                 </div>
 
+                <div className="flex items-center space-x-2 mb-6">
+                  <Input
+                    placeholder="Add new task..."
+                    value={newTodo}
+                    onChange={(e) => setNewTodo(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && addTodo()}
+                    className="flex-1"
+                  />
+                  <Button onClick={addTodo}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Task
+                  </Button>
+                </div>
+
                 <div className="space-y-3">
                   {weddingData.todos.map((todo) => (
                     <div 
@@ -425,116 +557,166 @@ const Index = () => {
                       <input
                         type="checkbox"
                         checked={todo.completed}
+                        onChange={() => toggleTodo(todo.id)}
                         className="h-5 w-5 text-rose-500 rounded focus:ring-rose-500"
-                        readOnly
                       />
                       <span className={`flex-1 ${todo.completed ? 'line-through text-gray-500' : ''}`}>
                         {todo.task}
                       </span>
+                      <span className="text-sm text-gray-500">{todo.dueDate}</span>
                       {todo.urgent && !todo.completed && (
                         <Badge variant="destructive">Urgent</Badge>
                       )}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => deleteTodo(todo.id)}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
                   ))}
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-                <div className="mt-6">
-                  <Button className="bg-blue-500 hover:bg-blue-600">
-                    Add New Task
+          {/* Vendor Manager */}
+          <TabsContent value="vendors">
+            <VendorManager />
+          </TabsContent>
+
+          {/* Event Schedule */}
+          <TabsContent value="schedule">
+            <EventSchedule />
+          </TabsContent>
+
+          {/* Guest Manager */}
+          <TabsContent value="guests">
+            <GuestManager />
+          </TabsContent>
+
+          {/* Gallery */}
+          <TabsContent value="gallery">
+            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Camera className="h-6 w-6 text-purple-500" />
+                  <span>Memories & Gallery</span>
+                </CardTitle>
+                <CardDescription>Store and share your wedding photos</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+                  {weddingData.gallery.categories.map((category, index) => (
+                    <div key={index} className="p-4 border-2 border-dashed border-gray-300 rounded-lg text-center hover:border-rose-300 transition-colors cursor-pointer">
+                      <Camera className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                      <p className="text-sm font-medium text-gray-600">{category}</p>
+                      <p className="text-xs text-gray-500">0 photos</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex space-x-4">
+                  <Button className="bg-purple-500 hover:bg-purple-600">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Upload Photos
                   </Button>
+                  <Button variant="outline">
+                    <Share2 className="h-4 w-4 mr-2" />
+                    Share Gallery Link
+                  </Button>
+                  <Button variant="outline">Create Slideshow</Button>
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
 
-          {/* Other tabs with placeholder content */}
-          <TabsContent value="vendors">
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-              <CardHeader>
-                <CardTitle>Vendor Manager</CardTitle>
-                <CardDescription>Manage all your wedding vendors in one place</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600 mb-4">Keep track of all your wedding vendors, contracts, and payments.</p>
-                <Button>Add New Vendor</Button>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="schedule">
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-              <CardHeader>
-                <CardTitle>Event Schedule</CardTitle>
-                <CardDescription>Plan your wedding timeline and events</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600 mb-4">Create a detailed schedule for all your wedding events.</p>
-                <Button>Add Event</Button>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="guests">
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-              <CardHeader>
-                <CardTitle>Guest Manager</CardTitle>
-                <CardDescription>Manage your guest list and contact information</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600 mb-4">Organize guest details, group them by families, and track attendance.</p>
-                <Button>Add Guest</Button>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="gallery">
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-              <CardHeader>
-                <CardTitle>Memories & Gallery</CardTitle>
-                <CardDescription>Store and share your wedding photos</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600 mb-4">Upload and organize photos from all your wedding events.</p>
-                <Button>Upload Photos</Button>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
+          {/* Notes & Collaboration */}
           <TabsContent value="notes">
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-              <CardHeader>
-                <CardTitle>Notes & Collaboration</CardTitle>
-                <CardDescription>Keep important notes and collaborate with your team</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600 mb-4">Add personal notes, vendor meeting notes, and collaborate with family.</p>
-                <Button>Add Note</Button>
-              </CardContent>
-            </Card>
+            <NotesCollaboration />
           </TabsContent>
 
+          {/* Travel & Accommodation */}
           <TabsContent value="travel">
             <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
               <CardHeader>
-                <CardTitle>Accommodation & Travel</CardTitle>
+                <CardTitle className="flex items-center space-x-2">
+                  <Hotel className="h-6 w-6 text-indigo-500" />
+                  <span>Accommodation & Travel</span>
+                </CardTitle>
                 <CardDescription>Manage guest accommodations and travel arrangements</CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600 mb-4">Track hotel bookings, travel schedules, and shuttle arrangements.</p>
-                <Button>Add Booking</Button>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  <div className="p-4 border rounded-lg">
+                    <h3 className="font-semibold mb-3">Hotel Bookings</h3>
+                    <div className="space-y-2 text-sm text-gray-600">
+                      <p>• Recommend nearby hotels to guests</p>
+                      <p>• Track group booking discounts</p>
+                      <p>• Manage check-in dates</p>
+                    </div>
+                  </div>
+                  <div className="p-4 border rounded-lg">
+                    <h3 className="font-semibold mb-3">Transportation</h3>
+                    <div className="space-y-2 text-sm text-gray-600">
+                      <p>• Shuttle schedules</p>
+                      <p>• Airport transfer arrangements</p>
+                      <p>• Parking information</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex space-x-4">
+                  <Button className="bg-indigo-500 hover:bg-indigo-600">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Hotel
+                  </Button>
+                  <Button variant="outline">
+                    <MapPin className="h-4 w-4 mr-2" />
+                    View Map
+                  </Button>
+                  <Button variant="outline">Send Travel Info</Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
 
+          {/* Invoice & Payment Manager */}
           <TabsContent value="payments">
             <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
               <CardHeader>
-                <CardTitle>Invoice & Payment Manager</CardTitle>
+                <CardTitle className="flex items-center space-x-2">
+                  <FileText className="h-6 w-6 text-emerald-500" />
+                  <span>Invoice & Payment Manager</span>
+                </CardTitle>
                 <CardDescription>Track all invoices and payment statuses</CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600 mb-4">Monitor payment due dates, upload receipts, and track vendor payments.</p>
-                <Button>Add Invoice</Button>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                  <div className="text-center p-4 bg-green-50 rounded-lg">
+                    <p className="text-2xl font-bold text-green-600">$25,000</p>
+                    <p className="text-sm text-green-700">Paid</p>
+                  </div>
+                  <div className="text-center p-4 bg-yellow-50 rounded-lg">
+                    <p className="text-2xl font-bold text-yellow-600">$8,500</p>
+                    <p className="text-sm text-yellow-700">Pending</p>
+                  </div>
+                  <div className="text-center p-4 bg-red-50 rounded-lg">
+                    <p className="text-2xl font-bold text-red-600">$2,000</p>
+                    <p className="text-sm text-red-700">Overdue</p>
+                  </div>
+                </div>
+                <div className="flex space-x-4">
+                  <Button className="bg-emerald-500 hover:bg-emerald-600">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Invoice
+                  </Button>
+                  <Button variant="outline">
+                    <Download className="h-4 w-4 mr-2" />
+                    Export Reports
+                  </Button>
+                  <Button variant="outline">Payment Reminders</Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
