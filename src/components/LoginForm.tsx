@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Heart } from "lucide-react";
+import { Heart, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface LoginFormProps {
@@ -40,47 +40,57 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 flex items-center justify-center p-4">
-      <div className="max-w-md w-full space-y-8">
-        <div className="text-center">
-          <div className="flex justify-center mb-6">
-            <div className="bg-gradient-to-r from-rose-500 to-pink-500 p-3 rounded-full">
-              <Heart className="h-8 w-8 text-white" />
+    <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 via-purple-50 to-indigo-100 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Background decorative elements */}
+      <div className="absolute inset-0">
+        <div className="absolute top-20 left-20 w-72 h-72 bg-rose-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse"></div>
+        <div className="absolute top-40 right-20 w-96 h-96 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse delay-1000"></div>
+        <div className="absolute -bottom-8 left-1/2 w-80 h-80 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse delay-2000"></div>
+      </div>
+
+      <div className="max-w-md w-full space-y-8 relative z-10">
+        <div className="text-center animate-fade-in-up">
+          <div className="flex justify-center mb-8">
+            <div className="relative">
+              <div className="bg-gradient-to-r from-rose-500 via-pink-500 to-purple-500 p-4 rounded-2xl shadow-2xl animate-pulse-glow">
+                <Heart className="h-10 w-10 text-white" />
+              </div>
+              <Sparkles className="absolute -top-1 -right-1 h-6 w-6 text-yellow-400 animate-pulse" />
             </div>
           </div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent">
+          <h1 className="text-5xl font-bold text-gradient mb-4">
             Meliora Moments
           </h1>
-          <p className="text-xl text-gray-600 mt-2 font-medium">Your Wedding OS</p>
-          <p className="text-gray-500 mt-4">
+          <p className="text-2xl text-gray-700 font-semibold mb-2">Your Wedding OS</p>
+          <p className="text-gray-600 text-lg">
             Plan, organize, and celebrate your perfect day
           </p>
         </div>
 
-        <Card className="backdrop-blur-sm bg-white/80 border-0 shadow-xl">
-          <CardHeader className="space-y-4">
-            <CardTitle className="text-center text-2xl">Welcome Back</CardTitle>
-            <CardDescription className="text-center">
+        <Card className="glass-effect border-0 shadow-2xl modern-shadow hover-lift animate-slide-in-right">
+          <CardHeader className="space-y-6 pb-8">
+            <CardTitle className="text-center text-3xl font-bold text-gray-800">Welcome Back</CardTitle>
+            <CardDescription className="text-center text-gray-600 text-lg">
               Access your personalized wedding dashboard
             </CardDescription>
             
-            <div className="flex rounded-lg bg-gray-100 p-1">
+            <div className="flex rounded-xl bg-gray-100/80 p-1.5 backdrop-blur-sm">
               <button
                 onClick={() => setLoginMethod('email')}
-                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
+                className={`flex-1 py-3 px-6 rounded-lg text-sm font-semibold transition-all duration-300 ${
                   loginMethod === 'email'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-white text-gray-900 shadow-lg transform scale-[1.02]'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
                 }`}
               >
                 Email Login
               </button>
               <button
                 onClick={() => setLoginMethod('code')}
-                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
+                className={`flex-1 py-3 px-6 rounded-lg text-sm font-semibold transition-all duration-300 ${
                   loginMethod === 'code'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-white text-gray-900 shadow-lg transform scale-[1.02]'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
                 }`}
               >
                 Event Code
@@ -88,41 +98,41 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
             </div>
           </CardHeader>
 
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-6">
             {loginMethod === 'email' ? (
-              <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
+              <div className="space-y-3">
+                <Label htmlFor="email" className="text-base font-semibold text-gray-700">Email Address</Label>
                 <Input
                   id="email"
                   type="email"
                   placeholder="your.email@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="border-gray-200 focus:border-rose-500 focus:ring-rose-500"
+                  className="h-12 border-2 border-gray-200 focus:border-rose-400 focus:ring-rose-400 rounded-xl text-base transition-all duration-300"
                 />
               </div>
             ) : (
-              <div className="space-y-2">
-                <Label htmlFor="eventCode">Event Code</Label>
+              <div className="space-y-3">
+                <Label htmlFor="eventCode" className="text-base font-semibold text-gray-700">Event Code</Label>
                 <Input
                   id="eventCode"
                   type="text"
                   placeholder="Enter your unique event code"
                   value={eventCode}
                   onChange={(e) => setEventCode(e.target.value)}
-                  className="border-gray-200 focus:border-rose-500 focus:ring-rose-500"
+                  className="h-12 border-2 border-gray-200 focus:border-rose-400 focus:ring-rose-400 rounded-xl text-base transition-all duration-300"
                 />
               </div>
             )}
 
             <Button 
               onClick={handleLogin} 
-              className="w-full bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-medium py-2.5"
+              className="w-full h-12 bg-gradient-to-r from-rose-500 via-pink-500 to-purple-500 hover:from-rose-600 hover:via-pink-600 hover:to-purple-600 text-white font-semibold text-base rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300"
             >
               Access Dashboard
             </Button>
 
-            <p className="text-xs text-gray-500 text-center mt-4">
+            <p className="text-sm text-gray-500 text-center mt-6 leading-relaxed">
               Don't have access yet? Contact your wedding planner to get your login details.
             </p>
           </CardContent>
