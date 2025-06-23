@@ -44,22 +44,11 @@ export const Navigation = ({ coupleNames, onLogout }: NavigationProps) => {
   const location = useLocation();
 
   return (
-    <nav className="bg-white/95 backdrop-blur-sm border-b border-rose-200 sticky top-0 z-50">
+    <nav className="bg-white border-b border-slate-200 sticky top-16 z-40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo & Brand */}
-          <div className="flex items-center space-x-3">
-            <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-rose-500 to-pink-500 rounded-full">
-              <Heart className="h-5 w-5 text-white" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-gradient">{coupleNames}</h1>
-              <p className="text-xs text-gray-600">Wedding Planning</p>
-            </div>
-          </div>
-
+        <div className="flex items-center justify-between h-14">
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-1">
+          <div className="hidden lg:flex items-center space-x-1 flex-1">
             {navigationItems.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.path;
@@ -68,10 +57,10 @@ export const Navigation = ({ coupleNames, onLogout }: NavigationProps) => {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-2 ${
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-2 ${
                     isActive 
-                      ? 'bg-rose-100 text-rose-700 shadow-sm' 
-                      : 'text-gray-600 hover:text-rose-600 hover:bg-rose-50'
+                      ? 'bg-teal-100 text-teal-700 shadow-sm' 
+                      : 'text-slate-600 hover:text-teal-600 hover:bg-teal-50'
                   }`}
                 >
                   <Icon className="h-4 w-4" />
@@ -82,21 +71,12 @@ export const Navigation = ({ coupleNames, onLogout }: NavigationProps) => {
           </div>
 
           {/* User Menu */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3">
             <Avatar className="h-8 w-8">
-              <AvatarFallback className="bg-rose-100 text-rose-700 text-sm">
+              <AvatarFallback className="bg-teal-100 text-teal-700 text-sm font-medium">
                 {coupleNames.split(' ')[0]?.[0]}{coupleNames.split(' ')[2]?.[0]}
               </AvatarFallback>
             </Avatar>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onLogout}
-              className="hidden sm:flex items-center space-x-2 text-gray-600 hover:text-rose-600"
-            >
-              <LogOut className="h-4 w-4" />
-              <span>Logout</span>
-            </Button>
             
             {/* Mobile menu button */}
             <Button
@@ -112,7 +92,7 @@ export const Navigation = ({ coupleNames, onLogout }: NavigationProps) => {
 
         {/* Mobile Navigation */}
         {isMobileMenuOpen && (
-          <div className="lg:hidden border-t border-rose-200 py-4">
+          <div className="lg:hidden border-t border-slate-200 py-4">
             <div className="grid grid-cols-2 gap-2">
               {navigationItems.map((item) => {
                 const Icon = item.icon;
@@ -125,8 +105,8 @@ export const Navigation = ({ coupleNames, onLogout }: NavigationProps) => {
                     onClick={() => setIsMobileMenuOpen(false)}
                     className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                       isActive 
-                        ? 'bg-rose-100 text-rose-700' 
-                        : 'text-gray-600 hover:text-rose-600 hover:bg-rose-50'
+                        ? 'bg-teal-100 text-teal-700' 
+                        : 'text-slate-600 hover:text-teal-600 hover:bg-teal-50'
                     }`}
                   >
                     <Icon className="h-4 w-4" />
@@ -135,12 +115,12 @@ export const Navigation = ({ coupleNames, onLogout }: NavigationProps) => {
                 );
               })}
             </div>
-            <div className="mt-4 pt-4 border-t border-rose-200">
+            <div className="mt-4 pt-4 border-t border-slate-200">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={onLogout}
-                className="w-full justify-start text-gray-600 hover:text-rose-600"
+                className="w-full justify-start text-slate-600 hover:text-red-600"
               >
                 <LogOut className="h-4 w-4 mr-2" />
                 Logout
