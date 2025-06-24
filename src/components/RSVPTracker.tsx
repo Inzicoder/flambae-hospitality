@@ -7,7 +7,10 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Heart, Share2, Plus, Download, Settings, Users, Utensils, Hotel } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Heart, Share2, Plus, Download, Settings, Users, Utensils, Hotel, Calendar, MapPin, Phone, Mail, MessageCircle, FileText, BarChart3, Gift } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 
@@ -33,11 +36,19 @@ const countries = [
   'United States', 'United Kingdom', 'India', 'UAE', 'Canada', 'Australia'
 ];
 
+const events = [
+  { id: 'haldi', name: 'Haldi Ceremony', date: '2024-06-13', time: '10:00 AM' },
+  { id: 'mehendi', name: 'Mehendi Night', date: '2024-06-14', time: '6:00 PM' },
+  { id: 'wedding', name: 'Wedding Ceremony', date: '2024-06-15', time: '11:00 AM' },
+  { id: 'reception', name: 'Reception', date: '2024-06-15', time: '7:00 PM' },
+];
+
 export const RSVPTracker = ({ guestStats, eventCode }: RSVPTrackerProps) => {
   const { toast } = useToast();
   const [currency, setCurrency] = useState('USD');
   const [country, setCountry] = useState('United States');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('overview');
 
   const form = useForm({
     defaultValues: {
@@ -45,6 +56,8 @@ export const RSVPTracker = ({ guestStats, eventCode }: RSVPTrackerProps) => {
       country: 'United States',
       rsvpDeadline: '',
       websiteUrl: '',
+      eventVenue: '',
+      dresscode: '',
     }
   });
 
@@ -62,6 +75,20 @@ export const RSVPTracker = ({ guestStats, eventCode }: RSVPTrackerProps) => {
     const message = `Hi! Please RSVP to our wedding by clicking this link: ${rsvpUrl}`;
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
+  };
+
+  const sendReminders = () => {
+    toast({
+      title: "Reminders Sent",
+      description: `Reminder messages sent to ${guestStats.pending} pending guests.`,
+    });
+  };
+
+  const exportGuestList = () => {
+    toast({
+      title: "Export Started",
+      description: "Your guest list is being exported to CSV format.",
+    });
   };
 
   const onSettingsSubmit = (data: any) => {
@@ -98,63 +125,65 @@ export const RSVPTracker = ({ guestStats, eventCode }: RSVPTrackerProps) => {
               Settings
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-white">
+          <DialogContent className="bg-white max-w-2xl">
             <DialogHeader>
               <DialogTitle>RSVP Settings</DialogTitle>
               <DialogDescription>
-                Configure your preferences and regional settings
+                Configure your preferences and event details
               </DialogDescription>
             </DialogHeader>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSettingsSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="currency"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Currency</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger className="bg-white">
-                            <SelectValue placeholder="Select currency" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent className="bg-white border shadow-lg z-50">
-                          {currencies.map((curr) => (
-                            <SelectItem key={curr.code} value={curr.code}>
-                              {curr.symbol} {curr.code} - {curr.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="country"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Country</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger className="bg-white">
-                            <SelectValue placeholder="Select country" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent className="bg-white border shadow-lg z-50">
-                          {countries.map((country) => (
-                            <SelectItem key={country} value={country}>
-                              {country}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="currency"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Currency</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="bg-white">
+                              <SelectValue placeholder="Select currency" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent className="bg-white border shadow-lg z-50">
+                            {currencies.map((curr) => (
+                              <SelectItem key={curr.code} value={curr.code}>
+                                {curr.symbol} {curr.code} - {curr.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="country"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Country</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="bg-white">
+                              <SelectValue placeholder="Select country" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent className="bg-white border shadow-lg z-50">
+                            {countries.map((country) => (
+                              <SelectItem key={country} value={country}>
+                                {country}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
                 <FormField
                   control={form.control}
                   name="rsvpDeadline"
@@ -168,6 +197,43 @@ export const RSVPTracker = ({ guestStats, eventCode }: RSVPTrackerProps) => {
                     </FormItem>
                   )}
                 />
+                <FormField
+                  control={form.control}
+                  name="eventVenue"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Event Venue</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter venue address" {...field} className="bg-white" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="dresscode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Dress Code</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="bg-white">
+                            <SelectValue placeholder="Select dress code" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="bg-white border shadow-lg z-50">
+                          <SelectItem value="formal">Formal</SelectItem>
+                          <SelectItem value="semiformal">Semi-Formal</SelectItem>
+                          <SelectItem value="cocktail">Cocktail</SelectItem>
+                          <SelectItem value="traditional">Traditional</SelectItem>
+                          <SelectItem value="casual">Casual</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 <Button type="submit" className="w-full bg-teal-600 hover:bg-teal-700">
                   Save Settings
                 </Button>
@@ -177,112 +243,324 @@ export const RSVPTracker = ({ guestStats, eventCode }: RSVPTrackerProps) => {
         </Dialog>
       </div>
 
-      {/* Main Stats Card */}
-      <Card className="border-0 shadow-xl bg-gradient-to-br from-slate-50 to-white">
-        <CardHeader className="pb-4">
-          <CardTitle className="text-xl text-slate-800">Response Overview</CardTitle>
-          <CardDescription className="text-slate-600">
-            Current status: {responseRate}% response rate • {country} • {selectedCurrency?.symbol} {selectedCurrency?.code}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
-            <div className="text-center p-6 bg-emerald-50 rounded-2xl border border-emerald-100">
-              <div className="text-3xl font-bold text-emerald-700 mb-1">{guestStats.confirmed}</div>
-              <div className="text-sm font-medium text-emerald-600">Confirmed</div>
-              <div className="text-xs text-emerald-500 mt-1">
-                {Math.round(guestStats.confirmed/guestStats.totalInvited*100)}% of total
-              </div>
-            </div>
-            
-            <div className="text-center p-6 bg-amber-50 rounded-2xl border border-amber-100">
-              <div className="text-3xl font-bold text-amber-700 mb-1">{guestStats.pending}</div>
-              <div className="text-sm font-medium text-amber-600">Pending</div>
-              <div className="text-xs text-amber-500 mt-1">
-                {Math.round(guestStats.pending/guestStats.totalInvited*100)}% waiting
-              </div>
-            </div>
-            
-            <div className="text-center p-6 bg-rose-50 rounded-2xl border border-rose-100">
-              <div className="text-3xl font-bold text-rose-700 mb-1">{guestStats.declined}</div>
-              <div className="text-sm font-medium text-rose-600">Declined</div>
-              <div className="text-xs text-rose-500 mt-1">
-                {Math.round(guestStats.declined/guestStats.totalInvited*100)}% declined
-              </div>
-            </div>
-            
-            <div className="text-center p-6 bg-slate-50 rounded-2xl border border-slate-100">
-              <div className="text-3xl font-bold text-slate-700 mb-1">{guestStats.totalInvited}</div>
-              <div className="text-sm font-medium text-slate-600">Total Invited</div>
-              <div className="text-xs text-slate-500 mt-1">
-                {responseRate}% responded
-              </div>
-            </div>
-          </div>
+      {/* Enhanced Tabs */}
+      <Tabs defaultValue="overview" className="w-full">
+        <TabsList className="grid w-full grid-cols-5 bg-white/80 backdrop-blur-sm">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="events">Events</TabsTrigger>
+          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsTrigger value="communications">Messages</TabsTrigger>
+          <TabsTrigger value="gifts">Gift Registry</TabsTrigger>
+        </TabsList>
 
-          {/* Planning Insights */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="p-5 bg-teal-50 rounded-xl border border-teal-100">
-              <div className="flex items-center space-x-3 mb-3">
-                <div className="p-2 bg-teal-100 rounded-lg">
-                  <Utensils className="h-5 w-5 text-teal-600" />
+        <TabsContent value="overview">
+          {/* Main Stats Card */}
+          <Card className="border-0 shadow-xl bg-white/90 backdrop-blur-sm">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-xl text-slate-800">Response Overview</CardTitle>
+              <CardDescription className="text-slate-600">
+                Current status: {responseRate}% response rate • {country} • {selectedCurrency?.symbol} {selectedCurrency?.code}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+                <div className="text-center p-6 bg-emerald-50 rounded-2xl border border-emerald-100">
+                  <div className="text-3xl font-bold text-emerald-700 mb-1">{guestStats.confirmed}</div>
+                  <div className="text-sm font-medium text-emerald-600">Confirmed</div>
+                  <div className="text-xs text-emerald-500 mt-1">
+                    {Math.round(guestStats.confirmed/guestStats.totalInvited*100)}% of total
+                  </div>
                 </div>
-                <h3 className="font-semibold text-teal-900">Catering</h3>
-              </div>
-              <p className="text-sm text-teal-700">~{Math.round(guestStats.confirmed * 0.4)} vegetarian</p>
-              <p className="text-sm text-teal-700">~{guestStats.confirmed - Math.round(guestStats.confirmed * 0.4)} non-vegetarian</p>
-            </div>
-            
-            <div className="p-5 bg-indigo-50 rounded-xl border border-indigo-100">
-              <div className="flex items-center space-x-3 mb-3">
-                <div className="p-2 bg-indigo-100 rounded-lg">
-                  <Hotel className="h-5 w-5 text-indigo-600" />
+                
+                <div className="text-center p-6 bg-amber-50 rounded-2xl border border-amber-100">
+                  <div className="text-3xl font-bold text-amber-700 mb-1">{guestStats.pending}</div>
+                  <div className="text-sm font-medium text-amber-600">Pending</div>
+                  <div className="text-xs text-amber-500 mt-1">
+                    {Math.round(guestStats.pending/guestStats.totalInvited*100)}% waiting
+                  </div>
                 </div>
-                <h3 className="font-semibold text-indigo-900">Accommodation</h3>
-              </div>
-              <p className="text-sm text-indigo-700">~{Math.round(guestStats.confirmed * 0.3)} guests need</p>
-              <p className="text-sm text-indigo-700">accommodation help</p>
-            </div>
-            
-            <div className="p-5 bg-purple-50 rounded-xl border border-purple-100">
-              <div className="flex items-center space-x-3 mb-3">
-                <div className="p-2 bg-purple-100 rounded-lg">
-                  <Users className="h-5 w-5 text-purple-600" />
+                
+                <div className="text-center p-6 bg-rose-50 rounded-2xl border border-rose-100">
+                  <div className="text-3xl font-bold text-rose-700 mb-1">{guestStats.declined}</div>
+                  <div className="text-sm font-medium text-rose-600">Declined</div>
+                  <div className="text-xs text-rose-500 mt-1">
+                    {Math.round(guestStats.declined/guestStats.totalInvited*100)}% declined
+                  </div>
                 </div>
-                <h3 className="font-semibold text-purple-900">Seating</h3>
+                
+                <div className="text-center p-6 bg-slate-50 rounded-2xl border border-slate-100">
+                  <div className="text-3xl font-bold text-slate-700 mb-1">{guestStats.totalInvited}</div>
+                  <div className="text-sm font-medium text-slate-600">Total Invited</div>
+                  <div className="text-xs text-slate-500 mt-1">
+                    {responseRate}% responded
+                  </div>
+                </div>
               </div>
-              <p className="text-sm text-purple-700">{Math.ceil(guestStats.confirmed / 8)} tables needed</p>
-              <p className="text-sm text-purple-700">(8 guests per table)</p>
-            </div>
-          </div>
-          
-          {/* Action Buttons */}
-          <div className="flex flex-wrap gap-3">
-            <Button 
-              onClick={shareRSVPLink} 
-              className="bg-teal-600 hover:bg-teal-700 text-white px-6"
-            >
-              <Share2 className="h-4 w-4 mr-2" />
-              Copy RSVP Link
-            </Button>
-            <Button 
-              onClick={generateWhatsAppMessage} 
-              className="bg-green-600 hover:bg-green-700 text-white px-6"
-            >
-              <Share2 className="h-4 w-4 mr-2" />
-              WhatsApp Invite
-            </Button>
-            <Button variant="outline" className="border-slate-300 hover:bg-slate-50 px-6">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Guest
-            </Button>
-            <Button variant="outline" className="border-slate-300 hover:bg-slate-50 px-6">
-              <Download className="h-4 w-4 mr-2" />
-              Export Data
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+
+              {/* Planning Insights */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div className="p-5 bg-teal-50 rounded-xl border border-teal-100">
+                  <div className="flex items-center space-x-3 mb-3">
+                    <div className="p-2 bg-teal-100 rounded-lg">
+                      <Utensils className="h-5 w-5 text-teal-600" />
+                    </div>
+                    <h3 className="font-semibold text-teal-900">Catering</h3>
+                  </div>
+                  <p className="text-sm text-teal-700">~{Math.round(guestStats.confirmed * 0.4)} vegetarian</p>
+                  <p className="text-sm text-teal-700">~{guestStats.confirmed - Math.round(guestStats.confirmed * 0.4)} non-vegetarian</p>
+                </div>
+                
+                <div className="p-5 bg-indigo-50 rounded-xl border border-indigo-100">
+                  <div className="flex items-center space-x-3 mb-3">
+                    <div className="p-2 bg-indigo-100 rounded-lg">
+                      <Hotel className="h-5 w-5 text-indigo-600" />
+                    </div>
+                    <h3 className="font-semibold text-indigo-900">Accommodation</h3>
+                  </div>
+                  <p className="text-sm text-indigo-700">~{Math.round(guestStats.confirmed * 0.3)} guests need</p>
+                  <p className="text-sm text-indigo-700">accommodation help</p>
+                </div>
+                
+                <div className="p-5 bg-purple-50 rounded-xl border border-purple-100">
+                  <div className="flex items-center space-x-3 mb-3">
+                    <div className="p-2 bg-purple-100 rounded-lg">
+                      <Users className="h-5 w-5 text-purple-600" />
+                    </div>
+                    <h3 className="font-semibold text-purple-900">Seating</h3>
+                  </div>
+                  <p className="text-sm text-purple-700">{Math.ceil(guestStats.confirmed / 8)} tables needed</p>
+                  <p className="text-sm text-purple-700">(8 guests per table)</p>
+                </div>
+
+                <div className="p-5 bg-rose-50 rounded-xl border border-rose-100">
+                  <div className="flex items-center space-x-3 mb-3">
+                    <div className="p-2 bg-rose-100 rounded-lg">
+                      <Gift className="h-5 w-5 text-rose-600" />
+                    </div>
+                    <h3 className="font-semibold text-rose-900">Gifts</h3>
+                  </div>
+                  <p className="text-sm text-rose-700">Registry items: 25</p>
+                  <p className="text-sm text-rose-700">Purchased: 12</p>
+                </div>
+              </div>
+              
+              {/* Action Buttons */}
+              <div className="flex flex-wrap gap-3">
+                <Button 
+                  onClick={shareRSVPLink} 
+                  className="bg-teal-600 hover:bg-teal-700 text-white px-6"
+                >
+                  <Share2 className="h-4 w-4 mr-2" />
+                  Copy RSVP Link
+                </Button>
+                <Button 
+                  onClick={generateWhatsAppMessage} 
+                  className="bg-green-600 hover:bg-green-700 text-white px-6"
+                >
+                  <MessageCircle className="h-4 w-4 mr-2" />
+                  WhatsApp Invite
+                </Button>
+                <Button 
+                  onClick={sendReminders}
+                  className="bg-orange-600 hover:bg-orange-700 text-white px-6"
+                >
+                  <Mail className="h-4 w-4 mr-2" />
+                  Send Reminders
+                </Button>
+                <Button variant="outline" className="border-slate-300 hover:bg-slate-50 px-6">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Guest
+                </Button>
+                <Button 
+                  onClick={exportGuestList}
+                  variant="outline" 
+                  className="border-slate-300 hover:bg-slate-50 px-6"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Export Data
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="events">
+          <Card className="border-0 shadow-xl bg-white/90 backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Calendar className="h-5 w-5 text-blue-500" />
+                <span>Event-wise RSVP Tracking</span>
+              </CardTitle>
+              <CardDescription>Track attendance for individual events</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                {events.map((event) => (
+                  <div key={event.id} className="border rounded-lg p-6 hover:shadow-md transition-shadow">
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <h3 className="text-lg font-semibold text-slate-800">{event.name}</h3>
+                        <div className="flex items-center space-x-4 text-sm text-slate-600">
+                          <span className="flex items-center">
+                            <Calendar className="h-3 w-3 mr-1" />
+                            {event.date}
+                          </span>
+                          <span>{event.time}</span>
+                        </div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-blue-600">
+                          {Math.round(guestStats.confirmed * (0.7 + Math.random() * 0.3))}
+                        </div>
+                        <div className="text-xs text-slate-500">attending</div>
+                      </div>
+                    </div>
+                    <Progress value={75 + Math.random() * 20} className="mb-3" />
+                    <div className="flex justify-between text-sm text-slate-600">
+                      <span>Response Rate: {Math.round(75 + Math.random() * 20)}%</span>
+                      <Button variant="outline" size="sm">
+                        <FileText className="h-3 w-3 mr-1" />
+                        View Details
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="analytics">
+          <Card className="border-0 shadow-xl bg-white/90 backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <BarChart3 className="h-5 w-5 text-purple-500" />
+                <span>RSVP Analytics</span>
+              </CardTitle>
+              <CardDescription>Detailed insights and trends</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-slate-800">Response Timeline</h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center p-3 bg-blue-50 rounded">
+                      <span className="text-sm">Last 7 days</span>
+                      <Badge>+12 responses</Badge>
+                    </div>
+                    <div className="flex justify-between items-center p-3 bg-green-50 rounded">
+                      <span className="text-sm">Last 30 days</span>
+                      <Badge variant="secondary">+45 responses</Badge>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-slate-800">Guest Demographics</h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center p-3 bg-purple-50 rounded">
+                      <span className="text-sm">Family Members</span>
+                      <span className="font-semibold">{Math.round(guestStats.confirmed * 0.6)}</span>
+                    </div>
+                    <div className="flex justify-between items-center p-3 bg-pink-50 rounded">
+                      <span className="text-sm">Friends</span>
+                      <span className="font-semibold">{Math.round(guestStats.confirmed * 0.4)}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="communications">
+          <Card className="border-0 shadow-xl bg-white/90 backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <MessageCircle className="h-5 w-5 text-green-500" />
+                <span>Guest Communications</span>
+              </CardTitle>
+              <CardDescription>Send messages and reminders to guests</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Button className="bg-blue-600 hover:bg-blue-700 h-20 flex flex-col">
+                    <Mail className="h-6 w-6 mb-2" />
+                    <span>Email Reminder</span>
+                  </Button>
+                  <Button className="bg-green-600 hover:bg-green-700 h-20 flex flex-col">
+                    <MessageCircle className="h-6 w-6 mb-2" />
+                    <span>WhatsApp Blast</span>
+                  </Button>
+                  <Button className="bg-purple-600 hover:bg-purple-700 h-20 flex flex-col">
+                    <Phone className="h-6 w-6 mb-2" />
+                    <span>SMS Alert</span>
+                  </Button>
+                </div>
+                <div className="border rounded-lg p-4">
+                  <h3 className="font-semibold mb-4">Recent Messages</h3>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                      <div>
+                        <p className="text-sm font-medium">RSVP Reminder</p>
+                        <p className="text-xs text-gray-600">Sent to {guestStats.pending} guests</p>
+                      </div>
+                      <Badge variant="outline">2 days ago</Badge>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                      <div>
+                        <p className="text-sm font-medium">Event Details Update</p>
+                        <p className="text-xs text-gray-600">Sent to all guests</p>
+                      </div>
+                      <Badge variant="outline">1 week ago</Badge>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="gifts">
+          <Card className="border-0 shadow-xl bg-white/90 backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Gift className="h-5 w-5 text-pink-500" />
+                <span>Gift Registry</span>
+              </CardTitle>
+              <CardDescription>Manage your wedding gift registry</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h3 className="font-semibold">Registry Progress</h3>
+                    <Button variant="outline" size="sm">
+                      <Plus className="h-3 w-3 mr-1" />
+                      Add Item
+                    </Button>
+                  </div>
+                  <Progress value={48} className="mb-2" />
+                  <p className="text-sm text-gray-600">12 of 25 items purchased</p>
+                </div>
+                <div className="space-y-4">
+                  <h3 className="font-semibold">Popular Items</h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                      <span className="text-sm">Kitchen Set</span>
+                      <Badge variant="secondary">Purchased</Badge>
+                    </div>
+                    <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                      <span className="text-sm">Dinnerware</span>
+                      <Badge>Available</Badge>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

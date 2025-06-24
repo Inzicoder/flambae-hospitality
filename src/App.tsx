@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -18,6 +17,7 @@ import { GalleryPage } from "@/pages/GalleryPage";
 import { NotesPage } from "@/pages/NotesPage";
 import { TravelPage } from "@/pages/TravelPage";
 import { PaymentPage } from "@/pages/PaymentPage";
+import { VendorManager } from "@/components/VendorManager";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -166,7 +166,7 @@ const App = () => {
                     <Route path="/gallery" element={<GalleryPage gallery={weddingData.gallery} />} />
                     <Route path="/notes" element={<NotesPage />} />
                     <Route path="/payments" element={<PaymentPage />} />
-                    <Route path="/vendors" element={<div className="text-center py-8"><h1 className="text-2xl font-bold">Vendor Management</h1><p>Coming soon...</p></div>} />
+                    <Route path="/vendors" element={<VendorManager />} />
                   </>
                 ) : (
                   <>
