@@ -46,7 +46,7 @@ export const DashboardHeader = ({ onLogout }: DashboardHeaderProps) => {
         <div className="flex justify-between items-center py-4">
           <div className="flex items-center space-x-3">
             <img 
-              src="/placeholder.svg" 
+              src="/lovable-uploads/74588944-94cf-4442-8a35-20fd018532a2.png" 
               alt="Meliora Moments Logo" 
               className="h-10 w-auto"
             />
