@@ -47,14 +47,14 @@ export const DashboardHeader = ({ onLogout }: DashboardHeaderProps) => {
         <div className="flex justify-between items-center py-4">
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-gradient-to-br from-rose-100 to-pink-100 rounded-full">
-                <Heart className="h-6 w-6 text-rose-600" />
+              <div className="flex justify-center">
+                <img 
+                  src="/lovable-uploads/df5b7422-1f97-4754-b2f4-5822f3b683c0.png" 
+                  alt="Meliora Moments Logo" 
+                  className="h-12 w-auto drop-shadow-lg"
+                />
               </div>
               <div>
-                <h1 className="text-2xl font-serif text-slate-800 flex items-center space-x-2">
-                  <span>Meliora Moments</span>
-                  <Sparkles className="h-5 w-5 text-rose-500" />
-                </h1>
                 <p className="text-sm text-slate-600 font-light">Your Wedding OS</p>
               </div>
             </div>

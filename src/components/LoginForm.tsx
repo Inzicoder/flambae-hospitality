@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -125,7 +124,7 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
           <div className="text-center mb-8">
             <div className="flex justify-center mb-6">
               <img 
-                src="/lovable-uploads/74588944-94cf-4442-8a35-20fd018532a2.png" 
+                src="/lovable-uploads/df5b7422-1f97-4754-b2f4-5822f3b683c0.png" 
                 alt="Meliora Moments Logo" 
                 className="h-20 w-auto drop-shadow-lg"
               />
@@ -232,7 +231,7 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
         <div className="text-center mb-10">
           <div className="flex justify-center mb-8">
             <img 
-              src="/lovable-uploads/74588944-94cf-4442-8a35-20fd018532a2.png" 
+              src="/lovable-uploads/df5b7422-1f97-4754-b2f4-5822f3b683c0.png" 
               alt="Meliora Moments Logo" 
               className="h-24 w-auto drop-shadow-lg"
             />
