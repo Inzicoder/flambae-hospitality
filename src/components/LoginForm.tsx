@@ -4,7 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Heart, Sparkles, Users, Building2 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Heart, Sparkles, Users, Building2, CreditCard, Mail, Key } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface LoginFormProps {
@@ -12,32 +13,187 @@ interface LoginFormProps {
 }
 
 export const LoginForm = ({ onLogin }: LoginFormProps) => {
+  const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
   const [userType, setUserType] = useState<'customer' | 'eventCompany'>('customer');
-  const [email, setEmail] = useState('');
-  const [eventCode, setEventCode] = useState('');
+  
+  // Login form states
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginEventCode, setLoginEventCode] = useState('');
+  
+  // Registration form states
+  const [registerEmail, setRegisterEmail] = useState('');
+  const [registerName, setRegisterName] = useState('');
+  const [registerPhone, setRegisterPhone] = useState('');
+  const [weddingDate, setWeddingDate] = useState('');
+  const [companyName, setCompanyName] = useState('');
+  
+  // Payment states
+  const [showPayment, setShowPayment] = useState(false);
+  const [cardNumber, setCardNumber] = useState('');
+  const [expiryDate, setExpiryDate] = useState('');
+  const [cvv, setCvv] = useState('');
+  
   const { toast } = useToast();
 
   const handleLogin = () => {
-    if (userType === 'customer' && email) {
+    if (loginEmail && loginEventCode) {
       onLogin(userType);
       toast({
         title: "Welcome back!",
-        description: "You've successfully logged in to your customer dashboard.",
-      });
-    } else if (userType === 'eventCompany' && eventCode) {
-      onLogin(userType);
-      toast({
-        title: "Welcome!",
-        description: "You've successfully accessed the event company dashboard.",
+        description: `You've successfully logged in to your ${userType} dashboard.`,
       });
     } else {
       toast({
-        title: "Please fill in the required field",
-        description: userType === 'customer' ? "Enter your email address" : "Enter your event code",
+        title: "Please fill in all fields",
+        description: "Both email and event code are required",
         variant: "destructive"
       });
     }
   };
+
+  const handleRegister = () => {
+    if (userType === 'customer' && (!registerEmail || !registerName || !weddingDate)) {
+      toast({
+        title: "Please fill in all fields",
+        description: "Email, name, and wedding date are required",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (userType === 'eventCompany' && (!registerEmail || !companyName)) {
+      toast({
+        title: "Please fill in all fields", 
+        description: "Email and company name are required",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setShowPayment(true);
+  };
+
+  const handlePayment = () => {
+    if (!cardNumber || !expiryDate || !cvv) {
+      toast({
+        title: "Please fill in payment details",
+        description: "All payment fields are required",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Simulate payment processing
+    toast({
+      title: "Payment Successful!",
+      description: "Your event code will be sent to your email shortly.",
+    });
+    
+    // Reset form
+    setShowPayment(false);
+    setActiveTab('login');
+    setRegisterEmail('');
+    setRegisterName('');
+    setRegisterPhone('');
+    setWeddingDate('');
+    setCompanyName('');
+    setCardNumber('');
+    setExpiryDate('');
+    setCvv('');
+  };
+
+  if (showPayment) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 via-purple-50 to-indigo-100 flex items-center justify-center p-4 relative overflow-hidden">
+        {/* Background decorative elements */}
+        <div className="absolute inset-0">
+          <div className="absolute top-20 left-20 w-72 h-72 bg-rose-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse"></div>
+          <div className="absolute top-40 right-20 w-96 h-96 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse delay-1000"></div>
+          <div className="absolute -bottom-8 left-1/2 w-80 h-80 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse delay-2000"></div>
+        </div>
+
+        <div className="max-w-md w-full space-y-8 relative z-10">
+          <div className="text-center animate-fade-in-up">
+            <div className="flex justify-center mb-8">
+              <img 
+                src="/placeholder.svg" 
+                alt="Meliora Moments Logo" 
+                className="h-16 w-auto"
+              />
+            </div>
+            <h1 className="text-4xl font-bold text-gradient mb-4">Complete Your Registration</h1>
+            <p className="text-gray-600 text-lg">Secure payment to activate your account</p>
+          </div>
+
+          <Card className="glass-effect border-0 shadow-2xl modern-shadow">
+            <CardHeader>
+              <CardTitle className="text-center text-2xl font-bold text-gray-800 flex items-center justify-center space-x-2">
+                <CreditCard className="h-6 w-6" />
+                <span>Payment Details</span>
+              </CardTitle>
+              <CardDescription className="text-center text-gray-600">
+                One-time setup fee: $49.99
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-3">
+                <Label htmlFor="cardNumber" className="text-base font-semibold text-gray-700">Card Number</Label>
+                <Input
+                  id="cardNumber"
+                  type="text"
+                  placeholder="1234 5678 9012 3456"
+                  value={cardNumber}
+                  onChange={(e) => setCardNumber(e.target.value)}
+                  className="h-12 border-2 border-gray-200 focus:border-rose-400 focus:ring-rose-400 rounded-xl text-base"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-3">
+                  <Label htmlFor="expiryDate" className="text-base font-semibold text-gray-700">Expiry Date</Label>
+                  <Input
+                    id="expiryDate"
+                    type="text"
+                    placeholder="MM/YY"
+                    value={expiryDate}
+                    onChange={(e) => setExpiryDate(e.target.value)}
+                    className="h-12 border-2 border-gray-200 focus:border-rose-400 focus:ring-rose-400 rounded-xl text-base"
+                  />
+                </div>
+                <div className="space-y-3">
+                  <Label htmlFor="cvv" className="text-base font-semibold text-gray-700">CVV</Label>
+                  <Input
+                    id="cvv"
+                    type="text"
+                    placeholder="123"
+                    value={cvv}
+                    onChange={(e) => setCvv(e.target.value)}
+                    className="h-12 border-2 border-gray-200 focus:border-rose-400 focus:ring-rose-400 rounded-xl text-base"
+                  />
+                </div>
+              </div>
+
+              <div className="flex space-x-3">
+                <Button 
+                  onClick={() => setShowPayment(false)}
+                  variant="outline"
+                  className="flex-1 h-12 border-2 border-gray-300 hover:border-gray-400 rounded-xl text-base"
+                >
+                  Back
+                </Button>
+                <Button 
+                  onClick={handlePayment}
+                  className="flex-1 h-12 bg-gradient-to-r from-rose-500 via-pink-500 to-purple-500 hover:from-rose-600 hover:via-pink-600 hover:to-purple-600 text-white font-semibold text-base rounded-xl"
+                >
+                  Complete Payment
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 via-purple-50 to-indigo-100 flex items-center justify-center p-4 relative overflow-hidden">
@@ -51,12 +207,11 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
       <div className="max-w-md w-full space-y-8 relative z-10">
         <div className="text-center animate-fade-in-up">
           <div className="flex justify-center mb-8">
-            <div className="relative">
-              <div className="bg-gradient-to-r from-rose-500 via-pink-500 to-purple-500 p-4 rounded-2xl shadow-2xl animate-pulse-glow">
-                <Heart className="h-10 w-10 text-white" />
-              </div>
-              <Sparkles className="absolute -top-1 -right-1 h-6 w-6 text-yellow-400 animate-pulse" />
-            </div>
+            <img 
+              src="/placeholder.svg" 
+              alt="Meliora Moments Logo" 
+              className="h-16 w-auto"
+            />
           </div>
           <h1 className="text-5xl font-bold text-gradient mb-4">
             Meliora Moments
@@ -69,11 +224,6 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
 
         <Card className="glass-effect border-0 shadow-2xl modern-shadow hover-lift animate-slide-in-right">
           <CardHeader className="space-y-6 pb-8">
-            <CardTitle className="text-center text-3xl font-bold text-gray-800">Welcome Back</CardTitle>
-            <CardDescription className="text-center text-gray-600 text-lg">
-              Choose your account type to continue
-            </CardDescription>
-            
             {/* User Type Selection */}
             <div className="flex rounded-xl bg-gray-100/80 p-1.5 backdrop-blur-sm">
               <button
@@ -99,51 +249,139 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
                 <span>Event Company</span>
               </button>
             </div>
+
+            <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'login' | 'register')}>
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="login">Login</TabsTrigger>
+                <TabsTrigger value="register">Register</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="login" className="space-y-6 mt-6">
+                <CardTitle className="text-center text-3xl font-bold text-gray-800">Welcome Back</CardTitle>
+                <CardDescription className="text-center text-gray-600 text-lg">
+                  Enter your credentials to access your dashboard
+                </CardDescription>
+
+                <div className="space-y-4">
+                  <div className="space-y-3">
+                    <Label htmlFor="loginEmail" className="text-base font-semibold text-gray-700 flex items-center space-x-2">
+                      <Mail className="h-4 w-4" />
+                      <span>Email Address</span>
+                    </Label>
+                    <Input
+                      id="loginEmail"
+                      type="email"
+                      placeholder="your.email@example.com"
+                      value={loginEmail}
+                      onChange={(e) => setLoginEmail(e.target.value)}
+                      className="h-12 border-2 border-gray-200 focus:border-rose-400 focus:ring-rose-400 rounded-xl text-base"
+                    />
+                  </div>
+
+                  <div className="space-y-3">
+                    <Label htmlFor="loginEventCode" className="text-base font-semibold text-gray-700 flex items-center space-x-2">
+                      <Key className="h-4 w-4" />
+                      <span>Event Code</span>
+                    </Label>
+                    <Input
+                      id="loginEventCode"
+                      type="text"
+                      placeholder="Enter your event code"
+                      value={loginEventCode}
+                      onChange={(e) => setLoginEventCode(e.target.value)}
+                      className="h-12 border-2 border-gray-200 focus:border-rose-400 focus:ring-rose-400 rounded-xl text-base"
+                    />
+                  </div>
+
+                  <Button 
+                    onClick={handleLogin} 
+                    className="w-full h-12 bg-gradient-to-r from-rose-500 via-pink-500 to-purple-500 hover:from-rose-600 hover:via-pink-600 hover:to-purple-600 text-white font-semibold text-base rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300"
+                  >
+                    Access Dashboard
+                  </Button>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="register" className="space-y-6 mt-6">
+                <CardTitle className="text-center text-3xl font-bold text-gray-800">Create Account</CardTitle>
+                <CardDescription className="text-center text-gray-600 text-lg">
+                  Register for your {userType === 'customer' ? 'wedding planning' : 'event management'} dashboard
+                </CardDescription>
+
+                <div className="space-y-4">
+                  <div className="space-y-3">
+                    <Label htmlFor="registerEmail" className="text-base font-semibold text-gray-700">Email Address</Label>
+                    <Input
+                      id="registerEmail"
+                      type="email"
+                      placeholder="your.email@example.com"
+                      value={registerEmail}
+                      onChange={(e) => setRegisterEmail(e.target.value)}
+                      className="h-12 border-2 border-gray-200 focus:border-rose-400 focus:ring-rose-400 rounded-xl text-base"
+                    />
+                  </div>
+
+                  {userType === 'customer' ? (
+                    <>
+                      <div className="space-y-3">
+                        <Label htmlFor="registerName" className="text-base font-semibold text-gray-700">Couple Names</Label>
+                        <Input
+                          id="registerName"
+                          type="text"
+                          placeholder="Sarah & Michael"
+                          value={registerName}
+                          onChange={(e) => setRegisterName(e.target.value)}
+                          className="h-12 border-2 border-gray-200 focus:border-rose-400 focus:ring-rose-400 rounded-xl text-base"
+                        />
+                      </div>
+                      <div className="space-y-3">
+                        <Label htmlFor="weddingDate" className="text-base font-semibold text-gray-700">Wedding Date</Label>
+                        <Input
+                          id="weddingDate"
+                          type="date"
+                          value={weddingDate}
+                          onChange={(e) => setWeddingDate(e.target.value)}
+                          className="h-12 border-2 border-gray-200 focus:border-rose-400 focus:ring-rose-400 rounded-xl text-base"
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    <div className="space-y-3">
+                      <Label htmlFor="companyName" className="text-base font-semibold text-gray-700">Company Name</Label>
+                      <Input
+                        id="companyName"
+                        type="text"
+                        placeholder="Your Event Company"
+                        value={companyName}
+                        onChange={(e) => setCompanyName(e.target.value)}
+                        className="h-12 border-2 border-gray-200 focus:border-rose-400 focus:ring-rose-400 rounded-xl text-base"
+                      />
+                    </div>
+                  )}
+
+                  <div className="space-y-3">
+                    <Label htmlFor="registerPhone" className="text-base font-semibold text-gray-700">Phone Number (Optional)</Label>
+                    <Input
+                      id="registerPhone"
+                      type="tel"
+                      placeholder="+1 (555) 123-4567"
+                      value={registerPhone}
+                      onChange={(e) => setRegisterPhone(e.target.value)}
+                      className="h-12 border-2 border-gray-200 focus:border-rose-400 focus:ring-rose-400 rounded-xl text-base"
+                    />
+                  </div>
+
+                  <Button 
+                    onClick={handleRegister}
+                    className="w-full h-12 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-semibold text-base rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300"
+                  >
+                    <CreditCard className="h-4 w-4 mr-2" />
+                    Continue to Payment
+                  </Button>
+                </div>
+              </TabsContent>
+            </Tabs>
           </CardHeader>
-
-          <CardContent className="space-y-6">
-            {userType === 'customer' ? (
-              <div className="space-y-3">
-                <Label htmlFor="email" className="text-base font-semibold text-gray-700">Email Address</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="your.email@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="h-12 border-2 border-gray-200 focus:border-rose-400 focus:ring-rose-400 rounded-xl text-base transition-all duration-300"
-                />
-              </div>
-            ) : (
-              <div className="space-y-3">
-                <Label htmlFor="eventCode" className="text-base font-semibold text-gray-700">Event Code</Label>
-                <Input
-                  id="eventCode"
-                  type="text"
-                  placeholder="Enter your unique event code"
-                  value={eventCode}
-                  onChange={(e) => setEventCode(e.target.value)}
-                  className="h-12 border-2 border-gray-200 focus:border-rose-400 focus:ring-rose-400 rounded-xl text-base transition-all duration-300"
-                />
-              </div>
-            )}
-
-            <Button 
-              onClick={handleLogin} 
-              className="w-full h-12 bg-gradient-to-r from-rose-500 via-pink-500 to-purple-500 hover:from-rose-600 hover:via-pink-600 hover:to-purple-600 text-white font-semibold text-base rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300"
-            >
-              Access {userType === 'customer' ? 'Customer' : 'Event Company'} Dashboard
-            </Button>
-
-            <div className="text-xs text-gray-500 text-center mt-6 leading-relaxed">
-              <p className="mb-2">
-                <strong>Customer:</strong> Access all wedding planning features including budget tracking, todos, gallery, and more.
-              </p>
-              <p>
-                <strong>Event Company:</strong> Specialized tools for RSVP management, event scheduling, guest management, and travel coordination.
-              </p>
-            </div>
-          </CardContent>
         </Card>
       </div>
     </div>

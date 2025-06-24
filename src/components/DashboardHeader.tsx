@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Heart, Bell, Sparkles, Menu } from "lucide-react";
 import {
@@ -46,15 +45,14 @@ export const DashboardHeader = ({ onLogout }: DashboardHeaderProps) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4">
           <div className="flex items-center space-x-3">
-            <div className="relative">
-              <div className="bg-gradient-to-r from-teal-500 to-cyan-500 p-2 rounded-xl shadow-sm">
-                <Heart className="h-6 w-6 text-white" />
-              </div>
-              <Sparkles className="absolute -top-1 -right-1 h-4 w-4 text-yellow-400 animate-pulse" />
-            </div>
+            <img 
+              src="/placeholder.svg" 
+              alt="Meliora Moments Logo" 
+              className="h-10 w-auto"
+            />
             <div>
-              <h1 className="text-xl font-bold text-slate-800">Wedding Planner</h1>
-              <p className="text-sm text-slate-600">Your special day organized</p>
+              <h1 className="text-xl font-bold text-slate-800">Meliora Moments</h1>
+              <p className="text-sm text-slate-600">Your Wedding OS</p>
             </div>
           </div>
           
