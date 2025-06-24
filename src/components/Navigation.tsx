@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Heart } from "lucide-react";
 
 interface NavigationProps {
   coupleNames: string;
@@ -10,18 +11,24 @@ interface NavigationProps {
 
 export const Navigation = ({ coupleNames, onLogout, userType }: NavigationProps) => {
   return (
-    <nav className="fixed top-16 left-0 right-0 bg-white/95 backdrop-blur-sm border-b border-slate-200 z-40">
+    <nav className="fixed top-16 left-0 right-0 bg-white/90 backdrop-blur-xl border-b border-rose-200/50 z-40 romantic-shadow">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-12">
-          <div className="text-sm text-slate-600">
-            {userType === 'customer' ? 'Customer Dashboard' : 'Event Company Dashboard'}
+        <div className="flex items-center justify-between h-14">
+          <div className="text-sm text-slate-600 font-light flex items-center space-x-2">
+            <div className="p-1.5 bg-gradient-to-br from-rose-100 to-pink-100 rounded-full">
+              <Heart className="h-3 w-3 text-rose-500" />
+            </div>
+            <span>{userType === 'customer' ? 'Customer Dashboard' : 'Event Company Dashboard'}</span>
           </div>
           <div className="flex items-center space-x-3">
-            <Avatar className="h-8 w-8">
-              <AvatarFallback className="bg-teal-100 text-teal-700 text-sm font-medium">
+            <Avatar className="h-9 w-9 border-2 border-rose-200">
+              <AvatarFallback className="bg-gradient-to-br from-rose-100 to-pink-100 text-rose-700 text-sm font-medium">
                 {coupleNames.split(' ')[0]?.[0]}{coupleNames.split(' ')[2]?.[0]}
               </AvatarFallback>
             </Avatar>
+            <div className="text-sm">
+              <p className="font-medium text-slate-700">{coupleNames}</p>
+            </div>
           </div>
         </div>
       </div>
