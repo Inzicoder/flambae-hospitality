@@ -21,11 +21,23 @@ export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
     confirmPassword: '',
     companyName: ''
   });
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Form submitted', { isLogin, userType, formData });
     
+    // Basic validation
+    if (!formData.email || !formData.password) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (!isLogin && formData.password !== formData.confirmPassword) {
       toast({
         title: "Error",
@@ -35,14 +47,54 @@ export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
       return;
     }
 
-    if (isLogin) {
-      onLogin(userType);
-    } else {
-      if (userType === 'eventCompany') {
-        onRegister('eventCompany');
+    if (!isLogin && userType === 'eventCompany' && !formData.companyName) {
+      toast({
+        title: "Error",
+        description: "Company name is required",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      if (isLogin) {
+        console.log('Calling onLogin with type:', userType);
+        onLogin(userType);
+        toast({
+          title: "Success",
+          description: `Welcome back! Logged in as ${userType}`,
+        });
       } else {
-        onLogin('guest');
+        if (userType === 'eventCompany') {
+          console.log('Calling onRegister for event company');
+          onRegister('eventCompany');
+          toast({
+            title: "Registration Started",
+            description: "Please complete the payment to finish registration",
+          });
+        } else {
+          console.log('Calling onLogin for guest registration');
+          onLogin('guest');
+          toast({
+            title: "Success",
+            description: "Account created successfully!",
+          });
+        }
       }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive"
+      });
+      console.error('Auth error:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -110,6 +162,7 @@ export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
           <Label className="text-sm font-medium text-gray-700">I am a:</Label>
           <div className="grid grid-cols-2 gap-3">
             <button
+              type="button"
               onClick={() => setUserType('guest')}
               className={`p-3 md:p-4 rounded-2xl border-2 transition-all duration-300 ${
                 userType === 'guest' 
@@ -121,6 +174,7 @@ export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
               <span className="text-sm font-medium">Guest</span>
             </button>
             <button
+              type="button"
               onClick={() => setUserType('eventCompany')}
               className={`p-3 md:p-4 rounded-2xl border-2 transition-all duration-300 ${
                 userType === 'eventCompany' 
@@ -146,7 +200,9 @@ export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
               value={formData.email}
               onChange={(e) => setFormData({...formData, email: e.target.value})}
               className="rounded-2xl transition-all duration-300"
+              placeholder="Enter your email"
               required
+              disabled={isLoading}
             />
           </div>
 
@@ -162,7 +218,9 @@ export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
                 value={formData.companyName}
                 onChange={(e) => setFormData({...formData, companyName: e.target.value})}
                 className="rounded-2xl transition-all duration-300"
+                placeholder="Enter your company name"
                 required
+                disabled={isLoading}
               />
             </div>
           )}
@@ -178,7 +236,9 @@ export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
               value={formData.password}
               onChange={(e) => setFormData({...formData, password: e.target.value})}
               className="rounded-2xl transition-all duration-300"
+              placeholder="Enter your password"
               required
+              disabled={isLoading}
             />
           </div>
 
@@ -194,20 +254,23 @@ export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
                 value={formData.confirmPassword}
                 onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
                 className="rounded-2xl transition-all duration-300"
+                placeholder="Confirm your password"
                 required
+                disabled={isLoading}
               />
             </div>
           )}
 
           <Button 
             type="submit"
+            disabled={isLoading}
             className={`w-full py-3 md:py-4 text-base md:text-lg rounded-2xl transition-all duration-300 hover:scale-105 ${
               userType === 'guest' 
                 ? 'bg-gradient-to-r from-rose-400 via-pink-400 to-purple-500 hover:from-rose-500 hover:via-pink-500 hover:to-purple-600 text-white shadow-lg' 
                 : 'bg-gradient-to-r from-purple-400 via-indigo-400 to-blue-400 hover:from-purple-500 hover:via-indigo-500 hover:to-blue-500 text-white shadow-lg'
-            }`}
+            } disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none`}
           >
-            {isLogin ? 'Sign In' : (userType === 'eventCompany' ? 'Register & Pay' : 'Create Account')}
+            {isLoading ? 'Processing...' : (isLogin ? 'Sign In' : (userType === 'eventCompany' ? 'Register & Pay' : 'Create Account'))}
           </Button>
         </form>
 

@@ -119,28 +119,72 @@ const App = () => {
   };
 
   const handleGetStarted = () => {
-    setIsLoggedIn(false);
+    console.log('Get started clicked - navigating to auth');
   };
 
   const handleLogin = (type: 'guest' | 'eventCompany') => {
+    console.log('Login successful for type:', type);
     setUserType(type);
     setIsLoggedIn(true);
+    setShowPayment(false);
   };
 
   const handleRegister = (type: 'eventCompany') => {
+    console.log('Register requested for type:', type);
     setUserType(type);
     setShowPayment(true);
   };
 
   const handlePaymentSuccess = (code: string) => {
+    console.log('Payment successful with code:', code);
     setEventCode(code);
     setShowPayment(false);
     setIsLoggedIn(true);
   };
 
   const handleBackToAuth = () => {
+    console.log('Back to auth');
     setShowPayment(false);
   };
+
+  const handleLogout = () => {
+    console.log('Logout');
+    setIsLoggedIn(false);
+    setShowPayment(false);
+    setUserType('guest');
+    setEventCode('');
+  };
+
+  // Common layout component for authenticated pages
+  const DashboardLayout = ({ children }: { children: React.ReactNode }) => (
+    <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-25 via-blush-50 to-lavender-50 relative overflow-hidden"
+         style={{ 
+           backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23f8d7da' fill-opacity='0.1' fill-rule='nonzero'%3E%3Cpath d='m36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")` 
+         }}>
+      {/* Floating romantic elements */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-20 left-20 w-32 h-32 opacity-20">
+          <div className="w-full h-full rounded-full bg-gradient-to-br from-rose-200 to-pink-300 blur-xl animate-pulse"></div>
+        </div>
+        <div className="absolute top-40 right-20 w-48 h-48 opacity-15">
+          <div className="w-full h-full rounded-full bg-gradient-to-br from-lavender-200 to-purple-200 blur-2xl animate-pulse delay-1000"></div>
+        </div>
+        <div className="absolute bottom-20 left-1/3 w-40 h-40 opacity-10">
+          <div className="w-full h-full rounded-full bg-gradient-to-br from-amber-200 to-yellow-200 blur-xl animate-pulse delay-2000"></div>
+        </div>
+      </div>
+      
+      <DashboardHeader onLogout={handleLogout} userType={userType} />
+      <Navigation 
+        coupleNames={weddingData.coupleNames}
+        onLogout={handleLogout}
+        userType={userType}
+      />
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-32 relative z-10">
+        {children}
+      </main>
+    </div>
+  );
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -149,12 +193,12 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           <Routes>
-            {/* Public routes - always accessible */}
+            {/* Public Routes */}
             <Route path="/" element={<LandingPage onGetStarted={handleGetStarted} />} />
             <Route path="/features/guest" element={<GuestFeaturesPage onGetStarted={handleGetStarted} />} />
             <Route path="/features/company" element={<EventCompanyFeaturesPage onGetStarted={handleGetStarted} />} />
             
-            {/* Auth and payment routes */}
+            {/* Auth Route */}
             <Route path="/auth" element={
               showPayment ? (
                 <PaymentFlow 
@@ -166,267 +210,68 @@ const App = () => {
               )
             } />
             
-            {/* Protected dashboard routes */}
+            {/* Protected Routes - Only accessible when logged in */}
             {isLoggedIn ? (
               <>
                 <Route path="/dashboard" element={
-                  <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-25 via-blush-50 to-lavender-50 relative overflow-hidden"
-                       style={{ 
-                         backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23f8d7da' fill-opacity='0.1' fill-rule='nonzero'%3E%3Cpath d='m36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")` 
-                       }}>
-                    {/* Floating romantic elements */}
-                    <div className="absolute inset-0 pointer-events-none">
-                      <div className="absolute top-20 left-20 w-32 h-32 opacity-20">
-                        <div className="w-full h-full rounded-full bg-gradient-to-br from-rose-200 to-pink-300 blur-xl animate-pulse"></div>
-                      </div>
-                      <div className="absolute top-40 right-20 w-48 h-48 opacity-15">
-                        <div className="w-full h-full rounded-full bg-gradient-to-br from-lavender-200 to-purple-200 blur-2xl animate-pulse delay-1000"></div>
-                      </div>
-                      <div className="absolute bottom-20 left-1/3 w-40 h-40 opacity-10">
-                        <div className="w-full h-full rounded-full bg-gradient-to-br from-amber-200 to-yellow-200 blur-xl animate-pulse delay-2000"></div>
-                      </div>
-                    </div>
-                    
-                    <DashboardHeader onLogout={() => setIsLoggedIn(false)} userType={userType} />
-                    <Navigation 
-                      coupleNames={weddingData.coupleNames}
-                      onLogout={() => setIsLoggedIn(false)}
-                      userType={userType}
-                    />
-                    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-32 relative z-10">
-                      {userType === 'guest' ? (
-                        <GuestDashboard weddingData={weddingData} />
-                      ) : (
-                        <EventCompanyDashboard weddingData={weddingData} />
-                      )}
-                    </main>
-                  </div>
+                  <DashboardLayout>
+                    {userType === 'guest' ? (
+                      <GuestDashboard weddingData={weddingData} />
+                    ) : (
+                      <EventCompanyDashboard weddingData={weddingData} />
+                    )}
+                  </DashboardLayout>
                 } />
                 
+                {/* Guest-only routes */}
                 {userType === 'guest' && (
                   <>
                     <Route path="/budget" element={
-                      <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-25 via-blush-50 to-lavender-50 relative overflow-hidden"
-                             style={{ 
-                               backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23f8d7da' fill-opacity='0.1' fill-rule='nonzero'%3E%3Cpath d='m36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")` 
-                             }}>
-                        <div className="absolute inset-0 pointer-events-none">
-                          <div className="absolute top-20 left-20 w-32 h-32 opacity-20">
-                            <div className="w-full h-full rounded-full bg-gradient-to-br from-rose-200 to-pink-300 blur-xl animate-pulse"></div>
-                          </div>
-                          <div className="absolute top-40 right-20 w-48 h-48 opacity-15">
-                            <div className="w-full h-full rounded-full bg-gradient-to-br from-lavender-200 to-purple-200 blur-2xl animate-pulse delay-1000"></div>
-                          </div>
-                          <div className="absolute bottom-20 left-1/3 w-40 h-40 opacity-10">
-                            <div className="w-full h-full rounded-full bg-gradient-to-br from-amber-200 to-yellow-200 blur-xl animate-pulse delay-2000"></div>
-                          </div>
-                        </div>
-                        <DashboardHeader onLogout={() => setIsLoggedIn(false)} userType={userType} />
-                        <Navigation 
-                          coupleNames={weddingData.coupleNames}
-                          onLogout={() => setIsLoggedIn(false)}
-                          userType={userType}
-                        />
-                        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-32 relative z-10">
-                          <BudgetPage budget={weddingData.budget} onAddCategory={addBudgetCategory} />
-                        </main>
-                      </div>
+                      <DashboardLayout>
+                        <BudgetPage budget={weddingData.budget} onAddCategory={addBudgetCategory} />
+                      </DashboardLayout>
                     } />
                     <Route path="/todos" element={
-                      <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-25 via-blush-50 to-lavender-50 relative overflow-hidden"
-                             style={{ 
-                               backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23f8d7da' fill-opacity='0.1' fill-rule='nonzero'%3E%3Cpath d='m36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")` 
-                             }}>
-                        <div className="absolute inset-0 pointer-events-none">
-                          <div className="absolute top-20 left-20 w-32 h-32 opacity-20">
-                            <div className="w-full h-full rounded-full bg-gradient-to-br from-rose-200 to-pink-300 blur-xl animate-pulse"></div>
-                          </div>
-                          <div className="absolute top-40 right-20 w-48 h-48 opacity-15">
-                            <div className="w-full h-full rounded-full bg-gradient-to-br from-lavender-200 to-purple-200 blur-2xl animate-pulse delay-1000"></div>
-                          </div>
-                          <div className="absolute bottom-20 left-1/3 w-40 h-40 opacity-10">
-                            <div className="w-full h-full rounded-full bg-gradient-to-br from-amber-200 to-yellow-200 blur-xl animate-pulse delay-2000"></div>
-                          </div>
-                        </div>
-                        <DashboardHeader onLogout={() => setIsLoggedIn(false)} userType={userType} />
-                        <Navigation 
-                          coupleNames={weddingData.coupleNames}
-                          onLogout={() => setIsLoggedIn(false)}
-                          userType={userType}
-                        />
-                        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-32 relative z-10">
-                          <TodoPage todos={weddingData.todos} onToggleTodo={toggleTodo} onAddTodo={addTodo} onDeleteTodo={deleteTodo} />
-                        </main>
-                      </div>
+                      <DashboardLayout>
+                        <TodoPage todos={weddingData.todos} onToggleTodo={toggleTodo} onAddTodo={addTodo} onDeleteTodo={deleteTodo} />
+                      </DashboardLayout>
                     } />
                     <Route path="/gallery" element={
-                      <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-25 via-blush-50 to-lavender-50 relative overflow-hidden"
-                             style={{ 
-                               backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23f8d7da' fill-opacity='0.1' fill-rule='nonzero'%3E%3Cpath d='m36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")` 
-                             }}>
-                        <div className="absolute inset-0 pointer-events-none">
-                          <div className="absolute top-20 left-20 w-32 h-32 opacity-20">
-                            <div className="w-full h-full rounded-full bg-gradient-to-br from-rose-200 to-pink-300 blur-xl animate-pulse"></div>
-                          </div>
-                          <div className="absolute top-40 right-20 w-48 h-48 opacity-15">
-                            <div className="w-full h-full rounded-full bg-gradient-to-br from-lavender-200 to-purple-200 blur-2xl animate-pulse delay-1000"></div>
-                          </div>
-                          <div className="absolute bottom-20 left-1/3 w-40 h-40 opacity-10">
-                            <div className="w-full h-full rounded-full bg-gradient-to-br from-amber-200 to-yellow-200 blur-xl animate-pulse delay-2000"></div>
-                          </div>
-                        </div>
-                        <DashboardHeader onLogout={() => setIsLoggedIn(false)} userType={userType} />
-                        <Navigation 
-                          coupleNames={weddingData.coupleNames}
-                          onLogout={() => setIsLoggedIn(false)}
-                          userType={userType}
-                        />
-                        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-32 relative z-10">
-                          <GalleryPage gallery={weddingData.gallery} />
-                        </main>
-                      </div>
+                      <DashboardLayout>
+                        <GalleryPage gallery={weddingData.gallery} />
+                      </DashboardLayout>
                     } />
                     <Route path="/notes" element={
-                      <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-25 via-blush-50 to-lavender-50 relative overflow-hidden"
-                             style={{ 
-                               backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23f8d7da' fill-opacity='0.1' fill-rule='nonzero'%3E%3Cpath d='m36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")` 
-                             }}>
-                        <div className="absolute inset-0 pointer-events-none">
-                          <div className="absolute top-20 left-20 w-32 h-32 opacity-20">
-                            <div className="w-full h-full rounded-full bg-gradient-to-br from-rose-200 to-pink-300 blur-xl animate-pulse"></div>
-                          </div>
-                          <div className="absolute top-40 right-20 w-48 h-48 opacity-15">
-                            <div className="w-full h-full rounded-full bg-gradient-to-br from-lavender-200 to-purple-200 blur-2xl animate-pulse delay-1000"></div>
-                          </div>
-                          <div className="absolute bottom-20 left-1/3 w-40 h-40 opacity-10">
-                            <div className="w-full h-full rounded-full bg-gradient-to-br from-amber-200 to-yellow-200 blur-xl animate-pulse delay-2000"></div>
-                          </div>
-                        </div>
-                        <DashboardHeader onLogout={() => setIsLoggedIn(false)} userType={userType} />
-                        <Navigation 
-                          coupleNames={weddingData.coupleNames}
-                          onLogout={() => setIsLoggedIn(false)}
-                          userType={userType}
-                        />
-                        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-32 relative z-10">
-                          <NotesPage />
-                        </main>
-                      </div>
+                      <DashboardLayout>
+                        <NotesPage />
+                      </DashboardLayout>
                     } />
                     <Route path="/payments" element={
-                      <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-25 via-blush-50 to-lavender-50 relative overflow-hidden"
-                             style={{ 
-                               backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23f8d7da' fill-opacity='0.1' fill-rule='nonzero'%3E%3Cpath d='m36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")` 
-                             }}>
-                        <div className="absolute inset-0 pointer-events-none">
-                          <div className="absolute top-20 left-20 w-32 h-32 opacity-20">
-                            <div className="w-full h-full rounded-full bg-gradient-to-br from-rose-200 to-pink-300 blur-xl animate-pulse"></div>
-                          </div>
-                          <div className="absolute top-40 right-20 w-48 h-48 opacity-15">
-                            <div className="w-full h-full rounded-full bg-gradient-to-br from-lavender-200 to-purple-200 blur-2xl animate-pulse delay-1000"></div>
-                          </div>
-                          <div className="absolute bottom-20 left-1/3 w-40 h-40 opacity-10">
-                            <div className="w-full h-full rounded-full bg-gradient-to-br from-amber-200 to-yellow-200 blur-xl animate-pulse delay-2000"></div>
-                          </div>
-                        </div>
-                        <DashboardHeader onLogout={() => setIsLoggedIn(false)} userType={userType} />
-                        <Navigation 
-                          coupleNames={weddingData.coupleNames}
-                          onLogout={() => setIsLoggedIn(false)}
-                          userType={userType}
-                        />
-                        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-32 relative z-10">
-                          <PaymentPage />
-                        </main>
-                      </div>
+                      <DashboardLayout>
+                        <PaymentPage />
+                      </DashboardLayout>
                     } />
                     <Route path="/vendors" element={
-                      <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-25 via-blush-50 to-lavender-50 relative overflow-hidden"
-                             style={{ 
-                               backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23f8d7da' fill-opacity='0.1' fill-rule='nonzero'%3E%3Cpath d='m36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")` 
-                             }}>
-                        <div className="absolute inset-0 pointer-events-none">
-                          <div className="absolute top-20 left-20 w-32 h-32 opacity-20">
-                            <div className="w-full h-full rounded-full bg-gradient-to-br from-rose-200 to-pink-300 blur-xl animate-pulse"></div>
-                          </div>
-                          <div className="absolute top-40 right-20 w-48 h-48 opacity-15">
-                            <div className="w-full h-full rounded-full bg-gradient-to-br from-lavender-200 to-purple-200 blur-2xl animate-pulse delay-1000"></div>
-                          </div>
-                          <div className="absolute bottom-20 left-1/3 w-40 h-40 opacity-10">
-                            <div className="w-full h-full rounded-full bg-gradient-to-br from-amber-200 to-yellow-200 blur-xl animate-pulse delay-2000"></div>
-                          </div>
-                        </div>
-                        <DashboardHeader onLogout={() => setIsLoggedIn(false)} userType={userType} />
-                        <Navigation 
-                          coupleNames={weddingData.coupleNames}
-                          onLogout={() => setIsLoggedIn(false)}
-                          userType={userType}
-                        />
-                        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-32 relative z-10">
-                          <VendorManager />
-                        </main>
-                      </div>
+                      <DashboardLayout>
+                        <VendorManager />
+                      </DashboardLayout>
                     } />
                     <Route path="/guests" element={
-                      <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-25 via-blush-50 to-lavender-50 relative overflow-hidden"
-                             style={{ 
-                               backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23f8d7da' fill-opacity='0.1' fill-rule='nonzero'%3E%3Cpath d='m36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")` 
-                             }}>
-                        <div className="absolute inset-0 pointer-events-none">
-                          <div className="absolute top-20 left-20 w-32 h-32 opacity-20">
-                            <div className="w-full h-full rounded-full bg-gradient-to-br from-rose-200 to-pink-300 blur-xl animate-pulse"></div>
-                          </div>
-                          <div className="absolute top-40 right-20 w-48 h-48 opacity-15">
-                            <div className="w-full h-full rounded-full bg-gradient-to-br from-lavender-200 to-purple-200 blur-2xl animate-pulse delay-1000"></div>
-                          </div>
-                          <div className="absolute bottom-20 left-1/3 w-40 h-40 opacity-10">
-                            <div className="w-full h-full rounded-full bg-gradient-to-br from-amber-200 to-yellow-200 blur-xl animate-pulse delay-2000"></div>
-                          </div>
-                        </div>
-                        <DashboardHeader onLogout={() => setIsLoggedIn(false)} userType={userType} />
-                        <Navigation 
-                          coupleNames={weddingData.coupleNames}
-                          onLogout={() => setIsLoggedIn(false)}
-                          userType={userType}
-                        />
-                        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-32 relative z-10">
-                          <GuestPage />
-                        </main>
-                      </div>
+                      <DashboardLayout>
+                        <GuestPage />
+                      </DashboardLayout>
                     } />
                     <Route path="/schedule" element={
-                      <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-25 via-blush-50 to-lavender-50 relative overflow-hidden"
-                             style={{ 
-                               backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23f8d7da' fill-opacity='0.1' fill-rule='nonzero'%3E%3Cpath d='m36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")` 
-                             }}>
-                        <div className="absolute inset-0 pointer-events-none">
-                          <div className="absolute top-20 left-20 w-32 h-32 opacity-20">
-                            <div className="w-full h-full rounded-full bg-gradient-to-br from-rose-200 to-pink-300 blur-xl animate-pulse"></div>
-                          </div>
-                          <div className="absolute top-40 right-20 w-48 h-48 opacity-15">
-                            <div className="w-full h-full rounded-full bg-gradient-to-br from-lavender-200 to-purple-200 blur-2xl animate-pulse delay-1000"></div>
-                          </div>
-                          <div className="absolute bottom-20 left-1/3 w-40 h-40 opacity-10">
-                            <div className="w-full h-full rounded-full bg-gradient-to-br from-amber-200 to-yellow-200 blur-xl animate-pulse delay-2000"></div>
-                          </div>
-                        </div>
-                        <DashboardHeader onLogout={() => setIsLoggedIn(false)} userType={userType} />
-                        <Navigation 
-                          coupleNames={weddingData.coupleNames}
-                          onLogout={() => setIsLoggedIn(false)}
-                          userType={userType}
-                        />
-                        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-32 relative z-10">
-                          <SchedulePage />
-                        </main>
-                      </div>
+                      <DashboardLayout>
+                        <SchedulePage />
+                      </DashboardLayout>
                     } />
                   </>
                 )}
               </>
             ) : (
-              /* Redirect to auth if trying to access protected routes while not logged in */
               <>
+                {/* Redirect protected routes to auth when not logged in */}
                 <Route path="/dashboard" element={<Navigate to="/auth" replace />} />
                 <Route path="/budget" element={<Navigate to="/auth" replace />} />
                 <Route path="/todos" element={<Navigate to="/auth" replace />} />
@@ -439,7 +284,7 @@ const App = () => {
               </>
             )}
             
-            {/* 404 catch-all route */}
+            {/* 404 Route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
