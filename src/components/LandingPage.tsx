@@ -56,98 +56,99 @@ export const LandingPage = ({ onGetStarted }: LandingPageProps) => {
          }}>
       {/* Floating romantic elements */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-20 left-20 w-32 h-32 opacity-20">
+        <div className="absolute top-20 left-20 w-24 h-24 md:w-32 md:h-32 opacity-20">
           <div className="w-full h-full rounded-full bg-gradient-to-br from-rose-200 to-pink-300 blur-xl animate-pulse"></div>
         </div>
-        <div className="absolute top-40 right-20 w-48 h-48 opacity-15">
+        <div className="absolute top-40 right-20 w-32 h-32 md:w-48 md:h-48 opacity-15">
           <div className="w-full h-full rounded-full bg-gradient-to-br from-lavender-200 to-purple-200 blur-2xl animate-pulse delay-1000"></div>
         </div>
-        <div className="absolute bottom-20 left-1/3 w-40 h-40 opacity-10">
+        <div className="absolute bottom-20 left-1/3 w-28 h-28 md:w-40 md:h-40 opacity-10">
           <div className="w-full h-full rounded-full bg-gradient-to-br from-amber-200 to-yellow-200 blur-xl animate-pulse delay-2000"></div>
         </div>
       </div>
 
       {/* Header */}
-      <div className="relative z-10 bg-white/95 backdrop-blur-xl border-b border-rose-200/50 romantic-shadow">
+      <header className="relative z-10 bg-white/95 backdrop-blur-xl border-b border-rose-200/50 romantic-shadow sticky top-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <CustomLogo size="md" showTagline={true} />
-            <div className="flex items-center space-x-4">
-              <Link to="/features/guest">
-                <Button variant="outline" className="border-2 border-rose-200 hover:border-rose-400 hover:bg-rose-50 text-slate-700 rounded-2xl transition-all duration-300">
+          <div className="flex justify-between items-center py-3 md:py-4">
+            <CustomLogo size="sm" showTagline={false} className="md:block" />
+            <div className="flex items-center space-x-2 md:space-x-4">
+              <Link to="/features/guest" className="hidden sm:block">
+                <Button variant="outline" size="sm" className="border-2 border-rose-200 hover:border-rose-400 hover:bg-rose-50 text-slate-700 rounded-2xl smooth-transition text-xs md:text-sm">
                   Guest Features
                 </Button>
               </Link>
-              <Link to="/features/company">
-                <Button variant="outline" className="border-2 border-purple-200 hover:border-purple-400 hover:bg-purple-50 text-slate-700 rounded-2xl transition-all duration-300">
+              <Link to="/features/company" className="hidden sm:block">
+                <Button variant="outline" size="sm" className="border-2 border-purple-200 hover:border-purple-400 hover:bg-purple-50 text-slate-700 rounded-2xl smooth-transition text-xs md:text-sm">
                   Company Features
                 </Button>
               </Link>
               <Button 
                 onClick={onGetStarted}
-                className="romantic-button"
+                size="sm"
+                className="romantic-button text-xs md:text-sm px-4 py-2"
               >
                 Get Started
               </Button>
             </div>
           </div>
         </div>
-      </div>
+      </header>
 
       {/* Hero Section */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="text-center mb-16">
-          <h1 className="text-5xl md:text-6xl font-serif font-bold bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 bg-clip-text text-transparent mb-6">
+      <section className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
+        <div className="text-center mb-12 md:mb-16 animate-fade-in-up">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 bg-clip-text text-transparent mb-4 md:mb-6 leading-tight">
             Plan Your Perfect Wedding
           </h1>
-          <p className="text-xl md:text-2xl text-slate-600 font-light mb-8 max-w-3xl mx-auto">
+          <p className="text-lg md:text-xl lg:text-2xl text-slate-600 font-light mb-6 md:mb-8 max-w-3xl mx-auto leading-relaxed px-4">
             Whether you're a couple planning your dream wedding or an event company managing multiple celebrations, 
             we have the perfect tools for you
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/features/guest">
-              <Button size="lg" className="romantic-button text-lg px-8 py-4">
-                <Heart className="mr-2 h-5 w-5" />
+          <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center px-4">
+            <Link to="/features/guest" className="w-full sm:w-auto">
+              <Button size="lg" className="romantic-button text-base md:text-lg px-6 md:px-8 py-3 md:py-4 w-full sm:w-auto">
+                <Heart className="mr-2 h-4 w-4 md:h-5 md:w-5" />
                 For Couples
-                <ArrowRight className="ml-2 h-5 w-5" />
+                <ArrowRight className="ml-2 h-4 w-4 md:h-5 md:w-5" />
               </Button>
             </Link>
-            <Link to="/features/company">
-              <Button size="lg" variant="outline" className="border-2 border-purple-300 hover:border-purple-500 hover:bg-purple-50 text-purple-700 rounded-2xl text-lg px-8 py-4">
-                <Building2 className="mr-2 h-5 w-5" />
+            <Link to="/features/company" className="w-full sm:w-auto">
+              <Button size="lg" variant="outline" className="border-2 border-purple-300 hover:border-purple-500 hover:bg-purple-50 text-purple-700 rounded-2xl text-base md:text-lg px-6 md:px-8 py-3 md:py-4 w-full sm:w-auto smooth-transition">
+                <Building2 className="mr-2 h-4 w-4 md:h-5 md:w-5" />
                 For Event Companies
-                <ArrowRight className="ml-2 h-5 w-5" />
+                <ArrowRight className="ml-2 h-4 w-4 md:h-5 md:w-5" />
               </Button>
             </Link>
           </div>
         </div>
 
         {/* Quick Overview */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 mb-12 md:mb-16">
           {/* Guest Dashboard Preview */}
-          <Card className="bg-white/95 backdrop-blur-xl border-2 border-rose-200/50 romantic-shadow rounded-3xl">
-            <CardHeader className="text-center pb-6">
-              <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-rose-400 to-pink-500 rounded-2xl flex items-center justify-center">
-                <Heart className="h-8 w-8 text-white" />
+          <Card className="responsive-card animate-stagger">
+            <CardHeader className="text-center pb-4 md:pb-6">
+              <div className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-3 md:mb-4 bg-gradient-to-br from-rose-400 to-pink-500 rounded-2xl flex items-center justify-center smooth-transition hover:scale-105">
+                <Heart className="h-6 w-6 md:h-8 md:w-8 text-white" />
               </div>
-              <CardTitle className="text-2xl font-serif elegant-text-gradient">For Couples</CardTitle>
-              <CardDescription className="text-slate-600 text-lg">
+              <CardTitle className="text-xl md:text-2xl font-serif elegant-text-gradient">For Couples</CardTitle>
+              <CardDescription className="text-slate-600 text-base md:text-lg">
                 Everything you need to plan your dream wedding
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                 {guestFeatures.slice(0, 4).map((feature, index) => (
-                  <div key={index} className="flex items-center space-x-3 p-3 bg-rose-50/50 rounded-xl">
-                    <feature.icon className="h-5 w-5 text-rose-500" />
+                  <div key={index} className="flex items-center space-x-3 p-3 bg-rose-50/50 rounded-xl smooth-transition hover:bg-rose-50">
+                    <feature.icon className="h-4 w-4 md:h-5 md:w-5 text-rose-500 flex-shrink-0" />
                     <div>
-                      <p className="text-sm font-medium text-slate-800">{feature.title}</p>
+                      <p className="text-sm md:text-base font-medium text-slate-800">{feature.title}</p>
                     </div>
                   </div>
                 ))}
               </div>
               <Link to="/features/guest">
-                <Button className="w-full mt-6 romantic-button">
+                <Button className="w-full mt-4 md:mt-6 romantic-button">
                   Explore Guest Features
                 </Button>
               </Link>
@@ -155,29 +156,29 @@ export const LandingPage = ({ onGetStarted }: LandingPageProps) => {
           </Card>
 
           {/* Event Company Preview */}
-          <Card className="bg-white/95 backdrop-blur-xl border-2 border-purple-200/50 romantic-shadow rounded-3xl">
-            <CardHeader className="text-center pb-6">
-              <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-purple-400 to-indigo-500 rounded-2xl flex items-center justify-center">
-                <Building2 className="h-8 w-8 text-white" />
+          <Card className="responsive-card animate-stagger">
+            <CardHeader className="text-center pb-4 md:pb-6">
+              <div className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-3 md:mb-4 bg-gradient-to-br from-purple-400 to-indigo-500 rounded-2xl flex items-center justify-center smooth-transition hover:scale-105">
+                <Building2 className="h-6 w-6 md:h-8 md:w-8 text-white" />
               </div>
-              <CardTitle className="text-2xl font-serif bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">For Event Companies</CardTitle>
-              <CardDescription className="text-slate-600 text-lg">
+              <CardTitle className="text-xl md:text-2xl font-serif bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">For Event Companies</CardTitle>
+              <CardDescription className="text-slate-600 text-base md:text-lg">
                 Professional tools for managing multiple events
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                 {companyFeatures.slice(0, 4).map((feature, index) => (
-                  <div key={index} className="flex items-center space-x-3 p-3 bg-purple-50/50 rounded-xl">
-                    <feature.icon className="h-5 w-5 text-purple-500" />
+                  <div key={index} className="flex items-center space-x-3 p-3 bg-purple-50/50 rounded-xl smooth-transition hover:bg-purple-50">
+                    <feature.icon className="h-4 w-4 md:h-5 md:w-5 text-purple-500 flex-shrink-0" />
                     <div>
-                      <p className="text-sm font-medium text-slate-800">{feature.title}</p>
+                      <p className="text-sm md:text-base font-medium text-slate-800">{feature.title}</p>
                     </div>
                   </div>
                 ))}
               </div>
               <Link to="/features/company">
-                <Button className="w-full mt-6 bg-gradient-to-r from-purple-400 to-indigo-500 hover:from-purple-500 hover:to-indigo-600 text-white rounded-2xl">
+                <Button className="w-full mt-4 md:mt-6 bg-gradient-to-r from-purple-400 to-indigo-500 hover:from-purple-500 hover:to-indigo-600 text-white rounded-2xl smooth-transition">
                   Explore Company Features
                 </Button>
               </Link>
@@ -186,24 +187,24 @@ export const LandingPage = ({ onGetStarted }: LandingPageProps) => {
         </div>
 
         {/* Call to Action */}
-        <div className="text-center">
-          <h2 className="text-3xl font-serif font-bold text-slate-800 mb-6">
+        <div className="text-center animate-fade-in-up">
+          <h2 className="text-2xl md:text-3xl font-serif font-bold text-slate-800 mb-4 md:mb-6">
             Ready to Start Planning?
           </h2>
-          <p className="text-lg text-slate-600 mb-8 max-w-2xl mx-auto">
+          <p className="text-base md:text-lg text-slate-600 mb-6 md:mb-8 max-w-2xl mx-auto px-4">
             Join thousands of couples and event professionals who trust Meliora Moments 
             to make their special day perfect
           </p>
           <Button 
             onClick={onGetStarted}
             size="lg" 
-            className="romantic-button text-xl px-12 py-6"
+            className="romantic-button text-lg md:text-xl px-8 md:px-12 py-4 md:py-6"
           >
-            <Heart className="mr-3 h-6 w-6" />
+            <Heart className="mr-3 h-5 w-5 md:h-6 md:w-6" />
             Get Started Today
           </Button>
         </div>
-      </div>
+      </section>
     </div>
   );
 };

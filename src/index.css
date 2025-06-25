@@ -97,6 +97,9 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'Inter', sans-serif;
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   
   .font-serif {
@@ -113,6 +116,14 @@
   
   .font-classic {
     font-family: 'Crimson Text', serif;
+  }
+
+  /* Improved mobile touch targets */
+  @media (max-width: 768px) {
+    button, a {
+      min-height: 44px;
+      min-width: 44px;
+    }
   }
 }
 
@@ -152,6 +163,7 @@
   
   .romantic-shadow {
     box-shadow: 0 20px 40px -15px rgba(244, 63, 94, 0.15), 0 10px 25px -10px rgba(244, 63, 94, 0.1);
+    transition: box-shadow 0.3s ease;
   }
   
   .logo-shadow {
@@ -159,7 +171,8 @@
   }
   
   .hover-lift {
-    @apply transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-2xl;
+    @apply transition-all duration-500 ease-out hover:-translate-y-2 hover:shadow-2xl;
+    will-change: transform, box-shadow;
   }
   
   .text-gradient {
@@ -194,13 +207,25 @@
   .to-lavender-50 {
     --tw-gradient-to: #faf7ff;
   }
+
+  /* Smooth transitions for better performance */
+  .smooth-transition {
+    @apply transition-all duration-300 ease-out;
+    will-change: transform, opacity;
+  }
+
+  /* Optimized card component */
+  .responsive-card {
+    @apply bg-white/95 backdrop-blur-xl border-2 border-rose-200/30 romantic-shadow rounded-3xl smooth-transition hover:shadow-xl hover:-translate-y-1;
+    will-change: transform, box-shadow;
+  }
 }
 
-/* Enhanced animations with romantic flair */
+/* Enhanced animations with romantic flair - optimized for performance */
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
@@ -211,7 +236,7 @@
 @keyframes slideInRight {
   from {
     opacity: 0;
-    transform: translateX(30px);
+    transform: translateX(20px);
   }
   to {
     opacity: 1;
@@ -233,7 +258,7 @@
     transform: translateY(0px);
   }
   50% {
-    transform: translateY(-10px);
+    transform: translateY(-6px);
   }
 }
 
@@ -246,6 +271,18 @@
   }
 }
 
+/* Staggered animation for elements */
+@keyframes staggered-fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .animate-fade-in-up {
   animation: fadeInUp 0.6s ease-out;
 }
@@ -255,7 +292,7 @@
 }
 
 .animate-pulse-glow {
-  animation: pulse-glow 2s infinite;
+  animation: pulse-glow 3s infinite;
 }
 
 .animate-float {
@@ -273,9 +310,19 @@
   background-size: 200% 100%;
 }
 
+.animate-stagger {
+  animation: staggered-fade-in 0.6s ease-out;
+}
+
+/* Staggered delays for smooth entrance */
+.animate-stagger:nth-child(1) { animation-delay: 0.1s; }
+.animate-stagger:nth-child(2) { animation-delay: 0.2s; }
+.animate-stagger:nth-child(3) { animation-delay: 0.3s; }
+.animate-stagger:nth-child(4) { animation-delay: 0.4s; }
+
 /* Enhanced scrollbar with romantic colors */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -286,6 +333,7 @@
 ::-webkit-scrollbar-thumb {
   background: linear-gradient(135deg, #f472b6, #ec4899);
   border-radius: 10px;
+  transition: background 0.3s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -297,9 +345,10 @@
   @apply bg-white/80 backdrop-blur-sm border-2 border-rose-200 focus:border-rose-400 focus:ring-rose-300 rounded-2xl transition-all duration-300;
 }
 
-/* Custom button hover effects */
+/* Custom button hover effects - optimized */
 .romantic-button {
-  @apply bg-gradient-to-r from-rose-400 via-pink-400 to-purple-400 hover:from-rose-500 hover:via-pink-500 hover:to-purple-500 text-white font-medium rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300;
+  @apply bg-gradient-to-r from-rose-400 via-pink-400 to-purple-400 hover:from-rose-500 hover:via-pink-500 hover:to-purple-500 text-white font-medium rounded-2xl shadow-lg hover:shadow-xl smooth-transition hover:-translate-y-1;
+  will-change: transform, box-shadow;
 }
 
 /* Brand logo styles */
@@ -313,4 +362,50 @@
 
 .script-accent {
   @apply font-script font-medium;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .romantic-shadow {
+    box-shadow: 0 10px 20px -8px rgba(244, 63, 94, 0.15), 0 5px 12px -5px rgba(244, 63, 94, 0.1);
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-1px);
+  }
+  
+  .animate-float {
+    animation: float 8s ease-in-out infinite;
+  }
+  
+  /* Reduce motion for mobile performance */
+  .animate-pulse-glow {
+    animation: none;
+  }
+}
+
+/* Tablet optimizations */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .hover-lift:hover {
+    transform: translateY(-1.5px);
+  }
+}
+
+/* Performance optimizations */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* High DPI display optimizations */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .romantic-shadow {
+    box-shadow: 0 10px 20px -8px rgba(244, 63, 94, 0.12), 0 5px 12px -5px rgba(244, 63, 94, 0.08);
+  }
 }
