@@ -8,53 +8,58 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Upload, X } from "lucide-react";
+import { Upload, X, User } from "lucide-react";
 
 interface ProfileDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  companyData: {
-    name: string;
-    email: string;
-    phone: string;
-    address: string;
-    description: string;
-    logo?: string;
-  };
-  onSave: (data: any) => void;
+  onLogoUpdate: (logo: string) => void;
 }
 
-export const ProfileDialog = ({ open, onOpenChange, companyData, onSave }: ProfileDialogProps) => {
-  const [formData, setFormData] = useState(companyData);
+export const ProfileDialog = ({ onLogoUpdate }: ProfileDialogProps) => {
+  const [open, setOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "Event Management Co.",
+    email: "contact@eventmanagement.com",
+    phone: "+1 (555) 123-4567",
+    address: "123 Event Street, City, State 12345",
+    description: "Professional event management services for weddings and special occasions.",
+    logo: ""
+  });
 
   const handleSave = () => {
-    onSave(formData);
     toast.success("Profile updated successfully!");
-    onOpenChange(false);
+    setOpen(false);
   };
 
   const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // Create a URL for the uploaded file
       const logoUrl = URL.createObjectURL(file);
       setFormData({ ...formData, logo: logoUrl });
+      onLogoUpdate(logoUrl);
       toast.success("Logo uploaded successfully!");
     }
   };
 
   const removeLogo = () => {
-    setFormData({ ...formData, logo: undefined });
+    setFormData({ ...formData, logo: "" });
+    onLogoUpdate("");
     toast.success("Logo removed successfully!");
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm" className="flex items-center gap-2">
+          <User className="h-4 w-4" />
+          Profile
+        </Button>
+      </DialogTrigger>
       <DialogContent className="sm:max-w-[500px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Company Profile</DialogTitle>
@@ -164,7 +169,7 @@ export const ProfileDialog = ({ open, onOpenChange, companyData, onSave }: Profi
           </div>
         </div>
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+          <Button type="button" variant="outline" onClick={() => setOpen(false)}>
             Cancel
           </Button>
           <Button type="button" onClick={handleSave}>

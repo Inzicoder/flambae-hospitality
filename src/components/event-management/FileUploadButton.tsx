@@ -124,7 +124,7 @@ Sarah Johnson,+1234567891,sarah@email.com,2024-06-15 16:00,2024-06-17 12:00,Pend
   };
 
   return (
-    <Dialog open={isOpen} onValueChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="flex items-center gap-2">
           <Upload className="h-4 w-4" />
