@@ -210,6 +210,7 @@ const App = () => {
                 ) : (
                   <>
                     <Route path="/" element={<EventCompanyDashboard weddingData={weddingData} />} />
+                    <Route path="/rsvp" element={<RSVPPage guestStats={weddingData.guestStats} />} />
                   </>
                 )}
                 <Route path="/404" element={<NotFound />} />
