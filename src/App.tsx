@@ -10,6 +10,9 @@ import { DashboardHeader } from "@/components/DashboardHeader";
 import { Navigation } from "@/components/Navigation";
 import { GuestDashboard } from "@/components/GuestDashboard";
 import { EventCompanyDashboard } from "@/components/EventCompanyDashboard";
+import { LandingPage } from "@/components/LandingPage";
+import { GuestFeaturesPage } from "@/components/GuestFeaturesPage";
+import { EventCompanyFeaturesPage } from "@/components/EventCompanyFeaturesPage";
 import { RSVPPage } from "@/pages/RSVPPage";
 import { BudgetPage } from "@/pages/BudgetPage";
 import { TodoPage } from "@/pages/TodoPage";
@@ -28,6 +31,7 @@ const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userType, setUserType] = useState<'guest' | 'eventCompany'>('guest');
   const [showPayment, setShowPayment] = useState(false);
+  const [showAuth, setShowAuth] = useState(false);
   const [eventCode, setEventCode] = useState('');
   
   // Sample data for demonstration
@@ -114,14 +118,20 @@ const App = () => {
     }));
   };
 
+  const handleGetStarted = () => {
+    setShowAuth(true);
+  };
+
   const handleLogin = (type: 'guest' | 'eventCompany') => {
     setUserType(type);
     setIsLoggedIn(true);
+    setShowAuth(false);
   };
 
   const handleRegister = (type: 'eventCompany') => {
     setUserType(type);
     setShowPayment(true);
+    setShowAuth(false);
   };
 
   const handlePaymentSuccess = (code: string) => {
@@ -132,6 +142,7 @@ const App = () => {
 
   const handleBackToAuth = () => {
     setShowPayment(false);
+    setShowAuth(true);
   };
 
   if (showPayment) {
@@ -149,7 +160,7 @@ const App = () => {
     );
   }
 
-  if (!isLoggedIn) {
+  if (showAuth) {
     return (
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
@@ -159,6 +170,25 @@ const App = () => {
             onLogin={handleLogin}
             onRegister={handleRegister}
           />
+        </TooltipProvider>
+      </QueryClientProvider>
+    );
+  }
+
+  if (!isLoggedIn) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<LandingPage onGetStarted={handleGetStarted} />} />
+              <Route path="/features/guest" element={<GuestFeaturesPage onGetStarted={handleGetStarted} />} />
+              <Route path="/features/company" element={<EventCompanyFeaturesPage onGetStarted={handleGetStarted} />} />
+              <Route path="*" element={<LandingPage onGetStarted={handleGetStarted} />} />
+            </Routes>
+          </BrowserRouter>
         </TooltipProvider>
       </QueryClientProvider>
     );
