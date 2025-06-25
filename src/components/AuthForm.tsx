@@ -4,9 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Heart, Users, Mail, Lock, User, ArrowLeft } from "lucide-react";
+import { Heart, Users, Mail, Lock, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Link } from "react-router-dom";
 
 interface AuthFormProps {
   onLogin: (type: 'guest' | 'eventCompany') => void;
@@ -63,16 +62,6 @@ export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
         <div className="absolute bottom-20 left-1/3 w-40 h-40 opacity-10">
           <div className="w-full h-full rounded-full bg-gradient-to-br from-amber-200 to-yellow-200 blur-xl animate-pulse delay-2000"></div>
         </div>
-      </div>
-
-      {/* Back Button */}
-      <div className="absolute top-8 left-8 z-20">
-        <Link to="/">
-          <Button variant="outline" size="sm" className="border-2 border-rose-200 hover:border-rose-400 hover:bg-rose-50 text-slate-700 rounded-2xl">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Home
-          </Button>
-        </Link>
       </div>
 
       <div className="bg-white/95 backdrop-blur-xl p-8 rounded-3xl romantic-shadow max-w-md w-full mx-4 border-2 border-rose-200/30">
