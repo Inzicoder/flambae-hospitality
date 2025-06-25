@@ -1,5 +1,5 @@
 
-import { RSVPTracker } from "@/components/RSVPTracker";
+import { EventManagementDashboard } from "./EventManagementDashboard";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { User, HelpCircle } from "lucide-react";
@@ -24,9 +24,9 @@ export const EventCompanyDashboard = ({ weddingData }: EventCompanyDashboardProp
       {/* Header with simplified navigation */}
       <div className="flex items-center justify-between py-6">
         <div className="text-center flex-1">
-          <h1 className="text-4xl font-bold text-gradient mb-4">Welcome {weddingData.coupleNames}</h1>
+          <h1 className="text-4xl font-bold text-gradient mb-4">Professional Event Management</h1>
           <p className="text-xl text-gray-600">Event Company Dashboard</p>
-          <p className="text-lg text-gray-500">Managing your special day - {weddingData.weddingDate}</p>
+          <p className="text-lg text-gray-500">Managing {weddingData.coupleNames} - {weddingData.weddingDate}</p>
         </div>
         
         {/* Profile and Help & Support buttons */}
@@ -57,8 +57,8 @@ export const EventCompanyDashboard = ({ weddingData }: EventCompanyDashboardProp
         </div>
       </div>
 
-      {/* RSVP Management - Full functionality */}
-      <RSVPTracker guestStats={weddingData.guestStats} />
+      {/* Advanced Event Management Dashboard */}
+      <EventManagementDashboard />
     </div>
   );
 };
