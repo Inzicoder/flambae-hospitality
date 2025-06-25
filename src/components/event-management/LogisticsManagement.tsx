@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Truck, Clock, MapPin, Plus, Calendar } from 'lucide-react';
+import { ScheduleTransportDialog } from './ScheduleTransportDialog';
+import { Truck, Clock, MapPin, Calendar } from 'lucide-react';
 
 interface LogisticsEntry {
   id: string;
@@ -50,6 +51,10 @@ export const LogisticsManagement = () => {
 
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterPriority, setFilterPriority] = useState('all');
+
+  const handleScheduleTransport = (newTransport: LogisticsEntry) => {
+    setLogistics([...logistics, newTransport]);
+  };
 
   const filteredLogistics = logistics.filter(entry => {
     const matchesStatus = filterStatus === 'all' || entry.status === filterStatus;
@@ -107,10 +112,7 @@ export const LogisticsManagement = () => {
               <SelectItem value="Regular">Regular</SelectItem>
             </SelectContent>
           </Select>
-          <Button className="flex-shrink-0">
-            <Plus className="h-4 w-4 mr-2" />
-            Schedule Transport
-          </Button>
+          <ScheduleTransportDialog onScheduleTransport={handleScheduleTransport} />
         </div>
 
         {/* Quick Stats */}
@@ -184,8 +186,8 @@ export const LogisticsManagement = () => {
                   </TableCell>
                   <TableCell>
                     <div className="text-sm">
-                      <div className="font-medium">{entry.assignedDriver}</div>
-                      <div className="text-gray-500">{entry.vehicle}</div>
+                      <div className="font-medium">{entry.assignedDriver || 'Not assigned'}</div>
+                      <div className="text-gray-500">{entry.vehicle || 'No vehicle assigned'}</div>
                     </div>
                   </TableCell>
                   <TableCell>

@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Filter, Plus, Edit, Phone, Mail } from 'lucide-react';
+import { AddGuestDialog } from './AddGuestDialog';
+import { Search, Filter, Edit, Phone, Mail } from 'lucide-react';
 
 interface Guest {
   id: string;
@@ -49,6 +50,10 @@ export const GuestManagementSystem = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterTravel, setFilterTravel] = useState('all');
+
+  const handleAddGuest = (newGuest: Guest) => {
+    setGuests([...guests, newGuest]);
+  };
 
   const filteredGuests = guests.filter(guest => {
     const matchesSearch = guest.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -114,10 +119,7 @@ export const GuestManagementSystem = () => {
               <SelectItem value="No">No Travel</SelectItem>
             </SelectContent>
           </Select>
-          <Button>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Guest
-          </Button>
+          <AddGuestDialog onAddGuest={handleAddGuest} />
         </div>
 
         {/* Stats */}
@@ -187,16 +189,16 @@ export const GuestManagementSystem = () => {
                   </TableCell>
                   <TableCell>
                     <div className="text-sm">
-                      {new Date(guest.arrivalDateTime).toLocaleDateString()}
+                      {guest.arrivalDateTime ? new Date(guest.arrivalDateTime).toLocaleDateString() : 'N/A'}
                       <br />
-                      {new Date(guest.arrivalDateTime).toLocaleTimeString()}
+                      {guest.arrivalDateTime ? new Date(guest.arrivalDateTime).toLocaleTimeString() : ''}
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="text-sm">
-                      {new Date(guest.departureDateTime).toLocaleDateString()}
+                      {guest.departureDateTime ? new Date(guest.departureDateTime).toLocaleDateString() : 'N/A'}
                       <br />
-                      {new Date(guest.departureDateTime).toLocaleTimeString()}
+                      {guest.departureDateTime ? new Date(guest.departureDateTime).toLocaleTimeString() : ''}
                     </div>
                   </TableCell>
                   <TableCell>
