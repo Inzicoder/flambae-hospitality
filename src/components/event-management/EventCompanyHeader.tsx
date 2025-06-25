@@ -14,6 +14,7 @@ interface EventCompanyHeaderProps {
     phone: string;
     address: string;
     description: string;
+    logo?: string;
   };
 }
 
@@ -50,7 +51,17 @@ export const EventCompanyHeader = ({
     <>
       <div className="flex items-center justify-between py-6">
         <div className="text-center flex-1">
-          <h1 className="text-4xl font-bold text-gradient mb-4">{currentCompanyData.name}</h1>
+          {/* Company Logo and Name Section */}
+          <div className="flex items-center justify-center mb-4 space-x-4">
+            {currentCompanyData.logo && (
+              <img 
+                src={currentCompanyData.logo} 
+                alt={`${currentCompanyData.name} Logo`}
+                className="h-16 w-16 object-contain"
+              />
+            )}
+            <h1 className="text-4xl font-bold text-gradient">{currentCompanyData.name}</h1>
+          </div>
           <p className="text-lg text-gray-500">Managing {weddingData.coupleNames} - {weddingData.weddingDate}</p>
         </div>
         
