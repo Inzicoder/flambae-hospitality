@@ -158,7 +158,7 @@ const App = () => {
               <Route path="/features/guest" element={<GuestFeaturesPage onGetStarted={handleGetStarted} />} />
               <Route path="/features/company" element={<EventCompanyFeaturesPage onGetStarted={handleGetStarted} />} />
               <Route path="/auth" element={<AuthForm onLogin={handleLogin} onRegister={handleRegister} />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
+              <Route path="*" element={<NotFound />} />
             </Routes>
           ) : (
             <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-25 via-blush-50 to-lavender-50 relative overflow-hidden"
@@ -198,15 +198,15 @@ const App = () => {
                       <Route path="/vendors" element={<VendorManager />} />
                       <Route path="/guests" element={<GuestPage />} />
                       <Route path="/schedule" element={<SchedulePage />} />
+                      <Route path="*" element={<NotFound />} />
                     </>
                   ) : (
                     <>
                       <Route path="/" element={<EventCompanyDashboard weddingData={weddingData} />} />
                       <Route path="/dashboard" element={<EventCompanyDashboard weddingData={weddingData} />} />
+                      <Route path="*" element={<NotFound />} />
                     </>
                   )}
-                  <Route path="/404" element={<NotFound />} />
-                  <Route path="*" element={<Navigate to="/404" replace />} />
                 </Routes>
               </main>
             </div>
