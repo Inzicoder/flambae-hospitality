@@ -187,7 +187,7 @@ const App = () => {
               </div>
             </div>
             
-            <DashboardHeader onLogout={() => setIsLoggedIn(false)} />
+            <DashboardHeader onLogout={() => setIsLoggedIn(false)} userType={userType} />
             <Navigation 
               coupleNames={weddingData.coupleNames}
               onLogout={() => setIsLoggedIn(false)}

@@ -12,13 +12,11 @@ import { Link, useLocation } from "react-router-dom";
 
 interface DashboardHeaderProps {
   onLogout: () => void;
+  userType?: 'guest' | 'eventCompany';
 }
 
-export const DashboardHeader = ({ onLogout }: DashboardHeaderProps) => {
+export const DashboardHeader = ({ onLogout, userType = 'guest' }: DashboardHeaderProps) => {
   const location = useLocation();
-  
-  // Determine if we're in event company mode based on current route content
-  const isEventCompany = location.pathname === '/' && document.querySelector('[data-event-company]');
   
   const guestNavItems = [
     { path: '/', label: 'Dashboard', icon: Heart },
@@ -31,14 +29,6 @@ export const DashboardHeader = ({ onLogout }: DashboardHeaderProps) => {
     { path: '/notes', label: 'Collaboration' },
     { path: '/payments', label: 'Payments' },
   ];
-
-  const eventCompanyNavItems = [
-    { path: '/', label: 'Dashboard' },
-    { path: '/rsvp', label: 'RSVP Tracker' },
-  ];
-
-  // Use guest nav by default, but could be enhanced to detect user type
-  const navigationItems = guestNavItems;
 
   return (
     <div className="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-b border-rose-200/50 z-50 romantic-shadow">
@@ -69,37 +59,39 @@ export const DashboardHeader = ({ onLogout }: DashboardHeaderProps) => {
               Notifications
             </Button>
 
-            {/* Navigation Menu */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  className="border-2 border-rose-200 hover:border-rose-400 hover:bg-rose-50 text-slate-700 rounded-2xl transition-all duration-300 backdrop-blur-sm"
-                >
-                  <Menu className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 bg-white/95 backdrop-blur-xl border-2 border-rose-200 romantic-shadow rounded-2xl">
-                {navigationItems.map((item) => (
-                  <DropdownMenuItem key={item.path} asChild>
-                    <Link 
-                      to={item.path}
-                      className="flex items-center px-4 py-3 text-sm text-slate-700 hover:bg-rose-50 hover:text-rose-700 cursor-pointer rounded-xl transition-all duration-200"
-                    >
-                      {item.label}
-                    </Link>
+            {/* Navigation Menu - Only show for guest users */}
+            {userType === 'guest' && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="border-2 border-rose-200 hover:border-rose-400 hover:bg-rose-50 text-slate-700 rounded-2xl transition-all duration-300 backdrop-blur-sm"
+                  >
+                    <Menu className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56 bg-white/95 backdrop-blur-xl border-2 border-rose-200 romantic-shadow rounded-2xl">
+                  {guestNavItems.map((item) => (
+                    <DropdownMenuItem key={item.path} asChild>
+                      <Link 
+                        to={item.path}
+                        className="flex items-center px-4 py-3 text-sm text-slate-700 hover:bg-rose-50 hover:text-rose-700 cursor-pointer rounded-xl transition-all duration-200"
+                      >
+                        {item.label}
+                      </Link>
+                    </DropdownMenuItem>
+                  ))}
+                  <DropdownMenuSeparator className="bg-rose-200/50" />
+                  <DropdownMenuItem 
+                    onClick={onLogout}
+                    className="flex items-center px-4 py-3 text-sm text-red-600 hover:bg-red-50 cursor-pointer rounded-xl transition-all duration-200"
+                  >
+                    Logout
                   </DropdownMenuItem>
-                ))}
-                <DropdownMenuSeparator className="bg-rose-200/50" />
-                <DropdownMenuItem 
-                  onClick={onLogout}
-                  className="flex items-center px-4 py-3 text-sm text-red-600 hover:bg-red-50 cursor-pointer rounded-xl transition-all duration-200"
-                >
-                  Logout
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
         </div>
       </div>

@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,7 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Heart, Share2, Plus, Download, Settings, Users, Utensils, Hotel, Calendar, MapPin, Phone, Mail, MessageCircle, FileText, BarChart3, Gift } from "lucide-react";
+import { Heart, Share2, Plus, Download, Settings, Users, Utensils, Hotel, Calendar, MapPin, Phone, Mail, MessageCircle, FileText, BarChart3, Bed, Gift } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 
@@ -41,6 +40,22 @@ const events = [
   { id: 'mehendi', name: 'Mehendi Night', date: '2024-06-14', time: '6:00 PM' },
   { id: 'wedding', name: 'Wedding Ceremony', date: '2024-06-15', time: '11:00 AM' },
   { id: 'reception', name: 'Reception', date: '2024-06-15', time: '7:00 PM' },
+];
+
+// Sample guest data
+const sampleGuests = [
+  { id: 1, name: 'John Smith', email: 'john@email.com', phone: '+1-555-0101', status: 'confirmed', roomNeeded: true, roomType: 'Single' },
+  { id: 2, name: 'Sarah Johnson', email: 'sarah@email.com', phone: '+1-555-0102', status: 'confirmed', roomNeeded: true, roomType: 'Double' },
+  { id: 3, name: 'Mike Wilson', email: 'mike@email.com', phone: '+1-555-0103', status: 'pending', roomNeeded: false, roomType: null },
+  { id: 4, name: 'Emily Davis', email: 'emily@email.com', phone: '+1-555-0104', status: 'confirmed', roomNeeded: true, roomType: 'Suite' },
+  { id: 5, name: 'Robert Brown', email: 'robert@email.com', phone: '+1-555-0105', status: 'declined', roomNeeded: false, roomType: null },
+];
+
+const roomTypes = [
+  { type: 'Single', count: 15, allocated: 8 },
+  { type: 'Double', count: 20, allocated: 12 },
+  { type: 'Suite', count: 5, allocated: 3 },
+  { type: 'Family', count: 8, allocated: 2 },
 ];
 
 export const RSVPTracker = ({ guestStats, eventCode }: RSVPTrackerProps) => {
@@ -247,10 +262,10 @@ export const RSVPTracker = ({ guestStats, eventCode }: RSVPTrackerProps) => {
       <Tabs defaultValue="overview" className="w-full">
         <TabsList className="grid w-full grid-cols-5 bg-white/80 backdrop-blur-sm">
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="guests">Guest Details</TabsTrigger>
           <TabsTrigger value="events">Events</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
-          <TabsTrigger value="communications">Messages</TabsTrigger>
-          <TabsTrigger value="gifts">Gift Registry</TabsTrigger>
+          <TabsTrigger value="rooms">Room Allocation</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview">
@@ -335,12 +350,12 @@ export const RSVPTracker = ({ guestStats, eventCode }: RSVPTrackerProps) => {
                 <div className="p-5 bg-rose-50 rounded-xl border border-rose-100">
                   <div className="flex items-center space-x-3 mb-3">
                     <div className="p-2 bg-rose-100 rounded-lg">
-                      <Gift className="h-5 w-5 text-rose-600" />
+                      <Bed className="h-5 w-5 text-rose-600" />
                     </div>
-                    <h3 className="font-semibold text-rose-900">Gifts</h3>
+                    <h3 className="font-semibold text-rose-900">Rooms</h3>
                   </div>
-                  <p className="text-sm text-rose-700">Registry items: 25</p>
-                  <p className="text-sm text-rose-700">Purchased: 12</p>
+                  <p className="text-sm text-rose-700">Total allocated: 25</p>
+                  <p className="text-sm text-rose-700">Available: 23</p>
                 </div>
               </div>
               
@@ -379,6 +394,57 @@ export const RSVPTracker = ({ guestStats, eventCode }: RSVPTrackerProps) => {
                   <Download className="h-4 w-4 mr-2" />
                   Export Data
                 </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="guests">
+          <Card className="border-0 shadow-xl bg-white/90 backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Users className="h-5 w-5 text-blue-500" />
+                <span>Guest Details</span>
+              </CardTitle>
+              <CardDescription>Manage individual guest information and responses</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left p-3 font-semibold">Name</th>
+                      <th className="text-left p-3 font-semibold">Email</th>
+                      <th className="text-left p-3 font-semibold">Phone</th>
+                      <th className="text-left p-3 font-semibold">Status</th>
+                      <th className="text-left p-3 font-semibold">Room Needed</th>
+                      <th className="text-left p-3 font-semibold">Room Type</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sampleGuests.map((guest) => (
+                      <tr key={guest.id} className="border-b hover:bg-gray-50">
+                        <td className="p-3 font-medium">{guest.name}</td>
+                        <td className="p-3 text-gray-600">{guest.email}</td>
+                        <td className="p-3 text-gray-600">{guest.phone}</td>
+                        <td className="p-3">
+                          <Badge 
+                            variant={guest.status === 'confirmed' ? 'default' : 
+                                    guest.status === 'pending' ? 'secondary' : 'destructive'}
+                          >
+                            {guest.status}
+                          </Badge>
+                        </td>
+                        <td className="p-3">
+                          <Badge variant={guest.roomNeeded ? 'default' : 'outline'}>
+                            {guest.roomNeeded ? 'Yes' : 'No'}
+                          </Badge>
+                        </td>
+                        <td className="p-3 text-gray-600">{guest.roomType || 'N/A'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </CardContent>
           </Card>
@@ -472,89 +538,55 @@ export const RSVPTracker = ({ guestStats, eventCode }: RSVPTrackerProps) => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="communications">
+        <TabsContent value="rooms">
           <Card className="border-0 shadow-xl bg-white/90 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <MessageCircle className="h-5 w-5 text-green-500" />
-                <span>Guest Communications</span>
+                <Bed className="h-5 w-5 text-indigo-500" />
+                <span>Room Allocation</span>
               </CardTitle>
-              <CardDescription>Send messages and reminders to guests</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Button className="bg-blue-600 hover:bg-blue-700 h-20 flex flex-col">
-                    <Mail className="h-6 w-6 mb-2" />
-                    <span>Email Reminder</span>
-                  </Button>
-                  <Button className="bg-green-600 hover:bg-green-700 h-20 flex flex-col">
-                    <MessageCircle className="h-6 w-6 mb-2" />
-                    <span>WhatsApp Blast</span>
-                  </Button>
-                  <Button className="bg-purple-600 hover:bg-purple-700 h-20 flex flex-col">
-                    <Phone className="h-6 w-6 mb-2" />
-                    <span>SMS Alert</span>
-                  </Button>
-                </div>
-                <div className="border rounded-lg p-4">
-                  <h3 className="font-semibold mb-4">Recent Messages</h3>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
-                      <div>
-                        <p className="text-sm font-medium">RSVP Reminder</p>
-                        <p className="text-xs text-gray-600">Sent to {guestStats.pending} guests</p>
-                      </div>
-                      <Badge variant="outline">2 days ago</Badge>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
-                      <div>
-                        <p className="text-sm font-medium">Event Details Update</p>
-                        <p className="text-xs text-gray-600">Sent to all guests</p>
-                      </div>
-                      <Badge variant="outline">1 week ago</Badge>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="gifts">
-          <Card className="border-0 shadow-xl bg-white/90 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Gift className="h-5 w-5 text-pink-500" />
-                <span>Gift Registry</span>
-              </CardTitle>
-              <CardDescription>Manage your wedding gift registry</CardDescription>
+              <CardDescription>Manage accommodation for your guests</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <h3 className="font-semibold">Registry Progress</h3>
-                    <Button variant="outline" size="sm">
-                      <Plus className="h-3 w-3 mr-1" />
-                      Add Item
-                    </Button>
+                  <h3 className="font-semibold text-slate-800">Room Availability</h3>
+                  <div className="space-y-4">
+                    {roomTypes.map((room) => (
+                      <div key={room.type} className="border rounded-lg p-4">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="font-medium">{room.type} Room</span>
+                          <span className="text-sm text-gray-600">{room.allocated}/{room.count}</span>
+                        </div>
+                        <Progress value={(room.allocated / room.count) * 100} className="mb-2" />
+                        <div className="flex justify-between text-sm text-gray-600">
+                          <span>Allocated: {room.allocated}</span>
+                          <span>Available: {room.count - room.allocated}</span>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                  <Progress value={48} className="mb-2" />
-                  <p className="text-sm text-gray-600">12 of 25 items purchased</p>
                 </div>
                 <div className="space-y-4">
-                  <h3 className="font-semibold">Popular Items</h3>
+                  <h3 className="font-semibold text-slate-800">Room Assignments</h3>
                   <div className="space-y-2">
-                    <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                      <span className="text-sm">Kitchen Set</span>
-                      <Badge variant="secondary">Purchased</Badge>
-                    </div>
-                    <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                      <span className="text-sm">Dinnerware</span>
-                      <Badge>Available</Badge>
-                    </div>
+                    {sampleGuests.filter(guest => guest.roomNeeded).map((guest) => (
+                      <div key={guest.id} className="flex justify-between items-center p-3 bg-gray-50 rounded">
+                        <div>
+                          <span className="font-medium">{guest.name}</span>
+                          <Badge className="ml-2" variant="outline">{guest.roomType}</Badge>
+                        </div>
+                        <Button variant="outline" size="sm">
+                          <Settings className="h-3 w-3 mr-1" />
+                          Manage
+                        </Button>
+                      </div>
+                    ))}
                   </div>
+                  <Button className="w-full bg-indigo-600 hover:bg-indigo-700">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Assign Room
+                  </Button>
                 </div>
               </div>
             </CardContent>
