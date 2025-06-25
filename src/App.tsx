@@ -4,10 +4,12 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useState } from 'react';
-import { LoginForm } from "@/components/LoginForm";
+import { AuthForm } from "@/components/AuthForm";
+import { PaymentFlow } from "@/components/PaymentFlow";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { Navigation } from "@/components/Navigation";
-import { RomanticDashboard } from "@/components/RomanticDashboard";
+import { GuestDashboard } from "@/components/GuestDashboard";
+import { EventCompanyDashboard } from "@/components/EventCompanyDashboard";
 import { RSVPPage } from "@/pages/RSVPPage";
 import { BudgetPage } from "@/pages/BudgetPage";
 import { TodoPage } from "@/pages/TodoPage";
@@ -25,6 +27,8 @@ const queryClient = new QueryClient();
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userType, setUserType] = useState<'guest' | 'eventCompany'>('guest');
+  const [showPayment, setShowPayment] = useState(false);
+  const [eventCode, setEventCode] = useState('');
   
   // Sample data for demonstration
   const [weddingData, setWeddingData] = useState({
@@ -115,13 +119,46 @@ const App = () => {
     setIsLoggedIn(true);
   };
 
+  const handleRegister = (type: 'eventCompany') => {
+    setUserType(type);
+    setShowPayment(true);
+  };
+
+  const handlePaymentSuccess = (code: string) => {
+    setEventCode(code);
+    setShowPayment(false);
+    setIsLoggedIn(true);
+  };
+
+  const handleBackToAuth = () => {
+    setShowPayment(false);
+  };
+
+  if (showPayment) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <PaymentFlow 
+            onPaymentSuccess={handlePaymentSuccess}
+            onBack={handleBackToAuth}
+          />
+        </TooltipProvider>
+      </QueryClientProvider>
+    );
+  }
+
   if (!isLoggedIn) {
     return (
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <LoginForm onLogin={handleLogin} />
+          <AuthForm 
+            onLogin={handleLogin}
+            onRegister={handleRegister}
+          />
         </TooltipProvider>
       </QueryClientProvider>
     );
@@ -160,7 +197,7 @@ const App = () => {
               <Routes>
                 {userType === 'guest' ? (
                   <>
-                    <Route path="/" element={<RomanticDashboard weddingData={weddingData} />} />
+                    <Route path="/" element={<GuestDashboard weddingData={weddingData} />} />
                     <Route path="/budget" element={<BudgetPage budget={weddingData.budget} onAddCategory={addBudgetCategory} />} />
                     <Route path="/todos" element={<TodoPage todos={weddingData.todos} onToggleTodo={toggleTodo} onAddTodo={addTodo} onDeleteTodo={deleteTodo} />} />
                     <Route path="/gallery" element={<GalleryPage gallery={weddingData.gallery} />} />
@@ -172,17 +209,7 @@ const App = () => {
                   </>
                 ) : (
                   <>
-                    <Route path="/" element={
-                      <div className="space-y-8">
-                        <div className="text-center py-6">
-                          <h1 className="text-4xl font-bold text-gradient mb-4">Welcome {weddingData.coupleNames}</h1>
-                          <p className="text-xl text-gray-600">Event Company Dashboard</p>
-                          <p className="text-lg text-gray-500">Managing your special day - {weddingData.weddingDate}</p>
-                        </div>
-                        <RSVPPage guestStats={weddingData.guestStats} />
-                      </div>
-                    } />
-                    <Route path="/rsvp" element={<RSVPPage guestStats={weddingData.guestStats} />} />
+                    <Route path="/" element={<EventCompanyDashboard weddingData={weddingData} />} />
                   </>
                 )}
                 <Route path="/404" element={<NotFound />} />
