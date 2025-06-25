@@ -5,9 +5,10 @@ import { Heart, Sparkles } from 'lucide-react';
 interface CustomLogoProps {
   size?: 'sm' | 'md' | 'lg';
   showTagline?: boolean;
+  className?: string;
 }
 
-export const CustomLogo = ({ size = 'md', showTagline = true }: CustomLogoProps) => {
+export const CustomLogo = ({ size = 'md', showTagline = true, className = '' }: CustomLogoProps) => {
   const sizeClasses = {
     sm: 'h-8',
     md: 'h-12',
@@ -27,7 +28,7 @@ export const CustomLogo = ({ size = 'md', showTagline = true }: CustomLogoProps)
   };
 
   return (
-    <div className="flex flex-col items-center space-y-2">
+    <div className={`flex flex-col items-center space-y-2 ${className}`}>
       <div className="flex items-center space-x-3">
         {/* Logo Icon */}
         <div className={`${sizeClasses[size]} aspect-square bg-gradient-to-br from-rose-400 via-pink-400 to-purple-500 rounded-2xl flex items-center justify-center shadow-xl relative overflow-hidden`}>
