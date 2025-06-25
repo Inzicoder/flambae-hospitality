@@ -50,7 +50,6 @@ export const EventCompanyHeader = ({
     <>
       <div className="flex items-center justify-between py-6">
         <div className="text-center flex-1">
-          <h1 className="text-4xl font-bold text-gradient mb-4">{currentCompanyData.name}</h1>
           <p className="text-lg text-gray-500">Managing {weddingData.coupleNames} - {weddingData.weddingDate}</p>
         </div>
         
