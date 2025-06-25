@@ -20,11 +20,13 @@ export const DashboardHeader = ({ onLogout }: DashboardHeaderProps) => {
   // Determine if we're in event company mode based on current route content
   const isEventCompany = location.pathname === '/' && document.querySelector('[data-event-company]');
   
-  const customerNavItems = [
+  const guestNavItems = [
     { path: '/', label: 'Dashboard', icon: Heart },
     { path: '/budget', label: 'Budget Manager' },
     { path: '/vendors', label: 'Vendor Management' },
     { path: '/todos', label: 'Task List' },
+    { path: '/guests', label: 'Guest Manager' },
+    { path: '/schedule', label: 'Event Schedule' },
     { path: '/gallery', label: 'Photo Gallery' },
     { path: '/notes', label: 'Collaboration' },
     { path: '/payments', label: 'Payments' },
@@ -33,13 +35,10 @@ export const DashboardHeader = ({ onLogout }: DashboardHeaderProps) => {
   const eventCompanyNavItems = [
     { path: '/', label: 'Dashboard' },
     { path: '/rsvp', label: 'RSVP Tracker' },
-    { path: '/schedule', label: 'Event Schedule' },
-    { path: '/guests', label: 'Guest Manager' },
-    { path: '/travel', label: 'Travel & Stay' },
   ];
 
-  // Use customer nav by default, but could be enhanced to detect user type
-  const navigationItems = customerNavItems;
+  // Use guest nav by default, but could be enhanced to detect user type
+  const navigationItems = guestNavItems;
 
   return (
     <div className="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-b border-rose-200/50 z-50 romantic-shadow">

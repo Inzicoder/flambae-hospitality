@@ -6,7 +6,7 @@ import { Heart } from "lucide-react";
 interface NavigationProps {
   coupleNames: string;
   onLogout: () => void;
-  userType: 'customer' | 'eventCompany';
+  userType: 'guest' | 'eventCompany';
 }
 
 export const Navigation = ({ coupleNames, onLogout, userType }: NavigationProps) => {
@@ -18,7 +18,7 @@ export const Navigation = ({ coupleNames, onLogout, userType }: NavigationProps)
             <div className="p-1.5 bg-gradient-to-br from-rose-100 to-pink-100 rounded-full">
               <Heart className="h-3 w-3 text-rose-500" />
             </div>
-            <span>{userType === 'customer' ? 'Customer Dashboard' : 'Event Company Dashboard'}</span>
+            <span>{userType === 'guest' ? 'Guest Dashboard' : 'Event Company Dashboard'}</span>
           </div>
           <div className="flex items-center space-x-3">
             <Avatar className="h-9 w-9 border-2 border-rose-200">

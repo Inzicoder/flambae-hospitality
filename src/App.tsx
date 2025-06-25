@@ -24,7 +24,7 @@ const queryClient = new QueryClient();
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userType, setUserType] = useState<'customer' | 'eventCompany'>('customer');
+  const [userType, setUserType] = useState<'guest' | 'eventCompany'>('guest');
   
   // Sample data for demonstration
   const [weddingData, setWeddingData] = useState({
@@ -110,7 +110,7 @@ const App = () => {
     }));
   };
 
-  const handleLogin = (type: 'customer' | 'eventCompany') => {
+  const handleLogin = (type: 'guest' | 'eventCompany') => {
     setUserType(type);
     setIsLoggedIn(true);
   };
@@ -158,7 +158,7 @@ const App = () => {
             />
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-32 relative z-10">
               <Routes>
-                {userType === 'customer' ? (
+                {userType === 'guest' ? (
                   <>
                     <Route path="/" element={<RomanticDashboard weddingData={weddingData} />} />
                     <Route path="/budget" element={<BudgetPage budget={weddingData.budget} onAddCategory={addBudgetCategory} />} />
@@ -167,6 +167,8 @@ const App = () => {
                     <Route path="/notes" element={<NotesPage />} />
                     <Route path="/payments" element={<PaymentPage />} />
                     <Route path="/vendors" element={<VendorManager />} />
+                    <Route path="/guests" element={<GuestPage />} />
+                    <Route path="/schedule" element={<SchedulePage />} />
                   </>
                 ) : (
                   <>
@@ -181,9 +183,6 @@ const App = () => {
                       </div>
                     } />
                     <Route path="/rsvp" element={<RSVPPage guestStats={weddingData.guestStats} />} />
-                    <Route path="/schedule" element={<SchedulePage />} />
-                    <Route path="/guests" element={<GuestPage />} />
-                    <Route path="/travel" element={<TravelPage />} />
                   </>
                 )}
                 <Route path="/404" element={<NotFound />} />
