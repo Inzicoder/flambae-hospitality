@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Heart, Users, Mail, Lock, User, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
@@ -67,13 +66,13 @@ export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
 
       {/* Back Button */}
       <Link to="/" className="absolute top-4 left-4 md:top-8 md:left-8 z-20">
-        <Button variant="outline" size="sm" className="border-2 border-rose-200 hover:border-rose-400 hover:bg-rose-50 text-slate-700 rounded-2xl smooth-transition">
+        <Button variant="outline" size="sm" className="border-2 border-rose-200 hover:border-rose-400 hover:bg-rose-50 text-slate-700 rounded-2xl transition-all duration-300">
           <ArrowLeft className="h-4 w-4 mr-2" />
           <span className="hidden sm:inline">Back</span>
         </Button>
       </Link>
 
-      <div className="bg-white/95 backdrop-blur-xl p-6 md:p-8 rounded-3xl romantic-shadow max-w-md w-full mx-4 border-2 border-rose-200/30 animate-fade-in-up">
+      <div className="bg-white/95 backdrop-blur-xl p-6 md:p-8 rounded-3xl shadow-2xl max-w-md w-full mx-4 border-2 border-rose-200/30 animate-fade-in-up">
         <div className="text-center mb-6 md:mb-8">
           <div className="flex justify-center mb-4 md:mb-6">
             <img 
@@ -82,7 +81,7 @@ export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
               className="h-16 md:h-20 w-auto drop-shadow-lg"
             />
           </div>
-          <h1 className="text-2xl md:text-3xl font-serif text-gradient mb-2">Welcome to Meliora Moments</h1>
+          <h1 className="text-2xl md:text-3xl font-serif bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 bg-clip-text text-transparent mb-2">Welcome to Meliora Moments</h1>
           <p className="text-slate-600 font-light text-sm md:text-base">Your Wedding Planning Journey Begins Here</p>
         </div>
 
@@ -90,7 +89,7 @@ export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
         <div className="flex space-x-2 mb-4 md:mb-6 bg-gray-100 p-1 rounded-2xl">
           <button
             onClick={() => setIsLogin(true)}
-            className={`flex-1 py-2 px-4 rounded-xl text-sm font-medium smooth-transition ${
+            className={`flex-1 py-2 px-4 rounded-xl text-sm font-medium transition-all duration-300 ${
               isLogin ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'
             }`}
           >
@@ -98,7 +97,7 @@ export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
           </button>
           <button
             onClick={() => setIsLogin(false)}
-            className={`flex-1 py-2 px-4 rounded-xl text-sm font-medium smooth-transition ${
+            className={`flex-1 py-2 px-4 rounded-xl text-sm font-medium transition-all duration-300 ${
               !isLogin ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600'
             }`}
           >
@@ -112,7 +111,7 @@ export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
           <div className="grid grid-cols-2 gap-3">
             <button
               onClick={() => setUserType('guest')}
-              className={`p-3 md:p-4 rounded-2xl border-2 smooth-transition ${
+              className={`p-3 md:p-4 rounded-2xl border-2 transition-all duration-300 ${
                 userType === 'guest' 
                   ? 'border-rose-400 bg-rose-50 text-rose-700' 
                   : 'border-gray-200 hover:border-gray-300'
@@ -123,7 +122,7 @@ export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
             </button>
             <button
               onClick={() => setUserType('eventCompany')}
-              className={`p-3 md:p-4 rounded-2xl border-2 smooth-transition ${
+              className={`p-3 md:p-4 rounded-2xl border-2 transition-all duration-300 ${
                 userType === 'eventCompany' 
                   ? 'border-purple-400 bg-purple-50 text-purple-700' 
                   : 'border-gray-200 hover:border-gray-300'
@@ -146,7 +145,7 @@ export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({...formData, email: e.target.value})}
-              className="rounded-2xl smooth-transition"
+              className="rounded-2xl transition-all duration-300"
               required
             />
           </div>
@@ -162,7 +161,7 @@ export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
                 type="text"
                 value={formData.companyName}
                 onChange={(e) => setFormData({...formData, companyName: e.target.value})}
-                className="rounded-2xl smooth-transition"
+                className="rounded-2xl transition-all duration-300"
                 required
               />
             </div>
@@ -178,7 +177,7 @@ export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
               type="password"
               value={formData.password}
               onChange={(e) => setFormData({...formData, password: e.target.value})}
-              className="rounded-2xl smooth-transition"
+              className="rounded-2xl transition-all duration-300"
               required
             />
           </div>
@@ -194,7 +193,7 @@ export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
                 type="password"
                 value={formData.confirmPassword}
                 onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
-                className="rounded-2xl smooth-transition"
+                className="rounded-2xl transition-all duration-300"
                 required
               />
             </div>
@@ -202,10 +201,10 @@ export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
 
           <Button 
             type="submit"
-            className={`w-full py-3 md:py-4 text-base md:text-lg rounded-2xl smooth-transition ${
+            className={`w-full py-3 md:py-4 text-base md:text-lg rounded-2xl transition-all duration-300 hover:scale-105 ${
               userType === 'guest' 
-                ? 'romantic-button' 
-                : 'bg-gradient-to-r from-purple-400 via-indigo-400 to-blue-400 hover:from-purple-500 hover:via-indigo-500 hover:to-blue-500'
+                ? 'bg-gradient-to-r from-rose-400 via-pink-400 to-purple-500 hover:from-rose-500 hover:via-pink-500 hover:to-purple-600 text-white shadow-lg' 
+                : 'bg-gradient-to-r from-purple-400 via-indigo-400 to-blue-400 hover:from-purple-500 hover:via-indigo-500 hover:to-blue-500 text-white shadow-lg'
             }`}
           >
             {isLogin ? 'Sign In' : (userType === 'eventCompany' ? 'Register & Pay' : 'Create Account')}
