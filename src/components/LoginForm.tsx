@@ -1,9 +1,11 @@
+
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Heart, Users } from "lucide-react";
+import { CustomLogo } from "./CustomLogo";
 
 interface LoginFormProps {
   onLogin: (type: 'guest' | 'eventCompany') => void;
@@ -43,14 +45,10 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
       <div className="bg-white/95 backdrop-blur-xl p-8 rounded-3xl romantic-shadow max-w-md w-full mx-4 border-2 border-rose-200/30">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-6">
-            <img 
-              src="/lovable-uploads/df5b7422-1f97-4754-b2f4-5822f3b683c0.png" 
-              alt="Meliora Moments Logo" 
-              className="h-20 w-auto drop-shadow-lg"
-            />
+            <CustomLogo size="lg" showTagline={true} />
           </div>
-          <h1 className="text-3xl font-serif text-gradient mb-2">Welcome to Meliora Moments</h1>
-          <p className="text-slate-600 font-light">Your Wedding Planning Journey Begins Here</p>
+          <h1 className="text-2xl font-elegant elegant-text-gradient mb-2">Welcome to Your Dream Wedding</h1>
+          <p className="text-slate-600 font-light script-accent text-lg">Your Planning Journey Begins Here</p>
         </div>
 
         <div className="space-y-4">
@@ -73,7 +71,7 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
 
         {/* Footer and Romantic Touch */}
         <div className="mt-8 text-center">
-          <p className="text-slate-500 text-sm">
+          <p className="text-slate-500 text-sm font-classic">
             Crafted with <Heart className="inline-block h-4 w-4 text-rose-400 align-top mx-1" /> for unforgettable moments
           </p>
         </div>

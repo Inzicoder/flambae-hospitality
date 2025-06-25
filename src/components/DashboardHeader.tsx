@@ -1,6 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Heart, Bell, Sparkles, Menu } from "lucide-react";
+import { CustomLogo } from "./CustomLogo";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,18 +36,7 @@ export const DashboardHeader = ({ onLogout, userType = 'guest' }: DashboardHeade
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-4">
           <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-3">
-              <div className="flex justify-center">
-                <img 
-                  src="/lovable-uploads/df5b7422-1f97-4754-b2f4-5822f3b683c0.png" 
-                  alt="Meliora Moments Logo" 
-                  className="h-12 w-auto drop-shadow-lg"
-                />
-              </div>
-              <div>
-                <p className="text-sm text-slate-600 font-light">Your Wedding OS</p>
-              </div>
-            </div>
+            <CustomLogo size="sm" showTagline={true} />
           </div>
           
           <div className="flex items-center space-x-3">
