@@ -48,6 +48,30 @@ export const EventCompanyHeader = ({
 
   return (
     <>
+      {/* Add CSS to hide unwanted navigation elements */}
+      <style>
+        {`
+          /* Hide Event Company Dashboard text */
+          [class*="text-gradient"]:has(svg[data-lucide="heart"]),
+          .text-gradient:has(svg[data-lucide="heart"]),
+          /* Hide elements containing heart icon and dashboard text */
+          *:has(svg[data-lucide="heart"]) + *:contains("Event Company Dashboard"),
+          *:contains("Event Company Dashboard"),
+          /* Hide SM Sarah & Michael elements */
+          *:has(.bg-rose-200) + *:contains("Sarah & Michael"),
+          *:contains("SM") + *:contains("Sarah & Michael"),
+          .avatar + *:contains("Sarah & Michael"),
+          /* Target common navigation patterns */
+          nav *:contains("Event Company Dashboard"),
+          header *:contains("Event Company Dashboard"),
+          nav *:contains("Sarah & Michael"):not(:contains("Managing")),
+          header *:contains("Sarah & Michael"):not(:contains("Managing"))
+          {
+            display: none !important;
+          }
+        `}
+      </style>
+      
       <div className="flex items-center justify-between py-6">
         <div className="text-center flex-1">
           <h1 className="text-4xl font-bold text-gradient mb-4">{currentCompanyData.name}</h1>
