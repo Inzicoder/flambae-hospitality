@@ -1,10 +1,9 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { useState } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { useState, useEffect } from 'react';
 import { AuthForm } from "@/components/AuthForm";
 import { PaymentFlow } from "@/components/PaymentFlow";
 import { DashboardHeader } from "@/components/DashboardHeader";
@@ -28,12 +27,73 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+// Auth wrapper component to handle navigation
+const AuthWrapper = ({ 
+  onLogin, 
+  onRegister, 
+  showPayment, 
+  onPaymentSuccess, 
+  onBackToAuth 
+}: {
+  onLogin: (type: 'guest' | 'eventCompany') => void;
+  onRegister: (type: 'eventCompany') => void;
+  showPayment: boolean;
+  onPaymentSuccess: (code: string) => void;
+  onBackToAuth: () => void;
+}) => {
+  const navigate = useNavigate();
+
+  const handleLogin = (type: 'guest' | 'eventCompany') => {
+    console.log('AuthWrapper - handleLogin called with type:', type);
+    onLogin(type);
+    // Navigate to dashboard after successful login
+    setTimeout(() => {
+      navigate('/dashboard', { replace: true });
+    }, 100);
+  };
+
+  const handleRegister = (type: 'eventCompany') => {
+    console.log('AuthWrapper - handleRegister called');
+    onRegister(type);
+  };
+
+  const handlePaymentSuccess = (code: string) => {
+    console.log('AuthWrapper - handlePaymentSuccess called');
+    onPaymentSuccess(code);
+    // Navigate to dashboard after successful payment
+    setTimeout(() => {
+      navigate('/dashboard', { replace: true });
+    }, 100);
+  };
+
+  if (showPayment) {
+    return (
+      <PaymentFlow 
+        onPaymentSuccess={handlePaymentSuccess}
+        onBack={onBackToAuth}
+      />
+    );
+  }
+
+  return (
+    <AuthForm 
+      onLogin={handleLogin} 
+      onRegister={handleRegister} 
+    />
+  );
+};
+
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userType, setUserType] = useState<'guest' | 'eventCompany'>('guest');
   const [showPayment, setShowPayment] = useState(false);
   const [eventCode, setEventCode] = useState('');
   
+  // Debug logging
+  useEffect(() => {
+    console.log('App state changed:', { isLoggedIn, userType, showPayment });
+  }, [isLoggedIn, userType, showPayment]);
+
   // Sample data for demonstration
   const [weddingData, setWeddingData] = useState({
     coupleNames: "Sarah & Michael",
@@ -123,32 +183,33 @@ const App = () => {
   };
 
   const handleLogin = (type: 'guest' | 'eventCompany') => {
-    console.log('Login successful for type:', type);
+    console.log('App - Login successful for type:', type);
     setUserType(type);
     setIsLoggedIn(true);
     setShowPayment(false);
   };
 
   const handleRegister = (type: 'eventCompany') => {
-    console.log('Register requested for type:', type);
+    console.log('App - Register requested for type:', type);
     setUserType(type);
     setShowPayment(true);
+    setIsLoggedIn(false); // Keep logged out until payment is complete
   };
 
   const handlePaymentSuccess = (code: string) => {
-    console.log('Payment successful with code:', code);
+    console.log('App - Payment successful with code:', code);
     setEventCode(code);
     setShowPayment(false);
     setIsLoggedIn(true);
   };
 
   const handleBackToAuth = () => {
-    console.log('Back to auth');
+    console.log('App - Back to auth');
     setShowPayment(false);
   };
 
   const handleLogout = () => {
-    console.log('Logout');
+    console.log('App - Logout');
     setIsLoggedIn(false);
     setShowPayment(false);
     setUserType('guest');
@@ -200,89 +261,110 @@ const App = () => {
             
             {/* Auth Route */}
             <Route path="/auth" element={
-              showPayment ? (
-                <PaymentFlow 
-                  onPaymentSuccess={handlePaymentSuccess}
-                  onBack={handleBackToAuth}
-                />
+              <AuthWrapper
+                onLogin={handleLogin}
+                onRegister={handleRegister}
+                showPayment={showPayment}
+                onPaymentSuccess={handlePaymentSuccess}
+                onBackToAuth={handleBackToAuth}
+              />
+            } />
+            
+            {/* Protected Routes */}
+            <Route path="/dashboard" element={
+              isLoggedIn ? (
+                <DashboardLayout>
+                  {userType === 'guest' ? (
+                    <GuestDashboard weddingData={weddingData} />
+                  ) : (
+                    <EventCompanyDashboard weddingData={weddingData} />
+                  )}
+                </DashboardLayout>
               ) : (
-                <AuthForm onLogin={handleLogin} onRegister={handleRegister} />
+                <Navigate to="/auth" replace />
               )
             } />
             
-            {/* Protected Routes - Only accessible when logged in */}
-            {isLoggedIn ? (
-              <>
-                <Route path="/dashboard" element={
-                  <DashboardLayout>
-                    {userType === 'guest' ? (
-                      <GuestDashboard weddingData={weddingData} />
-                    ) : (
-                      <EventCompanyDashboard weddingData={weddingData} />
-                    )}
-                  </DashboardLayout>
-                } />
-                
-                {/* Guest-only routes */}
-                {userType === 'guest' && (
-                  <>
-                    <Route path="/budget" element={
-                      <DashboardLayout>
-                        <BudgetPage budget={weddingData.budget} onAddCategory={addBudgetCategory} />
-                      </DashboardLayout>
-                    } />
-                    <Route path="/todos" element={
-                      <DashboardLayout>
-                        <TodoPage todos={weddingData.todos} onToggleTodo={toggleTodo} onAddTodo={addTodo} onDeleteTodo={deleteTodo} />
-                      </DashboardLayout>
-                    } />
-                    <Route path="/gallery" element={
-                      <DashboardLayout>
-                        <GalleryPage gallery={weddingData.gallery} />
-                      </DashboardLayout>
-                    } />
-                    <Route path="/notes" element={
-                      <DashboardLayout>
-                        <NotesPage />
-                      </DashboardLayout>
-                    } />
-                    <Route path="/payments" element={
-                      <DashboardLayout>
-                        <PaymentPage />
-                      </DashboardLayout>
-                    } />
-                    <Route path="/vendors" element={
-                      <DashboardLayout>
-                        <VendorManager />
-                      </DashboardLayout>
-                    } />
-                    <Route path="/guests" element={
-                      <DashboardLayout>
-                        <GuestPage />
-                      </DashboardLayout>
-                    } />
-                    <Route path="/schedule" element={
-                      <DashboardLayout>
-                        <SchedulePage />
-                      </DashboardLayout>
-                    } />
-                  </>
-                )}
-              </>
-            ) : (
-              <>
-                {/* Redirect protected routes to auth when not logged in */}
-                <Route path="/dashboard" element={<Navigate to="/auth" replace />} />
-                <Route path="/budget" element={<Navigate to="/auth" replace />} />
-                <Route path="/todos" element={<Navigate to="/auth" replace />} />
-                <Route path="/gallery" element={<Navigate to="/auth" replace />} />
-                <Route path="/notes" element={<Navigate to="/auth" replace />} />
-                <Route path="/payments" element={<Navigate to="/auth" replace />} />
-                <Route path="/vendors" element={<Navigate to="/auth" replace />} />
-                <Route path="/guests" element={<Navigate to="/auth" replace />} />
-                <Route path="/schedule" element={<Navigate to="/auth" replace />} />
-              </>
-            )}
+            {/* Guest-only routes */}
+            <Route path="/budget" element={
+              isLoggedIn && userType === 'guest' ? (
+                <DashboardLayout>
+                  <BudgetPage budget={weddingData.budget} onAddCategory={addBudgetCategory} />
+                </DashboardLayout>
+              ) : (
+                <Navigate to="/auth" replace />
+              )
+            } />
+            
+            <Route path="/todos" element={
+              isLoggedIn && userType === 'guest' ? (
+                <DashboardLayout>
+                  <TodoPage todos={weddingData.todos} onToggleTodo={toggleTodo} onAddTodo={addTodo} onDeleteTodo={deleteTodo} />
+                </DashboardLayout>
+              ) : (
+                <Navigate to="/auth" replace />
+              )
+            } />
+            
+            <Route path="/gallery" element={
+              isLoggedIn && userType === 'guest' ? (
+                <DashboardLayout>
+                  <GalleryPage gallery={weddingData.gallery} />
+                </DashboardLayout>
+              ) : (
+                <Navigate to="/auth" replace />
+              )
+            } />
+            
+            <Route path="/notes" element={
+              isLoggedIn && userType === 'guest' ? (
+                <DashboardLayout>
+                  <NotesPage />
+                </DashboardLayout>
+              ) : (
+                <Navigate to="/auth" replace />
+              )
+            } />
+            
+            <Route path="/payments" element={
+              isLoggedIn && userType === 'guest' ? (
+                <DashboardLayout>
+                  <PaymentPage />
+                </DashboardLayout>
+              ) : (
+                <Navigate to="/auth" replace />
+              )
+            } />
+            
+            <Route path="/vendors" element={
+              isLoggedIn && userType === 'guest' ? (
+                <DashboardLayout>
+                  <VendorManager />
+                </DashboardLayout>
+              ) : (
+                <Navigate to="/auth" replace />
+              )
+            } />
+            
+            <Route path="/guests" element={
+              isLoggedIn && userType === 'guest' ? (
+                <DashboardLayout>
+                  <GuestPage />
+                </DashboardLayout>
+              ) : (
+                <Navigate to="/auth" replace />
+              )
+            } />
+            
+            <Route path="/schedule" element={
+              isLoggedIn && userType === 'guest' ? (
+                <DashboardLayout>
+                  <SchedulePage />
+                </DashboardLayout>
+              ) : (
+                <Navigate to="/auth" replace />
+              )
+            } />
             
             {/* 404 Route */}
             <Route path="*" element={<NotFound />} />
