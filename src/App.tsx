@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
+import { useUserProfile } from "@/hooks/useUserProfile";
 import { AuthForm } from "@/components/AuthForm";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { Navigation } from "@/components/Navigation";
@@ -23,6 +24,7 @@ import { TravelPage } from "@/pages/TravelPage";
 import { PaymentPage } from "@/pages/PaymentPage";
 import { VendorManager } from "@/components/VendorManager";
 import NotFound from "./pages/NotFound";
+import { useWedding } from "@/hooks/useWedding";
 
 const queryClient = new QueryClient();
 
@@ -45,13 +47,41 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+// Dashboard Route Component that handles user type routing
+const DashboardRoute = () => {
+  const { profile, loading } = useUserProfile();
+  const { wedding } = useWedding();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-rose-600"></div>
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  // Route to appropriate dashboard based on user type
+  if (profile.user_type === 'eventCompany') {
+    return <EventCompanyDashboard weddingData={wedding} />;
+  }
+
+  return <GuestDashboard />;
+};
+
 // Dashboard Layout wrapper
-const DashboardLayout = ({ children, userType }: { children: React.ReactNode; userType?: 'guest' | 'eventCompany' }) => {
-  const { signOut, user } = useAuth();
+const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
+  const { signOut } = useAuth();
+  const { profile } = useUserProfile();
 
   const handleLogout = async () => {
     await signOut();
   };
+
+  const userType = profile?.user_type || 'guest';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-25 via-blush-50 to-lavender-50 relative overflow-hidden"
@@ -71,11 +101,11 @@ const DashboardLayout = ({ children, userType }: { children: React.ReactNode; us
         </div>
       </div>
       
-      <DashboardHeader onLogout={handleLogout} userType={userType || 'guest'} />
+      <DashboardHeader onLogout={handleLogout} userType={userType} />
       <Navigation 
         coupleNames="Your Wedding"
         onLogout={handleLogout}
-        userType={userType || 'guest'}
+        userType={userType}
       />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-32 relative z-10">
         {children}
@@ -114,11 +144,12 @@ const AppContent = () => {
       <Route path="/dashboard" element={
         <ProtectedRoute>
           <DashboardLayout>
-            <GuestDashboard />
+            <DashboardRoute />
           </DashboardLayout>
         </ProtectedRoute>
       } />
       
+      {/* Guest-only routes */}
       <Route path="/budget" element={
         <ProtectedRoute>
           <DashboardLayout>
