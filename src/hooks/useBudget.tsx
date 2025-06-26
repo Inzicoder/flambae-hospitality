@@ -39,7 +39,10 @@ export const useBudget = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setCategories(data || []);
+      setCategories((data || []).map(item => ({
+        ...item,
+        status: item.status as 'pending' | 'partial' | 'paid'
+      })));
     } catch (error: any) {
       console.error('Error fetching budget categories:', error);
     } finally {
@@ -59,7 +62,10 @@ export const useBudget = () => {
 
       if (error) throw error;
       
-      setCategories(prev => [data, ...prev]);
+      setCategories(prev => [{
+        ...data,
+        status: data.status as 'pending' | 'partial' | 'paid'
+      }, ...prev]);
       toast({
         title: "Success!",
         description: "Budget category added successfully.",
@@ -87,7 +93,10 @@ export const useBudget = () => {
 
       if (error) throw error;
       
-      setCategories(prev => prev.map(cat => cat.id === id ? data : cat));
+      setCategories(prev => prev.map(cat => cat.id === id ? {
+        ...data,
+        status: data.status as 'pending' | 'partial' | 'paid'
+      } : cat));
       toast({
         title: "Success!",
         description: "Budget category updated successfully.",

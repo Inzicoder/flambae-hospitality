@@ -46,7 +46,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 // Dashboard Layout wrapper
-const DashboardLayout = ({ children, userType }: { children: React.ReactNode; userType?: string }) => {
+const DashboardLayout = ({ children, userType }: { children: React.ReactNode; userType?: 'guest' | 'eventCompany' }) => {
   const { signOut, user } = useAuth();
 
   const handleLogout = async () => {

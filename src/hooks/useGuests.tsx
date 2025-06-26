@@ -41,7 +41,10 @@ export const useGuests = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setGuests(data || []);
+      setGuests((data || []).map(item => ({
+        ...item,
+        attendance_status: item.attendance_status as 'confirmed' | 'declined' | 'pending'
+      })));
     } catch (error: any) {
       console.error('Error fetching guests:', error);
     } finally {
@@ -61,7 +64,10 @@ export const useGuests = () => {
 
       if (error) throw error;
       
-      setGuests(prev => [data, ...prev]);
+      setGuests(prev => [{
+        ...data,
+        attendance_status: data.attendance_status as 'confirmed' | 'declined' | 'pending'
+      }, ...prev]);
       toast({
         title: "Success!",
         description: "Guest added successfully.",
@@ -89,7 +95,10 @@ export const useGuests = () => {
 
       if (error) throw error;
       
-      setGuests(prev => prev.map(guest => guest.id === id ? data : guest));
+      setGuests(prev => prev.map(guest => guest.id === id ? {
+        ...data,
+        attendance_status: data.attendance_status as 'confirmed' | 'declined' | 'pending'
+      } : guest));
       toast({
         title: "Success!",
         description: "Guest updated successfully.",

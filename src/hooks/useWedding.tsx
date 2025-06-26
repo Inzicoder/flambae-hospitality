@@ -49,7 +49,12 @@ export const useWedding = () => {
     try {
       const { data, error } = await supabase
         .from('weddings')
-        .insert([{ ...weddingData, user_id: user?.id }])
+        .insert([{ 
+          couple_names: weddingData.couple_names || '',
+          wedding_date: weddingData.wedding_date,
+          venue: weddingData.venue,
+          user_id: user?.id 
+        }])
         .select()
         .single();
 
