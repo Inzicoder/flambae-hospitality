@@ -31,6 +31,7 @@ export const useUserProfile = () => {
     if (!user) return;
 
     try {
+      console.log('Fetching profile for user:', user.id);
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -40,20 +41,29 @@ export const useUserProfile = () => {
       if (error) {
         console.error('Error fetching profile:', error);
         // If profile doesn't exist, create a default one
+        const userType = user.user_metadata?.user_type || 'guest';
+        console.log('Creating new profile with user_type:', userType);
+        
         const { data: newProfile, error: createError } = await supabase
           .from('profiles')
           .insert([{
             id: user.id,
             full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
             email: user.email,
-            user_type: 'guest'
+            user_type: userType,
+            company_name: user.user_metadata?.company_name || null
           }])
           .select()
           .single();
         
-        if (createError) throw createError;
+        if (createError) {
+          console.error('Error creating profile:', createError);
+          throw createError;
+        }
+        console.log('New profile created:', newProfile);
         setProfile(newProfile as UserProfile);
       } else {
+        console.log('Profile fetched:', data);
         setProfile(data as UserProfile);
       }
     } catch (error: any) {

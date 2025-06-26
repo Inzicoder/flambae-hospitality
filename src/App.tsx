@@ -52,6 +52,8 @@ const DashboardRoute = () => {
   const { profile, loading } = useUserProfile();
   const { wedding } = useWedding();
 
+  console.log('DashboardRoute - Profile:', profile, 'Loading:', loading);
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -61,14 +63,19 @@ const DashboardRoute = () => {
   }
 
   if (!profile) {
+    console.log('No profile found, redirecting to auth');
     return <Navigate to="/auth" replace />;
   }
 
+  console.log('Routing based on user_type:', profile.user_type);
+
   // Route to appropriate dashboard based on user type
   if (profile.user_type === 'eventCompany') {
+    console.log('Rendering EventCompanyDashboard');
     return <EventCompanyDashboard weddingData={wedding} />;
   }
 
+  console.log('Rendering GuestDashboard');
   return <GuestDashboard />;
 };
 
