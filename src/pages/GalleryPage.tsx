@@ -1,19 +1,11 @@
 
 import { PhotoGallery } from "@/components/PhotoGallery";
 
-export const GalleryPage = () => {
-  // For now, we'll provide default data structure until we implement file upload
-  const gallery = {
-    categories: [
-      "Engagement",
-      "Pre-Wedding",
-      "Ceremony", 
-      "Reception",
-      "Candid Moments"
-    ],
-    photos: []
-  };
+interface GalleryPageProps {
+  gallery: any;
+}
 
+export const GalleryPage = ({ gallery }: GalleryPageProps) => {
   return (
     <div className="space-y-6">
       <div className="text-center py-6">
