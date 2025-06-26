@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -69,8 +68,17 @@ const DashboardRoute = () => {
 
   console.log('Routing based on user_type:', profile.user_type);
 
+  // Check localStorage for selected user type (from login form)
+  const selectedUserType = localStorage.getItem('selectedUserType') as 'guest' | 'eventCompany' | null;
+  
+  // Use selected user type if available, otherwise fall back to profile user_type
+  const userTypeToUse = selectedUserType || profile.user_type;
+  
+  console.log('Selected user type from localStorage:', selectedUserType);
+  console.log('Final user type to use:', userTypeToUse);
+
   // Route to appropriate dashboard based on user type
-  if (profile.user_type === 'eventCompany') {
+  if (userTypeToUse === 'eventCompany') {
     console.log('Rendering EventCompanyDashboard');
     return <EventCompanyDashboard weddingData={wedding} />;
   }
@@ -85,10 +93,14 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const { profile } = useUserProfile();
 
   const handleLogout = async () => {
+    // Clear the selected user type from localStorage on logout
+    localStorage.removeItem('selectedUserType');
     await signOut();
   };
 
-  const userType = profile?.user_type || 'guest';
+  // Check localStorage for selected user type, fall back to profile user_type
+  const selectedUserType = localStorage.getItem('selectedUserType') as 'guest' | 'eventCompany' | null;
+  const userType = selectedUserType || profile?.user_type || 'guest';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-25 via-blush-50 to-lavender-50 relative overflow-hidden"

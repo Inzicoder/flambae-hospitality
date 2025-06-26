@@ -36,6 +36,8 @@ export const AuthForm = () => {
       if (isLogin) {
         const { error } = await signIn(formData.email, formData.password);
         if (!error) {
+          // Store user type selection in localStorage for routing
+          localStorage.setItem('selectedUserType', userType);
           navigate('/dashboard');
         }
       } else {
@@ -47,6 +49,8 @@ export const AuthForm = () => {
         
         const { error } = await signUp(formData.email, formData.password, userData);
         if (!error) {
+          // Store user type selection in localStorage for routing
+          localStorage.setItem('selectedUserType', userType);
           navigate('/dashboard');
         }
       }
@@ -116,38 +120,36 @@ export const AuthForm = () => {
           </button>
         </div>
 
-        {/* User Type Selection - Only show during registration */}
-        {!isLogin && (
-          <div className="space-y-3 mb-4 md:mb-6">
-            <Label className="text-sm font-medium text-gray-700">I am a:</Label>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => setUserType('guest')}
-                className={`p-3 md:p-4 rounded-2xl border-2 transition-all duration-300 ${
-                  userType === 'guest' 
-                    ? 'border-rose-400 bg-rose-50 text-rose-700' 
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
-              >
-                <Heart className="h-5 w-5 md:h-6 md:w-6 mx-auto mb-2" />
-                <span className="text-sm font-medium">Guest</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setUserType('eventCompany')}
-                className={`p-3 md:p-4 rounded-2xl border-2 transition-all duration-300 ${
-                  userType === 'eventCompany' 
-                    ? 'border-purple-400 bg-purple-50 text-purple-700' 
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
-              >
-                <Users className="h-5 w-5 md:h-6 md:w-6 mx-auto mb-2" />
-                <span className="text-sm font-medium">Event Company</span>
-              </button>
-            </div>
+        {/* User Type Selection - Show for both login and registration */}
+        <div className="space-y-3 mb-4 md:mb-6">
+          <Label className="text-sm font-medium text-gray-700">I am a:</Label>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={() => setUserType('guest')}
+              className={`p-3 md:p-4 rounded-2xl border-2 transition-all duration-300 ${
+                userType === 'guest' 
+                  ? 'border-rose-400 bg-rose-50 text-rose-700' 
+                  : 'border-gray-200 hover:border-gray-300'
+              }`}
+            >
+              <Heart className="h-5 w-5 md:h-6 md:w-6 mx-auto mb-2" />
+              <span className="text-sm font-medium">Guest</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setUserType('eventCompany')}
+              className={`p-3 md:p-4 rounded-2xl border-2 transition-all duration-300 ${
+                userType === 'eventCompany' 
+                  ? 'border-purple-400 bg-purple-50 text-purple-700' 
+                  : 'border-gray-200 hover:border-gray-300'
+              }`}
+            >
+              <Users className="h-5 w-5 md:h-6 md:w-6 mx-auto mb-2" />
+              <span className="text-sm font-medium">Event Company</span>
+            </button>
           </div>
-        )}
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
