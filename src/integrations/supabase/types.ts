@@ -9,7 +9,315 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      budget_categories: {
+        Row: {
+          actual_amount: number | null
+          created_at: string | null
+          estimated_amount: number | null
+          id: string
+          name: string
+          status: string | null
+          wedding_id: string | null
+        }
+        Insert: {
+          actual_amount?: number | null
+          created_at?: string | null
+          estimated_amount?: number | null
+          id?: string
+          name: string
+          status?: string | null
+          wedding_id?: string | null
+        }
+        Update: {
+          actual_amount?: number | null
+          created_at?: string | null
+          estimated_amount?: number | null
+          id?: string
+          name?: string
+          status?: string | null
+          wedding_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_categories_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gallery: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          file_name: string
+          file_url: string
+          id: string
+          uploaded_by: string | null
+          wedding_id: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          file_name: string
+          file_url: string
+          id?: string
+          uploaded_by?: string | null
+          wedding_id?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          file_name?: string
+          file_url?: string
+          id?: string
+          uploaded_by?: string | null
+          wedding_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gallery_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guests: {
+        Row: {
+          attendance_status: string | null
+          created_at: string | null
+          dietary_restrictions: string | null
+          email: string | null
+          full_name: string
+          id: string
+          phone_number: string | null
+          plus_one: boolean | null
+          wedding_id: string | null
+        }
+        Insert: {
+          attendance_status?: string | null
+          created_at?: string | null
+          dietary_restrictions?: string | null
+          email?: string | null
+          full_name: string
+          id?: string
+          phone_number?: string | null
+          plus_one?: boolean | null
+          wedding_id?: string | null
+        }
+        Update: {
+          attendance_status?: string | null
+          created_at?: string | null
+          dietary_restrictions?: string | null
+          email?: string | null
+          full_name?: string
+          id?: string
+          phone_number?: string | null
+          plus_one?: boolean | null
+          wedding_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guests_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notes: {
+        Row: {
+          content: string | null
+          created_at: string | null
+          created_by: string | null
+          id: string
+          title: string
+          updated_at: string | null
+          wedding_id: string | null
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          title: string
+          updated_at?: string | null
+          wedding_id?: string | null
+        }
+        Update: {
+          content?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          title?: string
+          updated_at?: string | null
+          wedding_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notes_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          company_name: string | null
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          id: string
+          updated_at: string | null
+          user_type: string | null
+        }
+        Insert: {
+          company_name?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id: string
+          updated_at?: string | null
+          user_type?: string | null
+        }
+        Update: {
+          company_name?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string | null
+          user_type?: string | null
+        }
+        Relationships: []
+      }
+      todos: {
+        Row: {
+          completed: boolean | null
+          created_at: string | null
+          description: string | null
+          due_date: string | null
+          id: string
+          title: string
+          urgent: boolean | null
+          wedding_id: string | null
+        }
+        Insert: {
+          completed?: boolean | null
+          created_at?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          title: string
+          urgent?: boolean | null
+          wedding_id?: string | null
+        }
+        Update: {
+          completed?: boolean | null
+          created_at?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          title?: string
+          urgent?: boolean | null
+          wedding_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "todos_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendors: {
+        Row: {
+          category: string
+          contact_person: string | null
+          cost: number | null
+          created_at: string | null
+          email: string | null
+          id: string
+          name: string
+          notes: string | null
+          phone: string | null
+          status: string | null
+          wedding_id: string | null
+        }
+        Insert: {
+          category: string
+          contact_person?: string | null
+          cost?: number | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          phone?: string | null
+          status?: string | null
+          wedding_id?: string | null
+        }
+        Update: {
+          category?: string
+          contact_person?: string | null
+          cost?: number | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          status?: string | null
+          wedding_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendors_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      weddings: {
+        Row: {
+          couple_names: string
+          created_at: string | null
+          id: string
+          updated_at: string | null
+          user_id: string | null
+          venue: string | null
+          wedding_date: string | null
+        }
+        Insert: {
+          couple_names: string
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id?: string | null
+          venue?: string | null
+          wedding_date?: string | null
+        }
+        Update: {
+          couple_names?: string
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id?: string | null
+          venue?: string | null
+          wedding_date?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

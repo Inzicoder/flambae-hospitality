@@ -1,221 +1,207 @@
 
+import { useWedding } from "@/hooks/useWedding";
+import { useGuests } from "@/hooks/useGuests";
+import { useTodos } from "@/hooks/useTodos";
+import { useBudget } from "@/hooks/useBudget";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
+import { CalendarDays, Users, CheckSquare, DollarSign, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Link } from "react-router-dom";
-import { 
-  Users, 
-  DollarSign, 
-  CheckSquare, 
-  Calendar,
-  TrendingUp,
-  AlertCircle,
-  Star,
-  ArrowRight,
-  Heart,
-  Camera,
-  StickyNote,
-  CreditCard
-} from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 
-interface GuestDashboardProps {
-  weddingData: any;
-}
+export const GuestDashboard = () => {
+  const { wedding } = useWedding();
+  const { guests } = useGuests();
+  const { todos } = useTodos();
+  const { categories } = useBudget();
 
-export const GuestDashboard = ({ weddingData }: GuestDashboardProps) => {
-  const completedTodos = weddingData.todos.filter((todo: any) => todo.completed).length;
-  const urgentTodos = weddingData.todos.filter((todo: any) => todo.urgent && !todo.completed).length;
-  const budgetUsed = (weddingData.budget.spent / weddingData.budget.total) * 100;
-  const rsvpRate = (weddingData.guestStats.confirmed / weddingData.guestStats.totalInvited) * 100;
-  const daysToGo = Math.ceil((new Date(weddingData.weddingDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+  const completedTodos = todos.filter(todo => todo.completed).length;
+  const totalTodos = todos.length;
+  const todoProgress = totalTodos > 0 ? (completedTodos / totalTodos) * 100 : 0;
+
+  const totalBudget = categories.reduce((sum, cat) => sum + cat.estimated_amount, 0);
+  const spentBudget = categories.reduce((sum, cat) => sum + cat.actual_amount, 0);
+  const budgetProgress = totalBudget > 0 ? (spentBudget / totalBudget) * 100 : 0;
+
+  const confirmedGuests = guests.filter(guest => guest.attendance_status === 'confirmed').length;
+  const pendingGuests = guests.filter(guest => guest.attendance_status === 'pending').length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="text-center">
-            <div className="flex justify-center mb-6">
-              <div className="p-4 bg-white/20 rounded-full backdrop-blur-sm">
-                <Heart className="h-12 w-12 text-white" />
-              </div>
-            </div>
-            <h1 className="text-5xl md:text-6xl font-bold mb-4">
-              {weddingData.coupleNames}
-            </h1>
-            <p className="text-xl md:text-2xl text-cyan-100 mb-2">
-              {weddingData.weddingDate}
-            </p>
-            <p className="text-lg text-cyan-200">
-              {daysToGo} days until your special day
-            </p>
-          </div>
-        </div>
+    <div className="space-y-8">
+      {/* Welcome Section */}
+      <div className="text-center space-y-4">
+        <h1 className="text-4xl md:text-6xl font-serif bg-gradient-to-r from-rose-600 via-pink-600 to-purple-600 bg-clip-text text-transparent">
+          {wedding?.couple_names || "Your Dream Wedding"}
+        </h1>
+        <p className="text-xl text-slate-600 font-light">
+          {wedding?.wedding_date 
+            ? `${new Date(wedding.wedding_date).toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+              })}`
+            : "Set your special date"
+          }
+        </p>
+        {wedding?.venue && (
+          <p className="text-lg text-slate-500 flex items-center justify-center">
+            <CalendarDays className="h-5 w-5 mr-2" />
+            {wedding.venue}
+          </p>
+        )}
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
-        {/* Quick Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="bg-gradient-to-br from-rose-50 to-pink-50 border-rose-200 hover:shadow-lg transition-shadow">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <p className="text-sm font-medium text-rose-600">RSVP Rate</p>
-                  <p className="text-3xl font-bold text-rose-700">{Math.round(rsvpRate)}%</p>
-                </div>
-                <Users className="h-8 w-8 text-rose-500" />
-              </div>
-              <Progress value={rsvpRate} className="mb-2" />
-              <p className="text-xs text-rose-600">
-                {weddingData.guestStats.confirmed} of {weddingData.guestStats.totalInvited} confirmed
-              </p>
-            </CardContent>
-          </Card>
+      {/* Quick Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-shadow">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Guests</CardTitle>
+            <Users className="h-4 w-4 text-blue-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-blue-600">{guests.length}</div>
+            <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+              <Badge variant="default" className="bg-green-100 text-green-800">
+                {confirmedGuests} confirmed
+              </Badge>
+              <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+                {pendingGuests} pending
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
 
-          <Card className="bg-gradient-to-br from-emerald-50 to-green-50 border-emerald-200 hover:shadow-lg transition-shadow">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <p className="text-sm font-medium text-emerald-600">Budget Used</p>
-                  <p className="text-3xl font-bold text-emerald-700">{Math.round(budgetUsed)}%</p>
-                </div>
-                <DollarSign className="h-8 w-8 text-emerald-500" />
-              </div>
-              <Progress value={budgetUsed} className="mb-2" />
-              <p className="text-xs text-emerald-600">
-                ${weddingData.budget.spent.toLocaleString()} spent
-              </p>
-            </CardContent>
-          </Card>
+        <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-shadow">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Tasks</CardTitle>
+            <CheckSquare className="h-4 w-4 text-green-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">
+              {completedTodos}/{totalTodos}
+            </div>
+            <Progress value={todoProgress} className="mt-2" />
+            <p className="text-xs text-muted-foreground mt-1">
+              {Math.round(todoProgress)}% complete
+            </p>
+          </CardContent>
+        </Card>
 
-          <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200 hover:shadow-lg transition-shadow">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <p className="text-sm font-medium text-blue-600">Tasks Done</p>
-                  <p className="text-3xl font-bold text-blue-700">
-                    {completedTodos}/{weddingData.todos.length}
-                  </p>
-                </div>
-                <CheckSquare className="h-8 w-8 text-blue-500" />
-              </div>
-              <Progress value={(completedTodos / weddingData.todos.length) * 100} className="mb-2" />
-              <p className="text-xs text-blue-600">
-                {Math.round((completedTodos / weddingData.todos.length) * 100)}% complete
-              </p>
-            </CardContent>
-          </Card>
+        <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-shadow">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Budget</CardTitle>
+            <DollarSign className="h-4 w-4 text-purple-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-purple-600">
+              ${spentBudget.toLocaleString()}
+            </div>
+            <Progress value={budgetProgress} className="mt-2" />
+            <p className="text-xs text-muted-foreground mt-1">
+              of ${totalBudget.toLocaleString()} budget
+            </p>
+          </CardContent>
+        </Card>
 
-          <Card className="bg-gradient-to-br from-purple-50 to-violet-50 border-purple-200 hover:shadow-lg transition-shadow">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <p className="text-sm font-medium text-purple-600">Days to Go</p>
-                  <p className="text-3xl font-bold text-purple-700">{daysToGo}</p>
-                </div>
-                <Calendar className="h-8 w-8 text-purple-500" />
-              </div>
-              <p className="text-xs text-purple-600">Until your big day</p>
-            </CardContent>
-          </Card>
-        </div>
+        <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-shadow">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Days Until</CardTitle>
+            <CalendarDays className="h-4 w-4 text-rose-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-rose-600">
+              {wedding?.wedding_date 
+                ? Math.max(0, Math.ceil((new Date(wedding.wedding_date).getTime() - new Date().getTime()) / (1000 * 3600 * 24)))
+                : '∞'
+              }
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {wedding?.wedding_date ? 'days to go!' : 'Set your date'}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
 
-        {/* Action Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Quick Actions */}
-          <Card className="border-0 shadow-lg bg-white">
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center space-x-2 text-slate-800">
-                <Star className="h-5 w-5 text-yellow-500" />
-                <span>Quick Actions</span>
-              </CardTitle>
-              <CardDescription className="text-slate-600">Jump to your most important tasks</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Link to="/guests">
-                <Button variant="outline" className="w-full justify-between hover:bg-teal-50 border-slate-200">
-                  <span>Manage Guests</span>
-                  <Badge variant="secondary">{weddingData.guestStats.pending} pending</Badge>
-                </Button>
-              </Link>
-              <Link to="/budget">
-                <Button variant="outline" className="w-full justify-between hover:bg-emerald-50 border-slate-200">
-                  <span>Review Budget</span>
-                  <Badge variant="secondary">${(weddingData.budget.total - weddingData.budget.spent).toLocaleString()} left</Badge>
-                </Button>
-              </Link>
-              <Link to="/todos">
-                <Button variant="outline" className="w-full justify-between hover:bg-blue-50 border-slate-200">
-                  <span>Check Tasks</span>
-                  {urgentTodos > 0 && <Badge variant="destructive">{urgentTodos} urgent</Badge>}
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-
-          {/* Recent Activity */}
-          <Card className="border-0 shadow-lg bg-white">
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center space-x-2 text-slate-800">
-                <TrendingUp className="h-5 w-5 text-blue-500" />
-                <span>Recent Updates</span>
-              </CardTitle>
-              <CardDescription className="text-slate-600">Latest changes to your wedding plans</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex items-center space-x-3 p-4 bg-emerald-50 rounded-xl border border-emerald-100">
-                <CheckSquare className="h-5 w-5 text-emerald-600" />
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-slate-800">Venue booked and paid</p>
-                  <p className="text-xs text-slate-600">Budget category updated</p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-3 p-4 bg-blue-50 rounded-xl border border-blue-100">
-                <Users className="h-5 w-5 text-blue-600" />
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-slate-800">New RSVP responses</p>
-                  <p className="text-xs text-slate-600">5 guests confirmed attendance</p>
-                </div>
-              </div>
-              {urgentTodos > 0 && (
-                <div className="flex items-center space-x-3 p-4 bg-red-50 rounded-xl border border-red-100">
-                  <AlertCircle className="h-5 w-5 text-red-600" />
+      {/* Recent Activity */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              Upcoming Tasks
+              <Button size="sm" variant="outline">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Task
+              </Button>
+            </CardTitle>
+            <CardDescription>
+              Your most important wedding planning tasks
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {todos.slice(0, 5).map((todo) => (
+                <div key={todo.id} className="flex items-center space-x-3 p-3 rounded-lg bg-gray-50">
+                  <div className={`w-2 h-2 rounded-full ${todo.urgent ? 'bg-red-500' : 'bg-blue-500'}`} />
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-slate-800">Urgent tasks pending</p>
-                    <p className="text-xs text-slate-600">{urgentTodos} tasks need attention</p>
+                    <p className={`text-sm ${todo.completed ? 'line-through text-gray-500' : 'text-gray-900'}`}>
+                      {todo.title}
+                    </p>
+                    {todo.due_date && (
+                      <p className="text-xs text-gray-500">
+                        Due: {new Date(todo.due_date).toLocaleDateString()}
+                      </p>
+                    )}
                   </div>
+                  {todo.urgent && <Badge variant="destructive" className="text-xs">Urgent</Badge>}
                 </div>
+              ))}
+              {todos.length === 0 && (
+                <p className="text-center text-gray-500 py-4">No tasks yet. Add your first task!</p>
               )}
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </CardContent>
+        </Card>
 
-        {/* Navigation Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {[
-            { to: '/guests', label: 'Guest Manager', icon: Users, color: 'from-rose-500 to-pink-500', bgColor: 'bg-rose-50', textColor: 'text-rose-700' },
-            { to: '/budget', label: 'Budget', icon: DollarSign, color: 'from-emerald-500 to-green-500', bgColor: 'bg-emerald-50', textColor: 'text-emerald-700' },
-            { to: '/vendors', label: 'Vendors', icon: TrendingUp, color: 'from-blue-500 to-indigo-500', bgColor: 'bg-blue-50', textColor: 'text-blue-700' },
-            { to: '/todos', label: 'Tasks', icon: CheckSquare, color: 'from-purple-500 to-violet-500', bgColor: 'bg-purple-50', textColor: 'text-purple-700' },
-            { to: '/schedule', label: 'Schedule', icon: Calendar, color: 'from-orange-500 to-amber-500', bgColor: 'bg-orange-50', textColor: 'text-orange-700' },
-            { to: '/gallery', label: 'Gallery', icon: Camera, color: 'from-pink-500 to-rose-500', bgColor: 'bg-pink-50', textColor: 'text-pink-700' },
-            { to: '/notes', label: 'Notes', icon: StickyNote, color: 'from-indigo-500 to-blue-500', bgColor: 'bg-indigo-50', textColor: 'text-indigo-700' },
-            { to: '/payments', label: 'Payments', icon: CreditCard, color: 'from-green-500 to-emerald-500', bgColor: 'bg-green-50', textColor: 'text-green-700' },
-          ].map((item) => (
-            <Link key={item.to} to={item.to}>
-              <Card className={`hover:shadow-lg transition-all duration-300 hover:-translate-y-1 ${item.bgColor} border-transparent`}>
-                <CardContent className="p-6 text-center">
-                  <div className={`w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-r ${item.color} flex items-center justify-center`}>
-                    <item.icon className="h-6 w-6 text-white" />
+        <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              Recent RSVPs
+              <Button size="sm" variant="outline">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Guest
+              </Button>
+            </CardTitle>
+            <CardDescription>
+              Latest guest responses and confirmations
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {guests.slice(0, 5).map((guest) => (
+                <div key={guest.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">{guest.full_name}</p>
+                    <p className="text-xs text-gray-500">{guest.email}</p>
                   </div>
-                  <p className={`font-semibold ${item.textColor} mb-2`}>{item.label}</p>
-                  <ArrowRight className="h-4 w-4 text-slate-400 mx-auto" />
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
-        </div>
+                  <Badge 
+                    variant={guest.attendance_status === 'confirmed' ? 'default' : guest.attendance_status === 'pending' ? 'secondary' : 'destructive'}
+                    className={
+                      guest.attendance_status === 'confirmed' ? 'bg-green-100 text-green-800' :
+                      guest.attendance_status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-red-100 text-red-800'
+                    }
+                  >
+                    {guest.attendance_status}
+                  </Badge>
+                </div>
+              ))}
+              {guests.length === 0 && (
+                <p className="text-center text-gray-500 py-4">No guests yet. Start building your guest list!</p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

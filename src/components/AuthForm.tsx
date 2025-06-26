@@ -4,94 +4,53 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Heart, Users, Mail, Lock, User, ArrowLeft } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { Link } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { Link, useNavigate } from "react-router-dom";
 
-interface AuthFormProps {
-  onLogin: (type: 'guest' | 'eventCompany') => void;
-  onRegister: (type: 'eventCompany') => void;
-}
-
-export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
+export const AuthForm = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [userType, setUserType] = useState<'guest' | 'eventCompany'>('guest');
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     confirmPassword: '',
+    fullName: '',
     companyName: ''
   });
   const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
+  const { signIn, signUp } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form submitted', { isLogin, userType, formData });
     
-    // Basic validation
-    if (!formData.email || !formData.password) {
-      toast({
-        title: "Error",
-        description: "Please fill in all required fields",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (!isLogin && formData.password !== formData.confirmPassword) {
-      toast({
-        title: "Error",
-        description: "Passwords do not match",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (!isLogin && userType === 'eventCompany' && !formData.companyName) {
-      toast({
-        title: "Error",
-        description: "Company name is required",
-        variant: "destructive"
-      });
-      return;
-    }
+    if (!formData.email || !formData.password) return;
+    
+    if (!isLogin && formData.password !== formData.confirmPassword) return;
+    
+    if (!isLogin && userType === 'eventCompany' && !formData.companyName) return;
 
     setIsLoading(true);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
       if (isLogin) {
-        console.log('Calling onLogin with type:', userType);
-        onLogin(userType);
-        toast({
-          title: "Success",
-          description: `Welcome back! Logged in as ${userType}`,
-        });
+        const { error } = await signIn(formData.email, formData.password);
+        if (!error) {
+          navigate('/dashboard');
+        }
       } else {
-        if (userType === 'eventCompany') {
-          console.log('Calling onRegister for event company');
-          onRegister('eventCompany');
-          toast({
-            title: "Registration Started",
-            description: "Please complete the payment to finish registration",
-          });
-        } else {
-          console.log('Calling onLogin for guest registration');
-          onLogin('guest');
-          toast({
-            title: "Success",
-            description: "Account created successfully!",
-          });
+        const userData = {
+          full_name: formData.fullName,
+          user_type: userType,
+          company_name: userType === 'eventCompany' ? formData.companyName : null
+        };
+        
+        const { error } = await signUp(formData.email, formData.password, userData);
+        if (!error) {
+          navigate('/dashboard');
         }
       }
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Something went wrong. Please try again.",
-        variant: "destructive"
-      });
       console.error('Auth error:', error);
     } finally {
       setIsLoading(false);
@@ -206,6 +165,25 @@ export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
             />
           </div>
 
+          {!isLogin && (
+            <div className="space-y-2">
+              <Label htmlFor="fullName" className="flex items-center space-x-2">
+                <User className="h-4 w-4" />
+                <span>Full Name</span>
+              </Label>
+              <Input
+                id="fullName"
+                type="text"
+                value={formData.fullName}
+                onChange={(e) => setFormData({...formData, fullName: e.target.value})}
+                className="rounded-2xl transition-all duration-300"
+                placeholder="Enter your full name"
+                required
+                disabled={isLoading}
+              />
+            </div>
+          )}
+
           {!isLogin && userType === 'eventCompany' && (
             <div className="space-y-2">
               <Label htmlFor="companyName" className="flex items-center space-x-2">
@@ -270,7 +248,7 @@ export const AuthForm = ({ onLogin, onRegister }: AuthFormProps) => {
                 : 'bg-gradient-to-r from-purple-400 via-indigo-400 to-blue-400 hover:from-purple-500 hover:via-indigo-500 hover:to-blue-500 text-white shadow-lg'
             } disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none`}
           >
-            {isLoading ? 'Processing...' : (isLogin ? 'Sign In' : (userType === 'eventCompany' ? 'Register & Pay' : 'Create Account'))}
+            {isLoading ? 'Processing...' : (isLogin ? 'Sign In' : 'Create Account')}
           </Button>
         </form>
 
