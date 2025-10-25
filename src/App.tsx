@@ -2,27 +2,25 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect } from 'react';
 import { AuthForm } from "@/components/AuthForm";
 import { PaymentFlow } from "@/components/PaymentFlow";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { Navigation } from "@/components/Navigation";
+import { BackButton } from "@/components/ui/BackButton";
 import { GuestDashboard } from "@/components/GuestDashboard";
-import { EventCompanyDashboard } from "@/components/EventCompanyDashboard";
+import { EventManagementDashboard } from "@/components/event-management/EventManagementDashboard";
+import { EventCompanyHeader } from "@/components/event-management/EventCompanyHeader";
+import EventsListingDashboard from "@/components/event-management/EventsListingDashboard";
 import { LandingPage } from "@/components/LandingPage";
 import { GuestFeaturesPage } from "@/components/GuestFeaturesPage";
 import { EventCompanyFeaturesPage } from "@/components/EventCompanyFeaturesPage";
-import { RSVPPage } from "@/pages/RSVPPage";
 import { BudgetPage } from "@/pages/BudgetPage";
 import { TodoPage } from "@/pages/TodoPage";
-import { SchedulePage } from "@/pages/SchedulePage";
-import { GuestPage } from "@/pages/GuestPage";
+import { EventParticipantsPage } from "@/pages/EventParticipantsPage";
+
 import { GalleryPage } from "@/pages/GalleryPage";
-import { NotesPage } from "@/pages/NotesPage";
-import { TravelPage } from "@/pages/TravelPage";
-import { PaymentPage } from "@/pages/PaymentPage";
-import { VendorManager } from "@/components/VendorManager";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -88,6 +86,59 @@ const App = () => {
   const [userType, setUserType] = useState<'guest' | 'eventCompany'>('guest');
   const [showPayment, setShowPayment] = useState(false);
   const [eventCode, setEventCode] = useState('');
+  const [isLoading, setIsLoading] = useState(true); // Add loading state
+  
+  // Restore authentication state from localStorage on app load
+  useEffect(() => {
+    const savedAuthState = localStorage.getItem('authState');
+    const token = localStorage.getItem('token');
+    const userRole = localStorage.getItem('userRole');
+    
+    console.log('Checking auth state:', { savedAuthState, token, userRole });
+    
+    if (savedAuthState && token) {
+      try {
+        const { isLoggedIn: savedIsLoggedIn, userType: savedUserType } = JSON.parse(savedAuthState);
+        if (savedIsLoggedIn && savedUserType) {
+          setIsLoggedIn(savedIsLoggedIn);
+          setUserType(savedUserType);
+          console.log('Successfully restored auth state:', { isLoggedIn: savedIsLoggedIn, userType: savedUserType, userRole });
+        } else {
+          console.log('Invalid auth state, clearing...');
+          localStorage.removeItem('authState');
+          localStorage.removeItem('token');
+          localStorage.removeItem('userRole');
+          setIsLoggedIn(false);
+          setUserType('guest');
+        }
+      } catch (error) {
+        console.error('Error parsing saved auth state:', error);
+        localStorage.removeItem('authState');
+        localStorage.removeItem('token');
+        localStorage.removeItem('userRole');
+        setIsLoggedIn(false);
+        setUserType('guest');
+      }
+    } else {
+      console.log('No valid auth state found, setting defaults');
+      setIsLoggedIn(false);
+      setUserType('guest');
+      if (!token) {
+        localStorage.removeItem('authState');
+        localStorage.removeItem('userRole');
+      }
+    }
+    
+    // Set loading to false after auth state is restored
+    setIsLoading(false);
+  }, []);
+  
+  // Save authentication state to localStorage whenever it changes
+  useEffect(() => {
+    const authState = { isLoggedIn, userType };
+    localStorage.setItem('authState', JSON.stringify(authState));
+    console.log('Saved auth state:', authState);
+  }, [isLoggedIn, userType]);
   
   // Debug logging
   useEffect(() => {
@@ -184,6 +235,7 @@ const App = () => {
 
   const handleLogin = (type: 'guest' | 'eventCompany') => {
     console.log('App - Login successful for type:', type);
+
     setUserType(type);
     setIsLoggedIn(true);
     setShowPayment(false);
@@ -191,10 +243,14 @@ const App = () => {
 
   const handleRegister = (type: 'eventCompany') => {
     console.log('App - Register requested for type:', type);
+
+
     setUserType(type);
     setShowPayment(true);
     setIsLoggedIn(false); // Keep logged out until payment is complete
   };
+
+
 
   const handlePaymentSuccess = (code: string) => {
     console.log('App - Payment successful with code:', code);
@@ -214,6 +270,10 @@ const App = () => {
     setShowPayment(false);
     setUserType('guest');
     setEventCode('');
+    // Clear authentication state from localStorage
+    localStorage.removeItem('authState');
+    localStorage.removeItem('token'); // Also clear any stored token
+    localStorage.removeItem('userRole');
   };
 
   // Common layout component for authenticated pages
@@ -241,11 +301,30 @@ const App = () => {
         onLogout={handleLogout}
         userType={userType}
       />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-32 relative z-10">
+      
+      {/* Common Back Button */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 relative z-10">
+        <BackButton className="mb-4" />
+      </div>
+      
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 relative z-10">
         {children}
       </main>
     </div>
   );
+
+  // Show loading screen while restoring authentication state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto mb-4"></div>
+          <h2 className="text-xl font-semibold text-gray-700 mb-2">Loading Flambae Hospitality</h2>
+          <p className="text-gray-500">Restoring your session...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -277,7 +356,7 @@ const App = () => {
                   {userType === 'guest' ? (
                     <GuestDashboard weddingData={weddingData} />
                   ) : (
-                    <EventCompanyDashboard weddingData={weddingData} />
+                    <Navigate to="/event-management" replace />
                   )}
                 </DashboardLayout>
               ) : (
@@ -285,7 +364,41 @@ const App = () => {
               )
             } />
             
-            {/* Guest-only routes */}
+            {/* Event Company Events Listing */}
+            <Route path="/event-management" element={
+              isLoggedIn && userType === 'eventCompany' ? (
+                <DashboardLayout>
+                  <EventsListingDashboard weddingData={weddingData} />
+                </DashboardLayout>
+              ) : (
+                <Navigate to="/auth" replace />
+              )
+            } />
+
+            {/* Individual Event Management Dashboard */}
+            <Route path="/event-management/:eventId" element={
+              isLoggedIn && userType === 'eventCompany' ? (
+                <DashboardLayout>
+                  <EventCompanyHeader weddingData={weddingData} />
+                  <EventManagementDashboard />
+                </DashboardLayout>
+              ) : (
+                <Navigate to="/auth" replace />
+              )
+            } />
+
+            {/* Event Participants Page */}
+            <Route path="/event-participants/:eventId" element={
+              isLoggedIn && userType === 'eventCompany' ? (
+                <DashboardLayout>
+                  <EventParticipantsPage />
+                </DashboardLayout>
+              ) : (
+                <Navigate to="/auth" replace />
+              )
+            } />
+            
+            {/* Simplified guest-only routes for personal planning */}
             <Route path="/budget" element={
               isLoggedIn && userType === 'guest' ? (
                 <DashboardLayout>
@@ -316,62 +429,13 @@ const App = () => {
               )
             } />
             
-            <Route path="/notes" element={
-              isLoggedIn && userType === 'guest' ? (
-                <DashboardLayout>
-                  <NotesPage />
-                </DashboardLayout>
-              ) : (
-                <Navigate to="/auth" replace />
-              )
-            } />
-            
-            <Route path="/payments" element={
-              isLoggedIn && userType === 'guest' ? (
-                <DashboardLayout>
-                  <PaymentPage />
-                </DashboardLayout>
-              ) : (
-                <Navigate to="/auth" replace />
-              )
-            } />
-            
-            <Route path="/vendors" element={
-              isLoggedIn && userType === 'guest' ? (
-                <DashboardLayout>
-                  <VendorManager />
-                </DashboardLayout>
-              ) : (
-                <Navigate to="/auth" replace />
-              )
-            } />
-            
-            <Route path="/guests" element={
-              isLoggedIn && userType === 'guest' ? (
-                <DashboardLayout>
-                  <GuestPage />
-                </DashboardLayout>
-              ) : (
-                <Navigate to="/auth" replace />
-              )
-            } />
-            
-            <Route path="/schedule" element={
-              isLoggedIn && userType === 'guest' ? (
-                <DashboardLayout>
-                  <SchedulePage />
-                </DashboardLayout>
-              ) : (
-                <Navigate to="/auth" replace />
-              )
-            } />
-            
             {/* 404 Route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
+
   );
 };
 

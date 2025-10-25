@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AddGuestDialog } from './AddGuestDialog';
 import { Search, Filter, Edit, Phone, Mail } from 'lucide-react';
+import { useToast } from "@/hooks/use-toast";
 
 interface Guest {
   id: string;
@@ -22,6 +23,7 @@ interface Guest {
 }
 
 export const GuestManagementSystem = () => {
+  const { toast } = useToast();
   const [guests, setGuests] = useState<Guest[]>([
     {
       id: '1',
@@ -50,6 +52,38 @@ export const GuestManagementSystem = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterTravel, setFilterTravel] = useState('all');
+
+  // Handle phone call functionality
+  const handlePhoneCall = (phoneNumber: string, guestName: string) => {
+    // Clean phone number (remove spaces, dashes, etc.)
+    const cleanPhoneNumber = phoneNumber.replace(/[\s\-\(\)]/g, '');
+    
+    // Check if it's a valid phone number with exactly 10 digits
+    if (!cleanPhoneNumber || cleanPhoneNumber.length !== 10 || !/^\d{10}$/.test(cleanPhoneNumber)) {
+      toast({
+        title: "Invalid Phone Number",
+        description: "Phone number must have exactly 10 digits.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Create tel: link for phone calls
+    const phoneLink = `tel:${cleanPhoneNumber}`;
+    
+    // Show confirmation dialog
+    const confirmed = window.confirm(`Call ${guestName} at ${phoneNumber}?`);
+    
+    if (confirmed) {
+      // Open phone dialer
+      window.open(phoneLink, '_self');
+      
+      toast({
+        title: "Calling Guest",
+        description: `Initiating call to ${guestName}`,
+      });
+    }
+  };
 
   const handleAddGuest = (newGuest: Guest) => {
     setGuests([...guests, newGuest]);
@@ -212,9 +246,20 @@ export const GuestManagementSystem = () => {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Button variant="outline" size="sm">
-                      <Edit className="h-4 w-4" />
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm">
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handlePhoneCall(guest.phoneNumber, guest.fullName)}
+                        className="flex items-center gap-1"
+                      >
+                        <Phone className="h-4 w-4" />
+                        Call
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

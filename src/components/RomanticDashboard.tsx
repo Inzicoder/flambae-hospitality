@@ -200,7 +200,7 @@ export const RomanticDashboard = ({ weddingData }: DashboardProps) => {
       <div className="text-center py-8">
         <h3 className="text-2xl font-serif text-slate-700 mb-6">Quick Actions</h3>
         <div className="flex flex-wrap justify-center gap-4">
-          <Button className="romantic-button px-8 py-3">
+          <Button className="bg-gradient-to-r from-purple-400 via-indigo-400 to-blue-400 hover:from-purple-500 hover:via-indigo-500 hover:to-blue-500 text-white font-medium rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 px-8 py-3">
             <Heart className="h-4 w-4 mr-2" />
             Add New Task
           </Button>

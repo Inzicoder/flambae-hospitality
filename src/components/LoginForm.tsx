@@ -54,7 +54,7 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
         <div className="space-y-4">
           <Button 
             onClick={() => onLogin('guest')}
-            className="w-full py-4 text-lg romantic-button"
+            className="w-full py-4 text-lg bg-gradient-to-r from-purple-400 via-indigo-400 to-blue-400 hover:from-purple-500 hover:via-indigo-500 hover:to-blue-500 text-white font-medium rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300"
           >
             <Heart className="mr-3 h-5 w-5" />
             Continue as Guest

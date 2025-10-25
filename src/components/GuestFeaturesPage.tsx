@@ -106,7 +106,7 @@ export const GuestFeaturesPage = ({ onGetStarted }: GuestFeaturesPageProps) => {
             <Button 
               onClick={onGetStarted}
               size="sm"
-              className="romantic-button"
+              className="bg-gradient-to-r from-purple-400 via-indigo-400 to-blue-400 hover:from-purple-500 hover:via-indigo-500 hover:to-blue-500 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
             >
               Get Started
             </Button>
@@ -180,13 +180,13 @@ export const GuestFeaturesPage = ({ onGetStarted }: GuestFeaturesPageProps) => {
             Ready to Plan Your Dream Wedding?
           </h2>
           <p className="text-base md:text-lg text-slate-600 mb-6 md:mb-8 max-w-2xl mx-auto px-4">
-            Join thousands of couples who have successfully planned their perfect wedding with Meliora Moments. 
+            Join thousands of couples who have successfully planned their perfect wedding with Flambae Hospitality. 
             Start your journey today!
           </p>
           <Button 
             onClick={onGetStarted}
             size="lg" 
-            className="romantic-button text-lg md:text-xl px-8 md:px-12 py-4 md:py-6"
+            className="bg-gradient-to-r from-purple-400 via-indigo-400 to-blue-400 hover:from-purple-500 hover:via-indigo-500 hover:to-blue-500 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 text-lg md:text-xl px-8 md:px-12 py-4 md:py-6"
           >
             <Heart className="mr-3 h-5 w-5 md:h-6 md:w-6" />
             Start Planning Now
