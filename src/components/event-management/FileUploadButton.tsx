@@ -6,9 +6,8 @@ import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, Download } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
-import * as XLSX from 'xlsx';
-import axios from 'axios';
-import { API_CONFIG, getApiUrl, getAuthHeadersForFormData } from '@/lib/config';
+import axios from "axios";
+import { API_CONFIG, getApiUrl, getAuthHeadersForFormData } from "@/lib/config";
 
 interface FileUploadButtonProps {
   onDataProcessed?: (data: any) => void;
@@ -44,41 +43,6 @@ export const FileUploadButton = ({ onDataProcessed, onError, eventId }: FileUplo
     setUploadProgress(0);
 
     try {
-      // Read the Excel file
-      const fileData = await file.arrayBuffer();
-      const workbook = XLSX.read(fileData);
-      const sheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[sheetName];
-      const jsonData = XLSX.utils.sheet_to_json(worksheet);
-      
-      // Store the raw data for editing
-      setData(jsonData);
-      
-      // Update progress
-      setUploadProgress(50);
-      
-      // Transform data to match API format
-      const transformedData = jsonData.map((row: any, index: number) => ({
-        eventId: eventId || 'default-event-id',
-        name: row['Full Name'] || row['Name'] || `Guest ${index + 1}`,
-        category: row['Category'] || 'Guest',
-        phoneNumber: row['Phone Number'] || row['Phone'] || '',
-        city: row['City'] || 'Unknown',
-        dateOfArrival: row['Arrival Date'] ? new Date(row['Arrival Date']).toISOString() : new Date().toISOString(),
-        modeOfArrival: row['Mode of Arrival'] || row['Transport'] || 'Car',
-        trainFlightNumber: row['Flight/Train Number'] || row['Transport Number'] || '',
-        time: row['Time'] || '12:00',
-        hotelName: row['Hotel Name'] || row['Hotel'] || '',
-        roomType: row['Room Type'] || row['Room'] || '',
-        checkIn: row['Check In'] ? new Date(row['Check In']).toISOString() : new Date().toISOString(),
-        checkOut: row['Check Out'] ? new Date(row['Check Out']).toISOString() : null,
-        departureDetails: row['Departure Details'] || '',
-        departureTime: row['Departure Time'] || '12:00',
-        attending: row['Attending'] || row['Status'] || 'Yes',
-        remarks: row['Remarks'] || row['Notes'] || null,
-        remarksRound2: null
-      }));
-
       // Update progress
       setUploadProgress(75);
 
@@ -86,37 +50,27 @@ export const FileUploadButton = ({ onDataProcessed, onError, eventId }: FileUplo
       if (eventId) {
         // Create FormData with the file key
         const formData = new FormData();
-        
+
         // Convert transformed data to JSON string and append as file
-        const jsonData = JSON.stringify(transformedData);
-        const blob = new Blob([jsonData], { type: 'application/json' });
-        formData.append('file', blob, 'participants.json');
+        formData.append("file", file);
 
         // Upload the FormData
-        await axios.post(getApiUrl(API_CONFIG.ENDPOINTS.PARTICIPANTS.CREATE(eventId)), formData, {
-          headers: getAuthHeadersForFormData()
-        });
+        await axios.post(
+          getApiUrl(API_CONFIG.ENDPOINTS.PARTICIPANTS.CREATE(eventId)),
+          formData,
+          {
+            headers: getAuthHeadersForFormData(),
+          }
+        );
       }
 
       // Update progress
       setUploadProgress(100);
-      
-      const processedData = {
-        guests: transformedData,
-        totalProcessed: transformedData.length
-      };
-      
-      setProcessedData(processedData);
-      
-      if (onDataProcessed) {
-        onDataProcessed(processedData);
-      }
 
       toast({
         title: "File uploaded successfully!",
-        description: `Successfully uploaded ${transformedData.length} guest records to the server.`,
+        description: `Successfully uploaded guest records to the server.`,
       });
-
     } catch (err) {
       const errorMessage = 'Failed to process file. Please check the format and try again.';
       setError(errorMessage);
