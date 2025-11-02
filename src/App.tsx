@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate, useNavigate, useParams } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useParams, useLocation } from "react-router-dom";
 import { useState, useEffect } from 'react';
 import { AuthForm } from "@/components/AuthForm";
 import { PaymentFlow } from "@/components/PaymentFlow";
@@ -24,6 +24,37 @@ import { GalleryPage } from "@/pages/GalleryPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
+
+// Navigation guard component to prevent browser back navigation to auth screen
+const NavigationGuard = ({ isLoggedIn }: { isLoggedIn: boolean }) => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Block browser back navigation when on event-management page
+    const handlePopState = (event: PopStateEvent) => {
+      if (location.pathname === '/event-management' && isLoggedIn) {
+        // Prevent navigation away from event-management page
+        event.preventDefault();
+        window.history.pushState(null, '', '/event-management');
+      }
+    };
+
+    // Override browser back button
+    window.addEventListener('popstate', handlePopState);
+
+    // Push a state to prevent going back to auth
+    if (location.pathname === '/event-management' && isLoggedIn) {
+      window.history.pushState(null, '', '/event-management');
+    }
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [location.pathname, isLoggedIn, navigate]);
+
+  return null;
+};
 
 // Auth wrapper component to handle navigation
 const AuthWrapper = ({ 
@@ -332,6 +363,7 @@ const App = () => {
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <NavigationGuard isLoggedIn={isLoggedIn} />
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<LandingPage onGetStarted={handleGetStarted} />} />

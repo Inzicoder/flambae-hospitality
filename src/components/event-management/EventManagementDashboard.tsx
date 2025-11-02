@@ -235,17 +235,19 @@ export const EventManagementDashboard = () => {
             </div>
           </div>
           
-          {/* Uploaded Data Table - Only show when API is successful */}
-          {apiSuccess && uploadedData && uploadedData.length > 0 && (
+          {/* Uploaded Data Table - Show when data is uploaded */}
+          {uploadedData && uploadedData.length > 0 && (
             <div className="mt-6 space-y-4">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">Uploaded Guest Data</h3>
                   <p className="text-sm text-gray-600 mt-1">Review and edit guest information</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span className="text-xs text-green-600 font-medium">Successfully uploaded to server</span>
-                  </div>
+                  {apiSuccess && (
+                    <div className="flex items-center gap-2 mt-1">
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      <span className="text-xs text-green-600 font-medium">Successfully uploaded to server</span>
+                    </div>
+                  )}
                 </div>
                 <div className="text-sm text-gray-500">
                   {uploadedData.length} records loaded
@@ -253,23 +255,36 @@ export const EventManagementDashboard = () => {
               </div>
               
               <div className="border rounded-lg overflow-hidden">
-                <div className="max-h-96 overflow-y-auto">
-                  <table className="w-full text-sm">
+                <div className="max-h-96 overflow-x-auto overflow-y-auto">
+                  <div className="min-w-full inline-block">
+                    <table className="w-full text-sm">
                     <thead className="bg-gray-50 sticky top-0">
                       <tr>
-                        <th className="px-3 py-2 text-left font-medium text-gray-700">Name</th>
-                        <th className="px-3 py-2 text-left font-medium text-gray-700">Phone</th>
-                        <th className="px-3 py-2 text-left font-medium text-gray-700">Email</th>
-                        <th className="px-3 py-2 text-left font-medium text-gray-700">Status</th>
-                        <th className="px-3 py-2 text-left font-medium text-gray-700">VIP</th>
-                        <th className="px-3 py-2 text-left font-medium text-gray-700">Arrival</th>
-                        <th className="px-3 py-2 text-left font-medium text-gray-700">Actions</th>
+                        <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">S.No</th>
+                        <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Name</th>
+                        <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Category</th>
+                        <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Mobile No.</th>
+                        <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">City</th>
+                        <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Date of Arrival</th>
+                        <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Mode of Arrival</th>
+                        <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Train/Flight No.</th>
+                        <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Time</th>
+                        <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Hotel Name</th>
+                        <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Room Type</th>
+                        <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Check-in</th>
+                        <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Check-out</th>
+                        <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Attending</th>
+                        <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
                       {uploadedData.map((guest: any, index: number) => (
                         <tr key={index} className="hover:bg-gray-50">
-                          <td className="px-3 py-2">
+                          {/* S.No */}
+                          <td className="px-2 py-2 text-xs">{index + 1}</td>
+                          
+                          {/* Name */}
+                          <td className="px-2 py-2">
                             <input
                               type="text"
                               value={guest.name || ''}
@@ -278,10 +293,26 @@ export const EventManagementDashboard = () => {
                                 newData[index].name = e.target.value;
                                 setUploadedData(newData);
                               }}
-                              className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5"
+                              className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
                             />
                           </td>
-                          <td className="px-3 py-2">
+                          
+                          {/* Category */}
+                          <td className="px-2 py-2">
+                            <input
+                              type="text"
+                              value={guest.category || ''}
+                              onChange={(e) => {
+                                const newData = [...uploadedData];
+                                newData[index].category = e.target.value;
+                                setUploadedData(newData);
+                              }}
+                              className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
+                            />
+                          </td>
+                          
+                          {/* Mobile No. */}
+                          <td className="px-2 py-2">
                             <input
                               type="text"
                               value={guest.phoneNumber || ''}
@@ -290,51 +321,26 @@ export const EventManagementDashboard = () => {
                                 newData[index].phoneNumber = e.target.value;
                                 setUploadedData(newData);
                               }}
-                              className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5"
+                              className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
                             />
                           </td>
-                          <td className="px-3 py-2">
+                          
+                          {/* City */}
+                          <td className="px-2 py-2">
                             <input
                               type="text"
-                              value={guest.email || ''}
+                              value={guest.city || ''}
                               onChange={(e) => {
                                 const newData = [...uploadedData];
-                                newData[index].email = e.target.value;
+                                newData[index].city = e.target.value;
                                 setUploadedData(newData);
                               }}
-                              className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5"
+                              className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
                             />
                           </td>
-                          <td className="px-3 py-2">
-                            <select
-                              value={guest.status || 'Pending'}
-                              onChange={(e) => {
-                                const newData = [...uploadedData];
-                                newData[index].status = e.target.value;
-                                setUploadedData(newData);
-                              }}
-                              className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5"
-                            >
-                              <option value="Pending">Pending</option>
-                              <option value="Confirmed">Confirmed</option>
-                              <option value="Declined">Declined</option>
-                            </select>
-                          </td>
-                          <td className="px-3 py-2">
-                            <select
-                              value={guest.isVip ? 'Yes' : 'No'}
-                              onChange={(e) => {
-                                const newData = [...uploadedData];
-                                newData[index].isVip = e.target.value === 'Yes';
-                                setUploadedData(newData);
-                              }}
-                              className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5"
-                            >
-                              <option value="No">No</option>
-                              <option value="Yes">Yes</option>
-                            </select>
-                          </td>
-                          <td className="px-3 py-2">
+                          
+                          {/* Date of Arrival */}
+                          <td className="px-2 py-2">
                             <input
                               type="text"
                               value={guest.arrivalDate || ''}
@@ -343,10 +349,130 @@ export const EventManagementDashboard = () => {
                                 newData[index].arrivalDate = e.target.value;
                                 setUploadedData(newData);
                               }}
-                              className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5"
+                              className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
                             />
                           </td>
-                          <td className="px-3 py-2">
+                          
+                          {/* Mode of Arrival */}
+                          <td className="px-2 py-2">
+                            <input
+                              type="text"
+                              value={guest.modeOfArrival || ''}
+                              onChange={(e) => {
+                                const newData = [...uploadedData];
+                                newData[index].modeOfArrival = e.target.value;
+                                setUploadedData(newData);
+                              }}
+                              className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
+                            />
+                          </td>
+                          
+                          {/* Train/Flight Number */}
+                          <td className="px-2 py-2">
+                            <input
+                              type="text"
+                              value={guest.trainFlightNumber || ''}
+                              onChange={(e) => {
+                                const newData = [...uploadedData];
+                                newData[index].trainFlightNumber = e.target.value;
+                                setUploadedData(newData);
+                              }}
+                              className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
+                            />
+                          </td>
+                          
+                          {/* Time */}
+                          <td className="px-2 py-2">
+                            <input
+                              type="text"
+                              value={guest.time || ''}
+                              onChange={(e) => {
+                                const newData = [...uploadedData];
+                                newData[index].time = e.target.value;
+                                setUploadedData(newData);
+                              }}
+                              className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
+                            />
+                          </td>
+                          
+                          {/* Hotel Name */}
+                          <td className="px-2 py-2">
+                            <input
+                              type="text"
+                              value={guest.hotelName || ''}
+                              onChange={(e) => {
+                                const newData = [...uploadedData];
+                                newData[index].hotelName = e.target.value;
+                                setUploadedData(newData);
+                              }}
+                              className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
+                            />
+                          </td>
+                          
+                          {/* Room Type */}
+                          <td className="px-2 py-2">
+                            <input
+                              type="text"
+                              value={guest.roomType || ''}
+                              onChange={(e) => {
+                                const newData = [...uploadedData];
+                                newData[index].roomType = e.target.value;
+                                setUploadedData(newData);
+                              }}
+                              className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
+                            />
+                          </td>
+                          
+                          {/* Check-in */}
+                          <td className="px-2 py-2">
+                            <select
+                              value={guest.checkIn || 'No'}
+                              onChange={(e) => {
+                                const newData = [...uploadedData];
+                                newData[index].checkIn = e.target.value;
+                                setUploadedData(newData);
+                              }}
+                              className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
+                            >
+                              <option value="No">No</option>
+                              <option value="Yes">Yes</option>
+                            </select>
+                          </td>
+                          
+                          {/* Check-out */}
+                          <td className="px-2 py-2">
+                            <select
+                              value={guest.checkOut || 'No'}
+                              onChange={(e) => {
+                                const newData = [...uploadedData];
+                                newData[index].checkOut = e.target.value;
+                                setUploadedData(newData);
+                              }}
+                              className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
+                            >
+                              <option value="No">No</option>
+                              <option value="Yes">Yes</option>
+                            </select>
+                          </td>
+                          
+                          {/* Attending */}
+                          <td className="px-2 py-2">
+                            <select
+                              value={guest.attending || 'No'}
+                              onChange={(e) => {
+                                const newData = [...uploadedData];
+                                newData[index].attending = e.target.value;
+                                setUploadedData(newData);
+                              }}
+                              className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
+                            >
+                              <option value="No">No</option>
+                              <option value="Yes">Yes</option>
+                            </select>
+                          </td>
+                          
+                          {/* Actions */}
+                          <td className="px-2 py-2">
                             <div className="flex gap-1">
                               <Button
                                 size="sm"
@@ -385,30 +511,38 @@ export const EventManagementDashboard = () => {
                       ))}
                     </tbody>
                   </table>
+                  </div>
                 </div>
               </div>
               
-              <div className="flex justify-between items-center">
-                <div className="text-sm text-gray-600">
-                  Total: {uploadedData.length} guests | 
-                  Confirmed: {uploadedData.filter(g => g.status === 'Confirmed').length} | 
-                  VIP: {uploadedData.filter(g => g.isVip).length}
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <div className="text-xs sm:text-sm text-gray-600 break-words">
+                  <div className="flex flex-wrap gap-2">
+                    <span>Total: {uploadedData.length} guests</span>
+                    <span className="hidden sm:inline">|</span>
+                    <span>Confirmed: {uploadedData.filter(g => g.status === 'Confirmed').length}</span>
+                    <span className="hidden sm:inline">|</span>
+                    <span>VIP: {uploadedData.filter(g => g.isVip).length}</span>
+                  </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 w-full sm:w-auto">
                   <Button
                     variant="outline"
+                    size="sm"
                     onClick={() => setUploadedData([])}
+                    className="flex-1 sm:flex-none"
                   >
                     Clear All
                   </Button>
                   <Button
+                    size="sm"
                     onClick={() => {
                       toast({
                         title: "Data Saved",
                         description: `Updated ${uploadedData.length} guest records`,
                       });
                     }}
-                    className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+                    className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 flex-1 sm:flex-none"
                   >
                     Save Changes
                   </Button>
@@ -946,31 +1080,31 @@ export const EventManagementDashboard = () => {
  
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4 sm:space-y-6">
       {/* Event Phase Navigation */}
       <Card className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-2xl font-bold">Event Management Dashboard</h1>
-              <p className="text-blue-100">Complete Event Management Workflow</p>
+        <CardContent className="p-4 sm:p-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+            <div className="flex-1">
+              <h1 className="text-xl sm:text-2xl font-bold">Event Management Dashboard</h1>
+              <p className="text-blue-100 text-sm sm:text-base mt-1">Complete Event Management Workflow</p>
               {eventDetails && (
-                <p className="text-blue-200 text-sm mt-1">
+                <p className="text-blue-200 text-xs sm:text-sm mt-2 break-words">
                   Managing: {eventDetails.eventName} at {eventDetails.venue}
                 </p>
               )}
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
               <Button 
                 variant="secondary" 
                 size="sm"
                 onClick={() => navigate(`/event-participants/${eventId}`)}
-                className="bg-white text-blue-600 hover:bg-blue-50"
+                className="bg-white text-blue-600 hover:bg-blue-50 w-full sm:w-auto"
               >
                 <Users className="h-4 w-4 mr-2" />
                 View Participants
               </Button>
-              <Badge variant="secondary" className="bg-white text-blue-600">
+              <Badge variant="secondary" className="bg-white text-blue-600 text-center py-1.5 sm:py-1">
                 {activePhase === "before-event" ? "Before Event" : "During Event"}
               </Badge>
             </div>
@@ -1003,9 +1137,9 @@ export const EventManagementDashboard = () => {
 
       {/* Tab Navigation */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className={`grid mb-6 ${
+        <TabsList className={`grid mb-6 overflow-x-auto ${
           activePhase === "before-event" ? "grid-cols-5" : "grid-cols-3"
-        }`}>
+        } w-full`}>
           {activePhase === "before-event" ? (
             <>
               <TabsTrigger value="data-collection" className="flex items-center gap-2">

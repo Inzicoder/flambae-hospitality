@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, Download } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import axios from "axios";
+import * as XLSX from 'xlsx';
 import { API_CONFIG, getApiUrl, getAuthHeadersForFormData } from "@/lib/config";
 
 interface FileUploadButtonProps {
@@ -43,17 +44,46 @@ export const FileUploadButton = ({ onDataProcessed, onError, eventId }: FileUplo
     setUploadProgress(0);
 
     try {
+      // Read the file once and store it
+      const fileBuffer = await file.arrayBuffer();
+      
       // Update progress
-      setUploadProgress(75);
+      setUploadProgress(25);
 
+      // Parse and process the file data first
+      const workbook = XLSX.read(fileBuffer);
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+      
+      // Transform data for display in the dashboard - matching CSV headers
+      const transformedData = jsonData.map((row: any, index: number) => ({
+        name: row['Name'] || row['Full Name'] || `Guest ${index + 1}`,
+        category: row['Category'] || '',
+        phoneNumber: row['Mobile No.'] || row['Phone Number'] || row['Phone'] || '',
+        city: row['City'] || '',
+        arrivalDate: row['Date Of Arrival'] || row['Arrival Date'] || '',
+        modeOfArrival: row['Mode of Arrival'] || row['Mode of Arrival'] || '',
+        trainFlightNumber: row['Train/Flight Number'] || row['Train/Flight No.'] || '',
+        time: row['Time'] || '',
+        hotelName: row['Hotel Name'] || row['Hotel'] || '',
+        roomType: row['Room Type'] || row['Room'] || '',
+        checkIn: row['Check-in'] || row['Check-in'] || 'No',
+        checkOut: row['Check-out'] || row['Check-out'] || 'No',
+        attending: row['Attending'] || 'No',
+        remarks: row['Remarks'] || '',
+        remarksRound2: row['Remarks (round 2)'] || row['Remarks (round 2)'] || '',
+      }));
+      
+      // Update progress
+      setUploadProgress(50);
+      
       // Upload to API
       if (eventId) {
-        // Create FormData with the file key
+        // Create FormData with the file
         const formData = new FormData();
-
-        // Convert transformed data to JSON string and append as file
         formData.append("file", file);
-
+        
         // Upload the FormData
         await axios.post(
           getApiUrl(API_CONFIG.ENDPOINTS.PARTICIPANTS.CREATE(eventId)),
@@ -63,13 +93,23 @@ export const FileUploadButton = ({ onDataProcessed, onError, eventId }: FileUplo
           }
         );
       }
-
+      
       // Update progress
       setUploadProgress(100);
+      
+      const processedData = {
+        guests: transformedData,
+        totalProcessed: transformedData.length
+      };
+      
+      // Call the callback to update the dashboard
+      if (onDataProcessed) {
+        onDataProcessed(processedData);
+      }
 
       toast({
         title: "File uploaded successfully!",
-        description: `Successfully uploaded guest records to the server.`,
+        description: `Successfully uploaded ${transformedData.length} guest records to the server.`,
       });
     } catch (err) {
       const errorMessage = 'Failed to process file. Please check the format and try again.';
@@ -211,7 +251,7 @@ Sarah Johnson,+1234567891,sarah@email.com,2024-06-15 16:00,2024-06-17 12:00,Pend
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                      {data.map((row: ExcelRow, index: number) => (
+        {data.map((row: ExcelRow, index: number) => (
                         <tr key={index} className="hover:bg-gray-50">
                           {/* Name */}
                           <td className="px-2 py-2">

@@ -22,9 +22,30 @@ export const BackButton: React.FC<BackButtonProps> = ({
     if (onClick) {
       onClick();
     } else {
-      navigate(-1);
+      // Get the current location
+      const currentPath = window.location.pathname;
+      
+      // If we're on the event management dashboard (specific event), go back to events listing
+      if (currentPath.startsWith('/event-management/') && currentPath !== '/event-management') {
+        navigate('/event-management');
+      } 
+      // If we're on the events listing page, don't allow navigation
+      // This prevents browser back from taking user to auth screen
+      else if (currentPath === '/event-management') {
+        // Do nothing - stay on events listing page
+        // Don't navigate to auth screen
+        return;
+      }
+      else {
+        // For other pages, use normal back navigation
+        navigate(-1);
+      }
     }
   };
+  
+  // Get the current location to conditionally hide the button
+  const currentPath = window.location.pathname;
+  const shouldShow = currentPath !== '/event-management';
 
   return (
     <Button 
