@@ -26,9 +26,6 @@ export const DashboardHeader = ({ onLogout, userType = 'guest' }: DashboardHeade
     { path: '/todos', label: 'Task List' },
     { path: '/guests', label: 'Guest Manager' },
     { path: '/schedule', label: 'Event Schedule' },
-    { path: '/gallery', label: 'Photo Gallery' },
-    { path: '/notes', label: 'Collaboration' },
-    { path: '/payments', label: 'Payments' },
   ];
 
   return (
@@ -40,14 +37,6 @@ export const DashboardHeader = ({ onLogout, userType = 'guest' }: DashboardHeade
           </div>
           
           <div className="flex items-center space-x-3">
-            <Button 
-              variant="outline" 
-              size="sm"
-              className="border-2 border-rose-200 hover:border-rose-400 hover:bg-rose-50 text-slate-700 rounded-2xl transition-all duration-300 hidden md:flex backdrop-blur-sm"
-            >
-              <Bell className="h-4 w-4 mr-2 text-rose-500" />
-              Notifications
-            </Button>
 
             {/* Navigation Menu - Only show for guest users */}
             {userType === 'guest' && (

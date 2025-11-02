@@ -6,19 +6,32 @@ import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, Download } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
+import axios from "axios";
+import * as XLSX from 'xlsx';
+import { API_CONFIG, getApiUrl, getAuthHeadersForFormData } from "@/lib/config";
 
 interface FileUploadButtonProps {
   onDataProcessed?: (data: any) => void;
+  onError?: (error: string) => void;
+  eventId?: string;
 }
 
-export const FileUploadButton = ({ onDataProcessed }: FileUploadButtonProps) => {
+interface ExcelRow {
+  [key: string]: string | number | boolean | Date;
+}
+
+
+export const FileUploadButton = ({ onDataProcessed, onError, eventId }: FileUploadButtonProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
   const [processedData, setProcessedData] = useState<any>(null);
   const [error, setError] = useState<string>('');
+    const [data, setData] = useState<ExcelRow[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -31,78 +44,82 @@ export const FileUploadButton = ({ onDataProcessed }: FileUploadButtonProps) => 
     setUploadProgress(0);
 
     try {
-      // Simulate file processing with progress
-      const progressInterval = setInterval(() => {
-        setUploadProgress(prev => {
-          if (prev >= 90) {
-            clearInterval(progressInterval);
-            return 90;
-          }
-          return prev + 10;
-        });
-      }, 200);
-
-      // Simulate processing delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Read the file once and store it
+      const fileBuffer = await file.arrayBuffer();
       
-      // Mock processed data
-      const mockData = {
-        guests: [
-          {
-            id: '1',
-            fullName: 'John Smith',
-            phoneNumber: '+1234567890',
-            email: 'john.smith@email.com',
-            arrivalDateTime: '2024-06-15T14:30',
-            departureDateTime: '2024-06-17T10:00',
-            attendanceStatus: 'Confirmed',
-            travelRequirement: 'Yes',
-            isVIP: true
-          },
-          {
-            id: '2',
-            fullName: 'Sarah Johnson',
-            phoneNumber: '+1234567891',
-            email: 'sarah.johnson@email.com',
-            arrivalDateTime: '2024-06-15T16:00',
-            departureDateTime: '2024-06-17T12:00',
-            attendanceStatus: 'Pending',
-            travelRequirement: 'No',
-            isVIP: false
-          }
-        ],
-        logistics: [
-          {
-            id: '1',
-            guestName: 'John Smith',
-            pickupType: 'Airport Pickup',
-            scheduledTime: '2024-06-15T14:00',
-            location: 'Terminal 1 - Gate 3',
-            assignedDriver: 'Mike Johnson',
-            vehicle: 'Mercedes S-Class (ABC-123)',
-            status: 'Scheduled',
-            priority: 'VIP',
-            notes: 'Flight delayed by 30 minutes'
-          }
-        ]
-      };
+      // Update progress
+      setUploadProgress(25);
 
-      clearInterval(progressInterval);
+      // Parse and process the file data first
+      const workbook = XLSX.read(fileBuffer);
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+      
+      // Transform data for display in the dashboard - matching CSV headers
+      const transformedData = jsonData.map((row: any, index: number) => ({
+        name: row['Name'] || row['Full Name'] || `Guest ${index + 1}`,
+        category: row['Category'] || '',
+        phoneNumber: row['Mobile No.'] || row['Phone Number'] || row['Phone'] || '',
+        city: row['City'] || '',
+        arrivalDate: row['Date Of Arrival'] || row['Arrival Date'] || '',
+        modeOfArrival: row['Mode of Arrival'] || row['Mode of Arrival'] || '',
+        trainFlightNumber: row['Train/Flight Number'] || row['Train/Flight No.'] || '',
+        time: row['Time'] || '',
+        hotelName: row['Hotel Name'] || row['Hotel'] || '',
+        roomType: row['Room Type'] || row['Room'] || '',
+        checkIn: row['Check-in'] || row['Check-in'] || 'No',
+        checkOut: row['Check-out'] || row['Check-out'] || 'No',
+        attending: row['Attending'] || 'No',
+        remarks: row['Remarks'] || '',
+        remarksRound2: row['Remarks (round 2)'] || row['Remarks (round 2)'] || '',
+      }));
+      
+      // Update progress
+      setUploadProgress(50);
+      
+      // Upload to API
+      if (eventId) {
+        // Create FormData with the file
+        const formData = new FormData();
+        formData.append("file", file);
+        
+        // Upload the FormData
+        await axios.post(
+          getApiUrl(API_CONFIG.ENDPOINTS.PARTICIPANTS.CREATE(eventId)),
+          formData,
+          {
+            headers: getAuthHeadersForFormData(),
+          }
+        );
+      }
+      
+      // Update progress
       setUploadProgress(100);
-      setProcessedData(mockData);
       
+      const processedData = {
+        guests: transformedData,
+        totalProcessed: transformedData.length
+      };
+      
+      // Call the callback to update the dashboard
       if (onDataProcessed) {
-        onDataProcessed(mockData);
+        onDataProcessed(processedData);
       }
 
       toast({
-        title: "File processed successfully!",
-        description: `Imported ${mockData.guests.length} guests and ${mockData.logistics.length} logistics entries.`,
+        title: "File uploaded successfully!",
+        description: `Successfully uploaded ${transformedData.length} guest records to the server.`,
       });
-
     } catch (err) {
-      setError('Failed to process file. Please check the format and try again.');
+      const errorMessage = 'Failed to process file. Please check the format and try again.';
+      setError(errorMessage);
       console.error('File processing error:', err);
+      
+      // Call error callback if provided
+      if (onError) {
+        onError(errorMessage);
+      }
     } finally {
       setIsProcessing(false);
     }
@@ -122,6 +139,11 @@ Sarah Johnson,+1234567891,sarah@email.com,2024-06-15 16:00,2024-06-17 12:00,Pend
     a.click();
     window.URL.revokeObjectURL(url);
   };
+
+  const handleExcelUpload = () => {
+    fileInputRef.current?.click();
+    
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -160,7 +182,7 @@ Sarah Johnson,+1234567891,sarah@email.com,2024-06-15 16:00,2024-06-17 12:00,Pend
               Supports Excel (.xlsx, .xls) and CSV files
             </p>
             <Button 
-              onClick={() => fileInputRef.current?.click()}
+              onClick={handleExcelUpload}
               disabled={isProcessing}
               className="mb-2"
             >
@@ -197,6 +219,220 @@ Sarah Johnson,+1234567891,sarah@email.com,2024-06-15 16:00,2024-06-17 12:00,Pend
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>{error}</AlertDescription>
             </Alert>
+          )}
+
+          {/* Editable Data Table */}
+          {data && data.length > 0 && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Uploaded Data Preview</h3>
+                  <p className="text-sm text-gray-600 mt-1">Click any field to edit the data before processing</p>
+                </div>
+                <div className="text-sm text-gray-500">
+                  {data.length} records loaded
+                </div>
+              </div>
+              
+              <div className="border rounded-lg overflow-hidden">
+                <div className="max-h-96 overflow-y-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-gray-50 sticky top-0">
+                      <tr>
+                        <th className="px-2 py-2 text-left font-medium text-gray-700">Name</th>
+                        <th className="px-2 py-2 text-left font-medium text-gray-700">Phone</th>
+                        <th className="px-2 py-2 text-left font-medium text-gray-700">Email</th>
+                        <th className="px-2 py-2 text-left font-medium text-gray-700">Arrival</th>
+                        <th className="px-2 py-2 text-left font-medium text-gray-700">Departure</th>
+                        <th className="px-2 py-2 text-left font-medium text-gray-700">Status</th>
+                        <th className="px-2 py-2 text-left font-medium text-gray-700">VIP</th>
+                        <th className="px-2 py-2 text-left font-medium text-gray-700">Travel</th>
+                        <th className="px-2 py-2 text-left font-medium text-gray-700">Pickup</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+        {data.map((row: ExcelRow, index: number) => (
+                        <tr key={index} className="hover:bg-gray-50">
+                          {/* Name */}
+                          <td className="px-2 py-2">
+                            <input
+                              type="text"
+                              value={row['Full Name'] || ''}
+                              onChange={(e) => {
+                                const newData = [...data];
+                                newData[index]['Full Name'] = e.target.value;
+                                setData(newData);
+                              }}
+                              className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
+                            />
+                          </td>
+                          {/* Phone */}
+                          <td className="px-2 py-2">
+                            <input
+                              type="text"
+                              value={row['Phone Number'] || ''}
+                              onChange={(e) => {
+                                const newData = [...data];
+                                newData[index]['Phone Number'] = e.target.value;
+                                setData(newData);
+                              }}
+                              className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
+                            />
+                          </td>
+                          {/* Email */}
+                          <td className="px-2 py-2">
+                            <input
+                              type="text"
+                              value={row['Email'] || ''}
+                              onChange={(e) => {
+                                const newData = [...data];
+                                newData[index]['Email'] = e.target.value;
+                                setData(newData);
+                              }}
+                              className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
+                            />
+                          </td>
+                          {/* Arrival Date */}
+                          <td className="px-2 py-2">
+                            <input
+                              type="text"
+                              value={row['Arrival Date'] || ''}
+                              onChange={(e) => {
+                                const newData = [...data];
+                                newData[index]['Arrival Date'] = e.target.value;
+                                setData(newData);
+                              }}
+                              className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
+                            />
+                          </td>
+                          {/* Departure Date */}
+                          <td className="px-2 py-2">
+                            <input
+                              type="text"
+                              value={row['Departure Date'] || ''}
+                              onChange={(e) => {
+                                const newData = [...data];
+                                newData[index]['Departure Date'] = e.target.value;
+                                setData(newData);
+                              }}
+                              className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
+                            />
+                          </td>
+                          {/* Status */}
+                          <td className="px-2 py-2">
+                            <select
+                              value={row['Status'] || 'Pending'}
+                              onChange={(e) => {
+                                const newData = [...data];
+                                newData[index]['Status'] = e.target.value;
+                                setData(newData);
+                              }}
+                              className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
+                            >
+                              <option value="Pending">Pending</option>
+                              <option value="Confirmed">Confirmed</option>
+                              <option value="Declined">Declined</option>
+                            </select>
+                          </td>
+                          {/* VIP */}
+                          <td className="px-2 py-2">
+                            <select
+                              value={row['VIP'] || 'No'}
+                              onChange={(e) => {
+                                const newData = [...data];
+                                newData[index]['VIP'] = e.target.value;
+                                setData(newData);
+                              }}
+                              className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
+                            >
+                              <option value="No">No</option>
+                              <option value="Yes">Yes</option>
+                            </select>
+                          </td>
+                          {/* Travel Required */}
+                          <td className="px-2 py-2">
+                            <select
+                              value={row['Travel Required'] || 'No'}
+                              onChange={(e) => {
+                                const newData = [...data];
+                                newData[index]['Travel Required'] = e.target.value;
+                                setData(newData);
+                              }}
+                              className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
+                            >
+                              <option value="No">No</option>
+                              <option value="Yes">Yes</option>
+                            </select>
+                          </td>
+                          {/* Pickup Type */}
+                          <td className="px-2 py-2">
+                            <input
+                              type="text"
+                              value={row['Pickup Type'] || ''}
+                              onChange={(e) => {
+                                const newData = [...data];
+                                newData[index]['Pickup Type'] = e.target.value;
+                                setData(newData);
+                              }}
+                              className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
+                            />
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              
+              <div className="flex justify-end space-x-2">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setData([]);
+                    setProcessedData(null);
+                    if (fileInputRef.current) {
+                      fileInputRef.current.value = '';
+                    }
+                  }}
+                >
+                  Clear Data
+                </Button>
+                <Button
+                  onClick={() => {
+                    // Process the edited data
+                    const transformedData = data.map(row => ({
+                      name: row['Full Name'] || '',
+                      phoneNumber: row['Phone Number'] || '',
+                      email: row['Email'] || '',
+                      arrivalDate: row['Arrival Date'] || '',
+                      status: row['Status'] || 'Pending',
+                      isVip: row['VIP'] === 'Yes',
+                      eventId: eventId || '',
+                      // Add other fields as needed
+                    }));
+                    
+                    const processedData = {
+                      guests: transformedData,
+                      totalProcessed: transformedData.length
+                    };
+                    
+                    setProcessedData(processedData);
+                    
+                    if (onDataProcessed) {
+                      onDataProcessed(processedData);
+                    }
+                    
+                    toast({
+                      title: "Data processed successfully!",
+                      description: `Processed ${transformedData.length} guest records locally.`,
+                    });
+                  }}
+                  className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+                >
+                  Process Data
+                </Button>
+              </div>
+            </div>
           )}
 
           {/* Success Display */}

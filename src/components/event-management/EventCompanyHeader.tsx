@@ -5,20 +5,20 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ProfileDialog } from './ProfileDialog';
 import { FileUploadButton } from './FileUploadButton';
-import { Building2, Calendar, Users, MapPin, Phone, Mail, HelpCircle, Settings, Upload, LogOut, Edit, Check, X } from 'lucide-react';
+import { Building2, Calendar, Users, MapPin, Phone, Mail, Settings, Upload, LogOut, Edit, Check, X } from 'lucide-react';
 
 interface EventCompanyHeaderProps {
-  weddingData: any;
+  weddingData?: any;
+  eventId?: string;
 }
 
-export const EventCompanyHeader = ({ weddingData }: EventCompanyHeaderProps) => {
+export const EventCompanyHeader = ({ weddingData, eventId }: EventCompanyHeaderProps) => {
   const [companyLogo, setCompanyLogo] = useState<string>('');
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingData, setEditingData] = useState({
-    weddingDate: weddingData.weddingDate,
-    totalGuests: weddingData.guestStats.totalInvited,
+    weddingDate: weddingData?.weddingDate || '',
+    totalGuests: weddingData?.guestStats?.totalInvited || 0,
     venueStatus: 'Confirmed'
   });
 
@@ -61,6 +61,7 @@ export const EventCompanyHeader = ({ weddingData }: EventCompanyHeaderProps) => 
     });
     setIsEditMode(false);
   };
+  
 
   return (
     <Card className="border-0 shadow-xl bg-gradient-to-r from-blue-50 to-indigo-50">
@@ -81,20 +82,13 @@ export const EventCompanyHeader = ({ weddingData }: EventCompanyHeaderProps) => 
             <div>
               <CardTitle className="text-2xl text-slate-800 mb-1">Event Management Dashboard</CardTitle>
               <CardDescription className="text-slate-600">
-                Managing: <span className="font-semibold text-blue-600">{weddingData.coupleNames}</span>
+                Managing: <span className="font-semibold text-blue-600">{weddingData?.coupleNames || 'Event Management'}</span>
               </CardDescription>
             </div>
           </div>
           
           <div className="flex items-center space-x-3">
-            <FileUploadButton onDataProcessed={handleDataProcessed} />
-            
-            <Button variant="outline" size="sm" className="flex items-center gap-2">
-              <HelpCircle className="h-4 w-4" />
-              Help & Support
-            </Button>
-            
-            <ProfileDialog onLogoUpdate={setCompanyLogo} />
+            <FileUploadButton onDataProcessed={handleDataProcessed} eventId={eventId} />
             
             <Button 
               variant="outline" 
@@ -156,7 +150,7 @@ export const EventCompanyHeader = ({ weddingData }: EventCompanyHeaderProps) => 
                   className="mt-1 text-sm"
                 />
               ) : (
-                <p className="font-semibold text-gray-800">{weddingData.weddingDate}</p>
+                <p className="font-semibold text-gray-800">{weddingData?.weddingDate || 'Not set'}</p>
               )}
             </div>
           </div>
@@ -175,7 +169,7 @@ export const EventCompanyHeader = ({ weddingData }: EventCompanyHeaderProps) => 
                   className="mt-1 text-sm"
                 />
               ) : (
-                <p className="font-semibold text-gray-800">{weddingData.guestStats.totalInvited}</p>
+                <p className="font-semibold text-gray-800">{weddingData?.guestStats?.totalInvited || 0}</p>
               )}
             </div>
           </div>

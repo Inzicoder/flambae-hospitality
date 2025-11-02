@@ -12,7 +12,7 @@ interface LandingPageProps {
 
 export const LandingPage = ({ onGetStarted }: LandingPageProps) => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-25 via-blush-50 to-lavender-50 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br relative overflow-hidden">
       {/* Background Pattern */}
       <div 
         className="absolute inset-0 opacity-30"
@@ -35,21 +35,23 @@ export const LandingPage = ({ onGetStarted }: LandingPageProps) => {
       </div>
 
       {/* Navigation */}
-      <nav className="relative z-20 flex items-center justify-between p-4 md:p-8">
+      <nav className="relative z-20 flex flex-col sm:flex-row items-center justify-between p-4 md:p-8 gap-4 sm:gap-0">
         <CustomLogo size="sm" showTagline={false} className="animate-fade-in" />
-        <div className="flex items-center space-x-4">
-          <Link to="/features/guest">
-            <Button variant="ghost" className="text-slate-700 hover:bg-white/50 transition-all duration-300">
-              For Couples
-            </Button>
-          </Link>
-          <Link to="/features/company">
-            <Button variant="ghost" className="text-slate-700 hover:bg-white/50 transition-all duration-300">
-              For Companies
-            </Button>
-          </Link>
+        <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4">
+          <div className="flex items-center space-x-2 sm:space-x-4">
+            <Link to="/features/guest">
+              <Button variant="ghost" className="text-slate-700 hover:bg-white/50 transition-all duration-300 text-sm sm:text-base">
+                For Couples
+              </Button>
+            </Link>
+            <Link to="/features/company">
+              <Button variant="ghost" className="text-slate-700 hover:bg-white/50 transition-all duration-300 text-sm sm:text-base">
+                For Companies
+              </Button>
+            </Link>
+          </div>
           <Link to="/auth">
-            <Button className="bg-gradient-to-r from-rose-400 via-pink-400 to-purple-500 text-white hover:from-rose-500 hover:via-pink-500 hover:to-purple-600 shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105">
+            <Button className="bg-gradient-to-r from-purple-400 via-indigo-400 to-blue-400 text-white hover:from-purple-500 hover:via-indigo-500 hover:to-blue-500 shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105 text-sm sm:text-base px-4 sm:px-6">
               Get Started
             </Button>
           </Link>
@@ -109,7 +111,7 @@ export const LandingPage = ({ onGetStarted }: LandingPageProps) => {
           <p className="text-lg text-slate-600 max-w-2xl mx-auto">Comprehensive tools to make your wedding planning seamless and stress-free</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 md:gap-8">
           {[
             {
               icon: Users,
@@ -118,13 +120,13 @@ export const LandingPage = ({ onGetStarted }: LandingPageProps) => {
               gradient: "from-rose-400 to-pink-500",
               bgGradient: "from-rose-50 to-pink-50"
             },
-            {
-              icon: DollarSign,
-              title: "Budget Tracking",
-              description: "Keep your finances on track with detailed budget management and expense tracking",
-              gradient: "from-emerald-400 to-green-500",
-              bgGradient: "from-emerald-50 to-green-50"
-            },
+            // {
+            //   icon: DollarSign,
+            //   title: "Budget Tracking",
+            //   description: "Keep your finances on track with detailed budget management and expense tracking",
+            //   gradient: "from-emerald-400 to-green-500",
+            //   bgGradient: "from-emerald-50 to-green-50"
+            // },
             {
               icon: CheckSquare,
               title: "Task Management",
@@ -139,13 +141,13 @@ export const LandingPage = ({ onGetStarted }: LandingPageProps) => {
               gradient: "from-purple-400 to-violet-500",
               bgGradient: "from-purple-50 to-violet-50"
             },
-            {
-              icon: Camera,
-              title: "Photo Gallery",
-              description: "Collect and organize memories from your engagement to your honeymoon",
-              gradient: "from-amber-400 to-orange-500",
-              bgGradient: "from-amber-50 to-orange-50"
-            },
+            // {
+            //   icon: Camera,
+            //   title: "Photo Gallery",
+            //   description: "Collect and organize memories from your engagement to your honeymoon",
+            //   gradient: "from-amber-400 to-orange-500",
+            //   bgGradient: "from-amber-50 to-orange-50"
+            // },
             {
               icon: MessageCircle,
               title: "Vendor Communication",
@@ -172,18 +174,18 @@ export const LandingPage = ({ onGetStarted }: LandingPageProps) => {
       </div>
 
       {/* CTA Section */}
-      <div className="relative z-10 bg-gradient-to-r from-rose-400 via-pink-400 to-purple-500 text-white py-12 md:py-20 mx-4 md:mx-8 rounded-3xl mb-8 md:mb-12 shadow-2xl">
+      <div className="relative z-10 bg-gradient-to-r from-purple-400 via-indigo-400 to-blue-500 text-white py-12 md:py-20 mx-4 md:mx-8 rounded-3xl mb-8 md:mb-12 shadow-2xl">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl md:text-4xl font-serif mb-4 md:mb-6">Ready to Begin Your Journey?</h2>
-          <p className="text-lg md:text-xl text-rose-100 mb-6 md:mb-8 max-w-2xl mx-auto">
-            Join thousands of couples who have planned their perfect wedding with Meliora Moments
+          <p className="text-lg md:text-xl text-purple-100 mb-6 md:mb-8 max-w-2xl mx-auto">
+            Join thousands of couples who have planned their perfect wedding with Flambae Hospitality
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link to="/auth">
               <Button 
                 size="lg" 
                 variant="secondary"
-                className="w-full sm:w-auto bg-white text-rose-600 hover:bg-rose-50 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 px-8 py-4 text-lg font-medium"
+                className="w-full sm:w-auto bg-white text-purple-600 hover:bg-purple-50 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 px-8 py-4 text-lg font-medium"
               >
                 Start Your Free Plan
                 <Heart className="ml-2 h-5 w-5" />
@@ -193,7 +195,8 @@ export const LandingPage = ({ onGetStarted }: LandingPageProps) => {
               <Button 
                 size="lg" 
                 variant="outline"
-                className="w-full sm:w-auto border-2 border-white text-white hover:bg-white hover:text-rose-600 transition-all duration-300 px-8 py-4 text-lg"
+                className="w-full sm:w-auto border-2 border-white  text-purple-600
+                hover:bg-white hover:text-purple-600 transition-all duration-300 px-8 py-4 text-lg"
               >
                 Learn More
               </Button>
@@ -207,7 +210,7 @@ export const LandingPage = ({ onGetStarted }: LandingPageProps) => {
         <div className="max-w-2xl mx-auto">
           <CustomLogo size="md" showTagline={true} className="mb-6" />
           <p className="text-slate-500 text-sm">
-            © 2024 Meliora Moments. Crafted with <Heart className="inline-block h-4 w-4 text-rose-400 mx-1" /> for your special day.
+            © 2024 Flambae Hospitality. Crafted with <Heart className="inline-block h-4 w-4 text-rose-400 mx-1" /> for your special day.
           </p>
         </div>
       </footer>

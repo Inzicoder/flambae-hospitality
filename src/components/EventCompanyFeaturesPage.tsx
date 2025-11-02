@@ -180,7 +180,7 @@ export const EventCompanyFeaturesPage = ({ onGetStarted }: EventCompanyFeaturesP
             Scale Your Event Business
           </h2>
           <p className="text-base md:text-lg text-slate-600 mb-6 md:mb-8 max-w-2xl mx-auto px-4">
-            Join leading event companies who trust Meliora Moments to deliver exceptional wedding experiences 
+            Join leading event companies who trust Flambae Hospitality to deliver exceptional wedding experiences 
             while streamlining their operations and growing their business.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
