@@ -29,7 +29,9 @@ export const API_CONFIG = {
       CREATE: (eventId: string) => `/event-participants/${eventId}`,
       GET_BY_EVENT: (eventId: string) => `/event-participants?eventId=${eventId}`,
       UPDATE: (id: string) => `/event-participants/${id}`,
-      DELETE: (id: string) => `/event-participants/${id}`
+      DELETE: (id: string) => `/event-participants/${id}`,
+      UPLOAD_DOCUMENT: (eventId: string, participantId: string) => 
+        `/event-participants/document/${eventId}/${participantId}`,
     },
     // Help desk endpoints
     HELP_DESK: {

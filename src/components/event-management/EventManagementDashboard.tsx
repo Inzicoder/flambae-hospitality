@@ -263,7 +263,7 @@ export const EventManagementDashboard = () => {
                         <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">S.No</th>
                         <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Name</th>
                         <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Category</th>
-                        <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Mobile No.</th>
+                        <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs min-w-[120px]">Mobile No.</th>
                         <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">City</th>
                         <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Date of Arrival</th>
                         <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Mode of Arrival</th>
@@ -312,7 +312,7 @@ export const EventManagementDashboard = () => {
                           </td>
                           
                           {/* Mobile No. */}
-                          <td className="px-2 py-2">
+                          <td className="px-2 py-2 min-w-[120px]">
                             <input
                               type="text"
                               value={guest.phoneNumber || ''}
@@ -321,7 +321,8 @@ export const EventManagementDashboard = () => {
                                 newData[index].phoneNumber = e.target.value;
                                 setUploadedData(newData);
                               }}
-                              className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
+                              className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs min-w-[100px]"
+                              placeholder="10-digit number"
                             />
                           </td>
                           

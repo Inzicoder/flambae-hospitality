@@ -51,29 +51,116 @@ export const FileUploadButton = ({ onDataProcessed, onError, eventId }: FileUplo
       setUploadProgress(25);
 
       // Parse and process the file data first
-      const workbook = XLSX.read(fileBuffer);
+      const workbook = XLSX.read(fileBuffer, { 
+        type: 'array',
+        cellDates: true,
+        cellNF: false,
+        cellText: false
+      });
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
-      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+      
+      // Convert sheet to array format to find header row
+      const sheetArray = XLSX.utils.sheet_to_json(worksheet, { 
+        header: 1, // Return as array of arrays
+        defval: '',
+        raw: false
+      });
+      
+      // Find the header row (row with "S. No.", "Name", "Category")
+      let headerRowIndex = -1;
+      let headers: string[] = [];
+      
+      for (let i = 0; i < Math.min(sheetArray.length, 5); i++) {
+        const row = sheetArray[i] as any[];
+        if (row && row.length > 0) {
+          const firstCell = String(row[0] || '').toLowerCase().trim();
+          const secondCell = String(row[1] || '').toLowerCase().trim();
+          const thirdCell = String(row[2] || '').toLowerCase().trim();
+          
+          // Check if this row contains headers
+          if ((firstCell.includes('s. no') || firstCell === 's. no.') && 
+              (secondCell.includes('name') || secondCell === 'name') && 
+              (thirdCell.includes('category') || thirdCell === 'category')) {
+            headerRowIndex = i;
+            headers = row.map((cell: any) => String(cell || '').trim());
+            break;
+          }
+        }
+      }
+      
+      // If header row found, use it; otherwise use first row
+      if (headerRowIndex === -1) {
+        headerRowIndex = 0;
+        headers = (sheetArray[0] as any[])?.map((cell: any) => String(cell || '').trim()) || [];
+      } else {
+        headers = (sheetArray[headerRowIndex] as any[])?.map((cell: any) => String(cell || '').trim()) || [];
+      }
+      
+      // Manually convert data rows to objects using the found headers
+      const dataRows: any[] = [];
+      for (let i = headerRowIndex + 1; i < sheetArray.length; i++) {
+        const row = sheetArray[i] as any[];
+        if (!row || row.length === 0) continue;
+        
+        // Check if row is empty
+        const isEmpty = row.every((cell: any) => {
+          const val = String(cell || '').trim();
+          return val === '' || val === null || val === undefined;
+        });
+        if (isEmpty) continue;
+        
+        // Check if this is a header row (skip duplicate headers)
+        const firstCell = String(row[0] || '').toLowerCase().trim();
+        if (firstCell === 's. no.' || firstCell === 's. no' || 
+            (firstCell === 'name' && String(row[1] || '').toLowerCase().trim() === 'name')) {
+          continue; // Skip header rows
+        }
+        
+        // Convert row to object using headers
+        const rowObj: any = {};
+        headers.forEach((header, colIndex) => {
+          if (header) {
+            rowObj[header] = row[colIndex] || '';
+          }
+        });
+        
+        // Only add if row has a name
+        if (rowObj['Name'] && String(rowObj['Name']).trim() !== '') {
+          dataRows.push(rowObj);
+        }
+      }
+      
+      const filteredData = dataRows;
       
       // Transform data for display in the dashboard - matching CSV headers
-      const transformedData = jsonData.map((row: any, index: number) => ({
-        name: row['Name'] || row['Full Name'] || `Guest ${index + 1}`,
-        category: row['Category'] || '',
-        phoneNumber: row['Mobile No.'] || row['Phone Number'] || row['Phone'] || '',
-        city: row['City'] || '',
-        arrivalDate: row['Date Of Arrival'] || row['Arrival Date'] || '',
-        modeOfArrival: row['Mode of Arrival'] || row['Mode of Arrival'] || '',
-        trainFlightNumber: row['Train/Flight Number'] || row['Train/Flight No.'] || '',
-        time: row['Time'] || '',
-        hotelName: row['Hotel Name'] || row['Hotel'] || '',
-        roomType: row['Room Type'] || row['Room'] || '',
-        checkIn: row['Check-in'] || row['Check-in'] || 'No',
-        checkOut: row['Check-out'] || row['Check-out'] || 'No',
-        attending: row['Attending'] || 'No',
-        remarks: row['Remarks'] || '',
-        remarksRound2: row['Remarks (round 2)'] || row['Remarks (round 2)'] || '',
-      }));
+      const transformedData = filteredData.map((row: any, index: number) => {
+        // Normalize Check-in/Check-out values (handle "yes", "Yes", "no", "No")
+        const normalizeYesNo = (value: any): string => {
+          const str = String(value || '').trim().toLowerCase();
+          if (str === 'yes' || str === 'y' || str === '1' || str === 'true') return 'Yes';
+          if (str === 'no' || str === 'n' || str === '0' || str === 'false' || str === '') return 'No';
+          return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase(); // Capitalize first letter
+        };
+        
+        return {
+          name: String(row['Name'] || row['Full Name'] || `Guest ${index + 1}`).trim(),
+          category: String(row['Category'] || '').trim(),
+          phoneNumber: String(row['Mobile No.'] || row['Phone Number'] || row['Phone'] || '').trim(),
+          city: String(row['City'] || '').trim(),
+          arrivalDate: String(row['Date Of Arrival'] || row['Arrival Date'] || '').trim(),
+          modeOfArrival: String(row['Mode of Arrival'] || row['Mode of Arrival'] || '').trim(),
+          trainFlightNumber: String(row['Train/Flight Number'] || row['Train/Flight No.'] || '').trim(),
+          time: String(row['Time'] || '').trim(),
+          hotelName: String(row['Hotel Name'] || row['Hotel'] || '').trim(),
+          roomType: String(row['Room Type'] || row['Room'] || '').trim(),
+          checkIn: normalizeYesNo(row['Check-in'] || row['Check-in']),
+          checkOut: normalizeYesNo(row['Check-out'] || row['Check-out']),
+          attending: normalizeYesNo(row['Attending']),
+          remarks: String(row['Remarks'] || '').trim(),
+          remarksRound2: String(row['Remarks (round 2)'] || row['Remarks (round 2)'] || '').trim(),
+        };
+      });
       
       // Update progress
       setUploadProgress(50);
@@ -257,7 +344,7 @@ Sarah Johnson,+1234567891,sarah@email.com,2024-06-15 16:00,2024-06-17 12:00,Pend
                           <td className="px-2 py-2">
                             <input
                               type="text"
-                              value={row['Full Name'] || ''}
+                              value={String(row['Full Name'] || '')}
                               onChange={(e) => {
                                 const newData = [...data];
                                 newData[index]['Full Name'] = e.target.value;
@@ -270,7 +357,7 @@ Sarah Johnson,+1234567891,sarah@email.com,2024-06-15 16:00,2024-06-17 12:00,Pend
                           <td className="px-2 py-2">
                             <input
                               type="text"
-                              value={row['Phone Number'] || ''}
+                              value={String(row['Phone Number'] || '')}
                               onChange={(e) => {
                                 const newData = [...data];
                                 newData[index]['Phone Number'] = e.target.value;
@@ -283,7 +370,7 @@ Sarah Johnson,+1234567891,sarah@email.com,2024-06-15 16:00,2024-06-17 12:00,Pend
                           <td className="px-2 py-2">
                             <input
                               type="text"
-                              value={row['Email'] || ''}
+                              value={String(row['Email'] || '')}
                               onChange={(e) => {
                                 const newData = [...data];
                                 newData[index]['Email'] = e.target.value;
@@ -296,7 +383,7 @@ Sarah Johnson,+1234567891,sarah@email.com,2024-06-15 16:00,2024-06-17 12:00,Pend
                           <td className="px-2 py-2">
                             <input
                               type="text"
-                              value={row['Arrival Date'] || ''}
+                              value={String(row['Arrival Date'] || '')}
                               onChange={(e) => {
                                 const newData = [...data];
                                 newData[index]['Arrival Date'] = e.target.value;
@@ -309,7 +396,7 @@ Sarah Johnson,+1234567891,sarah@email.com,2024-06-15 16:00,2024-06-17 12:00,Pend
                           <td className="px-2 py-2">
                             <input
                               type="text"
-                              value={row['Departure Date'] || ''}
+                              value={String(row['Departure Date'] || '')}
                               onChange={(e) => {
                                 const newData = [...data];
                                 newData[index]['Departure Date'] = e.target.value;
@@ -321,7 +408,7 @@ Sarah Johnson,+1234567891,sarah@email.com,2024-06-15 16:00,2024-06-17 12:00,Pend
                           {/* Status */}
                           <td className="px-2 py-2">
                             <select
-                              value={row['Status'] || 'Pending'}
+                              value={String(row['Status'] || 'Pending')}
                               onChange={(e) => {
                                 const newData = [...data];
                                 newData[index]['Status'] = e.target.value;
@@ -337,7 +424,7 @@ Sarah Johnson,+1234567891,sarah@email.com,2024-06-15 16:00,2024-06-17 12:00,Pend
                           {/* VIP */}
                           <td className="px-2 py-2">
                             <select
-                              value={row['VIP'] || 'No'}
+                              value={String(row['VIP'] || 'No')}
                               onChange={(e) => {
                                 const newData = [...data];
                                 newData[index]['VIP'] = e.target.value;
@@ -352,7 +439,7 @@ Sarah Johnson,+1234567891,sarah@email.com,2024-06-15 16:00,2024-06-17 12:00,Pend
                           {/* Travel Required */}
                           <td className="px-2 py-2">
                             <select
-                              value={row['Travel Required'] || 'No'}
+                              value={String(row['Travel Required'] || 'No')}
                               onChange={(e) => {
                                 const newData = [...data];
                                 newData[index]['Travel Required'] = e.target.value;
@@ -368,7 +455,7 @@ Sarah Johnson,+1234567891,sarah@email.com,2024-06-15 16:00,2024-06-17 12:00,Pend
                           <td className="px-2 py-2">
                             <input
                               type="text"
-                              value={row['Pickup Type'] || ''}
+                              value={String(row['Pickup Type'] || '')}
                               onChange={(e) => {
                                 const newData = [...data];
                                 newData[index]['Pickup Type'] = e.target.value;
