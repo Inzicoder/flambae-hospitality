@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate, useNavigate, useParams, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from 'react';
 import { AuthForm } from "@/components/AuthForm";
 import { PaymentFlow } from "@/components/PaymentFlow";
@@ -21,6 +21,7 @@ import { TodoPage } from "@/pages/TodoPage";
 import { EventParticipantsPage } from "@/pages/EventParticipantsPage";
 
 import { GalleryPage } from "@/pages/GalleryPage";
+import { DocumentUploadPage } from "@/pages/DocumentUploadPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -369,6 +370,7 @@ const App = () => {
             <Route path="/" element={<LandingPage onGetStarted={handleGetStarted} />} />
             <Route path="/features/guest" element={<GuestFeaturesPage onGetStarted={handleGetStarted} />} />
             <Route path="/features/company" element={<EventCompanyFeaturesPage onGetStarted={handleGetStarted} />} />
+            <Route path="/document-upload/:eventId/:participantId" element={<DocumentUploadPage />} />
             
             {/* Auth Route */}
             <Route path="/auth" element={
