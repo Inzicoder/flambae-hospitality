@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import axios from 'axios';
-import { API_CONFIG, getApiUrl, getAuthHeadersForFormData } from '@/lib/config';
+import { API_CONFIG, getApiUrl, getAuthHeaders, getAuthHeadersForFormData } from '@/lib/config';
 
 interface DocumentUploadProps {
   eventId: string;
@@ -34,10 +34,64 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({
   const [backIdPreview, setBackIdPreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string>('');
+  const [participantName, setParticipantName] = useState<string>('');
+  const [isLoadingParticipant, setIsLoadingParticipant] = useState(true);
   
   const frontIdInputRef = useRef<HTMLInputElement>(null);
   const backIdInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  // Fetch participant details on component mount
+  useEffect(() => {
+    const fetchParticipantDetails = async () => {
+      if (!participantId) return;
+
+      console.log({participantId})
+
+      
+      try {
+        setIsLoadingParticipant(true);
+        const url = getApiUrl(API_CONFIG.ENDPOINTS.PARTICIPANTS.GET_BY_ID(participantId));
+        const response = await axios.get(
+          url,
+          {
+            headers: getAuthHeaders()
+          }
+        );
+
+        console.log('Participant API Response:', response.data);
+        
+        if (response.data && response.data.status === 'success') {
+          const participantData = Array.isArray(response.data.data) 
+            ? response.data.data[0] 
+            : response.data.data;
+          
+          console.log('Participant Data:', participantData);
+          
+          if (participantData && participantData.name) {
+            setParticipantName(participantData.name);
+          }
+        }
+      } catch (err: any) {
+        console.error('Error fetching participant details:', err);
+
+        
+        // Log detailed error information
+        if (err.response) {
+          console.error('Response status:', err.response.status);
+          console.error('Response data:', err.response.data);
+          console.error('Response headers:', err.response.headers);
+        }
+        
+        // Don't set error state or show toast - just log it
+        // The user can still upload documents even if name fetch fails
+      } finally {
+        setIsLoadingParticipant(false);
+      }
+    };
+
+    fetchParticipantDetails();
+  }, [participantId]);
 
   const handleFrontIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -141,8 +195,8 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({
 
     try {
       const formData = new FormData();
-      formData.append('frontId', frontIdFile);
-      formData.append('backId', backIdFile);
+      formData.append('front', frontIdFile);
+      formData.append('back', backIdFile);
 
       const response = await axios.post(
         getApiUrl(API_CONFIG.ENDPOINTS.PARTICIPANTS.UPLOAD_DOCUMENT(eventId, participantId)),
@@ -203,6 +257,22 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
+
+          {/* Participant Name - Autofilled */}
+          <div className="space-y-2">
+            <Label htmlFor="participantName" className="text-base font-semibold">
+              Participant Name
+            </Label>
+            <Input
+              id="participantName"
+              type="text"
+              value={isLoadingParticipant ? 'Loading...' : participantName}
+              readOnly
+              disabled={isLoadingParticipant}
+              className="bg-gray-50 cursor-not-allowed"
+              placeholder="Participant name will appear here"
+            />
+          </div>
 
           {/* Front ID Upload */}
           <div className="space-y-4">

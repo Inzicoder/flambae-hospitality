@@ -1,9 +1,13 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { DocumentUpload } from '@/components/DocumentUpload';
+import { useToast } from '@/hooks/use-toast';
 
 export const DocumentUploadPage = () => {
-  const { eventId, participantId } = useParams<{ eventId: string; participantId: string }>();
+  const params = useParams<{ eventId: string; participantId: string }>();
+  const { eventId, participantId } = params;
+
+  const { toast } = useToast();
 
   if (!eventId || !participantId) {
     return (
@@ -23,6 +27,10 @@ export const DocumentUploadPage = () => {
         participantId={participantId}
         onUploadSuccess={() => {
           console.log('Documents uploaded successfully');
+          toast({
+            title: "Success",
+            description: `Documents uploaded successfully`,
+          });
         }}
       />
     </div>
