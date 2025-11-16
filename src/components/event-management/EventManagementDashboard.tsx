@@ -1268,13 +1268,13 @@ export const EventManagementDashboard = () => {
             <div className="space-y-3">
               <Button className="w-full">Send Final Reminders</Button>
               <Button variant="outline">Bulk Message Pending Guests</Button>
-              <div className="p-3 border rounded-lg bg-green-50">
+              {/* <div className="p-3 border rounded-lg bg-green-50">
                 <div className="text-sm text-green-700">
                   ✓ Reminders sent to 45 guests<br/>
                   ✓ 38 confirmations received<br/>
                   ⏳ 7 pending responses
                 </div>
-              </div>
+              </div> */}
             </div>
           </CardContent>
         </Card>
@@ -1291,13 +1291,13 @@ export const EventManagementDashboard = () => {
             <div className="space-y-3">
               <Button className="w-full">Update Gift Status</Button>
               <Button variant="outline">VIP Room Preferences</Button>
-              <div className="p-3 border rounded-lg bg-purple-50">
+              {/* <div className="p-3 border rounded-lg bg-purple-50">
                 <div className="text-sm text-purple-700">
                   ✓ 25 gifts delivered to rooms<br/>
                   ✓ 12 VIP preferences set<br/>
                   ⏳ 10 gifts remaining
                 </div>
-              </div>
+              </div> */}
             </div>
           </CardContent>
         </Card>
