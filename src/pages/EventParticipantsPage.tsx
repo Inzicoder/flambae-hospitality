@@ -20,7 +20,8 @@ import {
   AlertCircle,
   Loader2,
   Filter,
-  Download
+  Download,
+  Upload
 } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -524,9 +525,9 @@ export const EventParticipantsPage = () => {
 
                   {/* Actions */}
                   <div className="flex flex-col gap-2">
-                    <Button variant="outline" size="sm">
+                    {/* <Button variant="outline" size="sm">
                       Edit Details
-                    </Button>
+                    </Button> */}
                     <Button 
                       variant="outline" 
                       size="sm"

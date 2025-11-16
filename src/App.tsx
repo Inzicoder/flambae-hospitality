@@ -179,87 +179,55 @@ const App = () => {
 
   // Sample data for demonstration
   const [weddingData, setWeddingData] = useState({
-    coupleNames: "Sarah & Michael",
-    weddingDate: "June 15, 2024",
-    guestStats: {
-      totalInvited: 150,
-      confirmed: 89,
-      pending: 45,
-      declined: 16
-    },
-    budget: {
-      total: 50000,
-      spent: 32000,
-      categories: [
-        { id: 1, name: "Venue", estimated: 15000, actual: 15000, status: "paid" },
-        { id: 2, name: "Catering", estimated: 12000, actual: 11500, status: "paid" },
-        { id: 3, name: "Photography", estimated: 8000, actual: 8500, status: "partial" },
-        { id: 4, name: "Decor", estimated: 6000, actual: 4000, status: "pending" },
-        { id: 5, name: "Outfits", estimated: 4000, actual: 3000, status: "paid" },
-        { id: 6, name: "Music", estimated: 3000, actual: 0, status: "pending" },
-        { id: 7, name: "Flowers", estimated: 2000, actual: 2500, status: "paid" }
-      ]
-    },
-    todos: [
-      { id: 1, task: "Send save the dates", completed: true, urgent: false, dueDate: "2024-01-15" },
-      { id: 2, task: "Book wedding photographer", completed: true, urgent: false, dueDate: "2024-02-01" },
-      { id: 3, task: "Order wedding cake", completed: false, urgent: true, dueDate: "2024-05-01" },
-      { id: 4, task: "Finalize menu with caterer", completed: false, urgent: true, dueDate: "2024-04-15" },
-      { id: 5, task: "Buy wedding rings", completed: false, urgent: false, dueDate: "2024-05-15" },
-      { id: 6, task: "Plan honeymoon", completed: false, urgent: false, dueDate: "2024-06-01" }
-    ],
-    gallery: {
-      categories: ["Pre-wedding", "Haldi", "Mehendi", "Wedding", "Reception"],
-      photos: []
-    }
+
   });
 
-  const toggleTodo = (id: number) => {
-    setWeddingData(prev => ({
-      ...prev,
-      todos: prev.todos.map(todo => 
-        todo.id === id ? { ...todo, completed: !todo.completed } : todo
-      )
-    }));
-  };
+  // const toggleTodo = (id: number) => {
+  //   setWeddingData(prev => ({
+  //     ...prev,
+  //     todos: prev.todos.map(todo => 
+  //       todo.id === id ? { ...todo, completed: !todo.completed } : todo
+  //     )
+  //   }));
+  // };
 
-  const addTodo = (task: string) => {
-    const newTask = {
-      id: Date.now(),
-      task,
-      completed: false,
-      urgent: false,
-      dueDate: new Date().toISOString().split('T')[0]
-    };
-    setWeddingData(prev => ({
-      ...prev,
-      todos: [...prev.todos, newTask]
-    }));
-  };
+  // const addTodo = (task: string) => {
+  //   const newTask = {
+  //     id: Date.now(),
+  //     task,
+  //     completed: false,
+  //     urgent: false,
+  //     dueDate: new Date().toISOString().split('T')[0]
+  //   };
+  //   setWeddingData(prev => ({
+  //     ...prev,
+  //     todos: [...prev.todos, newTask]
+  //   }));
+  // };
 
-  const deleteTodo = (id: number) => {
-    setWeddingData(prev => ({
-      ...prev,
-      todos: prev.todos.filter(todo => todo.id !== id)
-    }));
-  };
+  // const deleteTodo = (id: number) => {
+  //   setWeddingData(prev => ({
+  //     ...prev,
+  //     todos: prev.todos.filter(todo => todo.id !== id)
+  //   }));
+  // };
 
-  const addBudgetCategory = (category: { name: string; estimated: number }) => {
-    const newCategory = {
-      id: Date.now(),
-      name: category.name,
-      estimated: category.estimated,
-      actual: 0,
-      status: "pending"
-    };
-    setWeddingData(prev => ({
-      ...prev,
-      budget: {
-        ...prev.budget,
-        categories: [...prev.budget.categories, newCategory]
-      }
-    }));
-  };
+  // const addBudgetCategory = (category: { name: string; estimated: number }) => {
+  //   const newCategory = {
+  //     id: Date.now(),
+  //     name: category.name,
+  //     estimated: category.estimated,
+  //     actual: 0,
+  //     status: "pending"
+  //   };
+  //   setWeddingData(prev => ({
+  //     ...prev,
+  //     budget: {
+  //       ...prev.budget,
+  //       categories: [...prev.budget.categories, newCategory]
+  //     }
+  //   }));
+  // };
 
   const handleGetStarted = () => {
     console.log('Get started clicked - navigating to auth');
@@ -329,7 +297,7 @@ const App = () => {
       
       <DashboardHeader onLogout={handleLogout} userType={userType} />
       <Navigation 
-        coupleNames={weddingData.coupleNames}
+        coupleNames={''}
         onLogout={handleLogout}
         userType={userType}
       />
@@ -433,7 +401,7 @@ const App = () => {
             } />
             
             {/* Simplified guest-only routes for personal planning */}
-            <Route path="/budget" element={
+            {/* <Route path="/budget" element={
               isLoggedIn && userType === 'guest' ? (
                 <DashboardLayout>
                   <BudgetPage budget={weddingData.budget} onAddCategory={addBudgetCategory} />
@@ -442,8 +410,8 @@ const App = () => {
                 <Navigate to="/auth" replace />
               )
             } />
-            
-            <Route path="/todos" element={
+{/*              */}
+            {/* <Route path="/todos" element={
               isLoggedIn && userType === 'guest' ? (
                 <DashboardLayout>
                   <TodoPage todos={weddingData.todos} onToggleTodo={toggleTodo} onAddTodo={addTodo} onDeleteTodo={deleteTodo} />
@@ -451,9 +419,9 @@ const App = () => {
               ) : (
                 <Navigate to="/auth" replace />
               )
-            } />
+            } /> */} 
             
-            <Route path="/gallery" element={
+            {/* <Route path="/gallery" element={
               isLoggedIn && userType === 'guest' ? (
                 <DashboardLayout>
                   <GalleryPage gallery={weddingData.gallery} />
@@ -461,7 +429,7 @@ const App = () => {
               ) : (
                 <Navigate to="/auth" replace />
               )
-            } />
+            } /> */}
             
             {/* 404 Route */}
             <Route path="*" element={<NotFound />} />

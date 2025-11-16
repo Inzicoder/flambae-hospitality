@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useLayoutEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +8,7 @@ import {
   Hotel, Car, Gift, Calendar, MessageCircle, HelpCircle,
   CheckCircle, Clock, AlertCircle, Star, Truck, 
   Settings, Download, Eye, Edit, Plus, Phone,
-  Loader2
+  Loader2, FileText, Save
 } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
@@ -17,6 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { FileUploadButton } from './FileUploadButton';
 import { HelpDeskTab } from './HelpDeskTab';
 import { API_CONFIG, getApiUrl, getAuthHeaders } from '@/lib/config';
+import * as XLSX from 'xlsx';
 
 // Event interface for type safety
 interface EventDetails {
@@ -48,6 +49,15 @@ export const EventManagementDashboard = () => {
   const [error, setError] = useState<string | null>(null);
   const [uploadedData, setUploadedData] = useState<any[]>([]);
   const [apiSuccess, setApiSuccess] = useState(false);
+  const scrollRestoreRef = useRef<{
+    scrollTop: number;
+    scrollLeft: number;
+    element: HTMLElement | null;
+    activeElement: HTMLElement | null;
+    selectionStart: number | null;
+    selectionEnd: number | null;
+  } | null>(null);
+  const tableScrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   // Fetch event details from API
   const fetchEventDetails = async () => {
@@ -65,7 +75,6 @@ export const EventManagementDashboard = () => {
         headers: getAuthHeaders()
       });
 
-      console.log(response.data,'response.data')
 
       if (response.data && response.data.status === 'success') {
         // API returns an array of events, get the first one
@@ -87,10 +96,440 @@ export const EventManagementDashboard = () => {
     }
   };
 
-  // Fetch event details on component mount
+  // Fetch participants from API
+  const fetchParticipants = async (): Promise<any[] | null> => {
+    if (!eventId) return null;
+
+    try {
+      const url = getApiUrl(API_CONFIG.ENDPOINTS.PARTICIPANTS.LIST(eventId));
+      console.log('Fetching participants from:', url);
+      
+      const response = await axios.get(
+        url,
+        {
+          headers: getAuthHeaders()
+        }
+      );
+
+      console.log('Participants API response:', response.data);
+
+      if (response.data && response.data.status === 'success') {
+        const participants = response.data.data || [];
+        
+        if (participants.length === 0) {
+          console.log('No participants found for this event');
+          return null;
+        }
+        
+        // Transform API response to match the uploadedData format
+        const transformedData = participants.map((participant: any) => ({
+          id: participant.id,
+          name: participant.name || '',
+          category: participant.category || '',
+          phoneNumber: participant.phoneNumber || '',
+          city: participant.city || '',
+          // Convert UTC date from API to local date string for display
+          arrivalDate: participant.dateOfArrival ? formatDateForInput(participant.dateOfArrival) : '',
+          modeOfArrival: participant.modeOfArrival || '',
+          trainFlightNumber: participant.trainFlightNumber || '',
+          time: participant.time || '',
+          hotelName: participant.hotelName || '',
+          roomType: participant.roomType || '',
+          checkIn: participant.checkIn ? (participant.checkIn === 'Yes' || participant.checkIn === 'yes' ? 'Yes' : 'No') : 'No',
+          checkOut: participant.checkOut ? (participant.checkOut === 'Yes' || participant.checkOut === 'yes' ? 'Yes' : 'No') : 'No',
+          attending: participant.attending ? (participant.attending === 'Yes' || participant.attending === 'yes' ? 'Yes' : 'No') : 'No',
+          remarks: participant.remarks || '',
+          remarksRound2: participant.remarksRound2 || '',
+        }));
+
+        if (transformedData.length > 0) {
+          setUploadedData(transformedData);
+          setApiSuccess(true);
+          console.log('Successfully loaded', transformedData.length, 'participants');
+          return transformedData;
+        }
+      } else {
+        console.warn('Unexpected API response format:', response.data);
+      }
+    } catch (error: any) {
+      console.error('Error fetching participants:', error);
+
+      // Only show error if it's not a 404 (participants might not exist yet)
+      if (error.response?.status !== 404) {
+        console.warn('Failed to fetch participants. This is normal if no participants have been uploaded yet.');
+      }
+    }
+    return null;
+  };
+
+  // Helper function to restore scroll position and focus
+  const restoreScrollAndFocus = useCallback(() => {
+    if (!scrollRestoreRef.current) return;
+
+    const { scrollTop, scrollLeft, element, activeElement, selectionStart, selectionEnd } = scrollRestoreRef.current;
+
+    // Restore scroll position
+    if (element) {
+      element.scrollTop = scrollTop;
+      element.scrollLeft = scrollLeft;
+    } else {
+      window.scrollTo(scrollLeft, scrollTop);
+    }
+
+    // Restore focus and cursor position
+    if (activeElement) {
+      activeElement.focus();
+      if (activeElement.tagName === 'INPUT' && selectionStart !== null && selectionEnd !== null) {
+        (activeElement as HTMLInputElement).setSelectionRange(selectionStart, selectionEnd);
+      }
+    }
+
+    // Clear the ref after restoring
+    scrollRestoreRef.current = null;
+  }, []);
+
+  // Helper function to convert UTC date string to local date for input (YYYY-MM-DD)
+  const formatDateForInput = (dateString: string | undefined): string => {
+    if (!dateString) return '';
+    try {
+      // If it's already in YYYY-MM-DD format, return as is (date input expects local date)
+      if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+        return dateString;
+      }
+      // Parse UTC date and convert to local date for display
+      const date = new Date(dateString);
+      if (!isNaN(date.getTime())) {
+        // Get local date components (not UTC)
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      }
+    } catch (e) {
+      // If parsing fails, try to extract date parts from common formats
+      const parts = dateString.split(/[-\/]/);
+      if (parts.length === 3) {
+        // Try DD-MM-YYYY or MM-DD-YYYY
+        if (parts[2].length === 4) {
+          return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+        }
+      }
+    }
+    return dateString;
+  };
+
+  // Helper function to convert local date + time to UTC ISO string
+  const convertToUTC = (dateString: string, timeString?: string): string | null => {
+    if (!dateString) return null;
+    
+    try {
+      let date: Date;
+      
+      // If date is in YYYY-MM-DD format (from date input)
+      if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+        // Parse as local date
+        const [year, month, day] = dateString.split('-').map(Number);
+        date = new Date(year, month - 1, day);
+        
+        // If time is provided, add it
+        if (timeString) {
+          const timeMatch = timeString.match(/(\d{1,2}):?(\d{2})/);
+          if (timeMatch) {
+            const hours = parseInt(timeMatch[1]);
+            const minutes = parseInt(timeMatch[2]);
+            date.setHours(hours, minutes, 0, 0);
+          }
+        } else {
+          // Default to midnight if no time provided
+          date.setHours(0, 0, 0, 0);
+        }
+      } else {
+        // Try to parse as existing date string
+        date = new Date(dateString);
+        if (isNaN(date.getTime())) {
+          return null;
+        }
+        
+        // If time is provided separately, update it
+        if (timeString) {
+          const timeMatch = timeString.match(/(\d{1,2}):?(\d{2})/);
+          if (timeMatch) {
+            const hours = parseInt(timeMatch[1]);
+            const minutes = parseInt(timeMatch[2]);
+            date.setHours(hours, minutes, 0, 0);
+          }
+        }
+      }
+      
+      // Convert to UTC ISO string
+      return date.toISOString();
+    } catch (e) {
+      console.warn('Could not convert date to UTC:', dateString, e);
+      return null;
+    }
+  };
+
+  // Helper function to format time for time input (HH:MM)
+  const formatTimeForInput = (timeString: string | undefined): string => {
+    if (!timeString) return '';
+    // If already in HH:MM format, return as is
+    if (/^\d{2}:\d{2}$/.test(timeString)) {
+      return timeString;
+    }
+    // Try to extract time from various formats
+    const timeMatch = timeString.match(/(\d{1,2}):?(\d{2})/);
+    if (timeMatch) {
+      const hours = String(parseInt(timeMatch[1])).padStart(2, '0');
+      const minutes = String(parseInt(timeMatch[2])).padStart(2, '0');
+      return `${hours}:${minutes}`;
+    }
+    return timeString;
+  };
+
+  // Helper function to update field value while preserving scroll position and focus
+  const updateField = useCallback((index: number, field: string, value: string) => {
+    // Save current scroll position and active element BEFORE state update
+    const activeElement = document.activeElement as HTMLInputElement | HTMLSelectElement | null;
+    
+    // Use the ref to the scroll container if available, otherwise try to find it
+    let scrollContainer: HTMLElement | null = tableScrollContainerRef.current;
+    
+    if (!scrollContainer && activeElement) {
+      // Fallback: try to find scroll container
+      scrollContainer = activeElement.closest('.overflow-x-auto') as HTMLElement | null;
+      if (!scrollContainer) {
+        scrollContainer = activeElement.closest('.overflow-y-auto') as HTMLElement | null;
+      }
+      if (!scrollContainer) {
+        scrollContainer = activeElement.closest('.max-h-96') as HTMLElement | null;
+      }
+    }
+
+    const scrollTop = scrollContainer?.scrollTop ?? window.scrollY;
+    const scrollLeft = scrollContainer?.scrollLeft ?? window.scrollX;
+    
+    // Only get selection for input elements (not select)
+    let selectionStart: number | null = null;
+    let selectionEnd: number | null = null;
+    if (activeElement && activeElement.tagName === 'INPUT') {
+      const inputElement = activeElement as HTMLInputElement;
+      selectionStart = inputElement.selectionStart;
+      selectionEnd = inputElement.selectionEnd;
+    }
+
+    // Store scroll info in ref
+    scrollRestoreRef.current = {
+      scrollTop,
+      scrollLeft,
+      element: scrollContainer,
+      activeElement: activeElement as HTMLElement | null,
+      selectionStart,
+      selectionEnd
+    };
+
+    // Update state
+    setUploadedData((prevData) => {
+      const newData = [...prevData];
+      if (newData[index]) {
+        (newData[index] as any)[field] = value;
+      }
+      return newData;
+    });
+
+    // Restore scroll position and focus using multiple strategies
+    // Use setTimeout to ensure it happens after React's render cycle
+    setTimeout(() => {
+      restoreScrollAndFocus();
+    }, 0);
+    
+    // Also use requestAnimationFrame as backup
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        restoreScrollAndFocus();
+      });
+    });
+  }, [restoreScrollAndFocus]);
+
+  // Save participant function
+  const saveParticipant = async (guest: any, index: number) => {
+    try {
+      // Convert date and time to UTC ISO format
+      // The date input provides YYYY-MM-DD in local time, we need to convert to UTC
+      const dateOfArrival = convertToUTC(guest.arrivalDate, guest.time);
+
+      // Prepare the data for API update - match API expected format
+      // All dates should be in UTC ISO format
+      const participantData: any = {
+        name: guest.name || '',
+        category: guest.category || '',
+        phoneNumber: guest.phoneNumber || '',
+        city: guest.city || '',
+        dateOfArrival: dateOfArrival, // Already in UTC ISO format
+        modeOfArrival: guest.modeOfArrival || '',
+        trainFlightNumber: guest.trainFlightNumber || '',
+        time: guest.time || '', // Keep time as separate field if API expects it
+        hotelName: guest.hotelName || '',
+        roomType: guest.roomType || '',
+        checkIn: guest.checkIn === 'Yes' || guest.checkIn === 'yes' ? 'Yes' : 'No',
+        checkOut: guest.checkOut === 'Yes' || guest.checkOut === 'yes' ? 'Yes' : 'No',
+        attending: guest.attending === 'Yes' || guest.attending === 'yes' ? 'Yes' : 'No',
+      };
+
+      // Only include remarks if they exist
+      if (guest.remarks) {
+        participantData.remarks = guest.remarks;
+      }
+      if (guest.remarksRound2) {
+        participantData.remarksRound2 = guest.remarksRound2;
+      }
+
+      console.log('Saving participant data:', participantData);
+      console.log('Participant ID:', guest.id);
+
+      if (guest.id) {
+        // Update existing participant
+        const url = getApiUrl(API_CONFIG.ENDPOINTS.PARTICIPANTS.UPDATE(guest.id));
+        console.log('Updating participant at:', url);
+        
+        const response = await axios.patch(
+          url,
+          participantData,
+          {
+            headers: getAuthHeaders()
+          }
+        );
+        
+        console.log('Update response:', response.data);
+        
+        // Refetch to get updated data
+        await fetchParticipants();
+        
+        toast({
+          title: "Success",
+          description: `${guest.name}'s information has been saved successfully.`,
+        });
+      } else {
+        // If no ID, create new participant (if eventId is available)
+        if (eventId) {
+          const url = getApiUrl(API_CONFIG.ENDPOINTS.PARTICIPANTS.CREATE(eventId));
+          console.log('Creating participant at:', url);
+          
+          const response = await axios.post(
+            url,
+            participantData,
+            {
+              headers: getAuthHeaders()
+            }
+          );
+          
+          console.log('Create response:', response.data);
+          
+          // Refetch to get the ID
+          await fetchParticipants();
+          
+          toast({
+            title: "Success",
+            description: `${guest.name}'s information has been saved successfully.`,
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: "Event ID is missing. Cannot save participant.",
+            variant: "destructive"
+          });
+        }
+      }
+    } catch (error: any) {
+      console.error('Error saving participant:', error);
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
+      console.error('Request data:', error.config?.data);
+      
+      toast({
+        title: "Error",
+        description: error.response?.data?.message || error.message || "Failed to save participant information.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Function to download uploaded data as Excel file
+  const downloadAsExcel = useCallback(() => {
+    if (!uploadedData || uploadedData.length === 0) {
+      toast({
+        title: "No Data",
+        description: "No data available to download.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      // Prepare data for Excel export - match the table structure
+      const excelData = uploadedData.map((guest, index) => ({
+        'S.No': index + 1,
+        'Name': guest.name || '',
+        'Category': guest.category || '',
+        'Mobile No.': guest.phoneNumber || '',
+        'City': guest.city || '',
+        'Date Of Arrival': guest.arrivalDate || '',
+        'Mode of Arrival': guest.modeOfArrival || '',
+        'Train/Flight Number': guest.trainFlightNumber || '',
+        'Time': guest.time || '',
+        'Hotel Name': guest.hotelName || '',
+        'Room Type': guest.roomType || '',
+        'Check-in': guest.checkIn || 'No',
+        'Check-out': guest.checkOut || 'No',
+        'Attending': guest.attending || 'No',
+        'Remarks': guest.remarks || '',
+        'Remarks (round 2)': guest.remarksRound2 || '',
+      }));
+
+      // Create workbook and worksheet
+      const worksheet = XLSX.utils.json_to_sheet(excelData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Guest Data');
+
+      // Generate filename with event name and current date
+      const eventName = eventDetails?.eventName || 'Event';
+      const sanitizedEventName = eventName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+      const currentDate = new Date().toISOString().split('T')[0];
+      const filename = `${sanitizedEventName}_guest_data_${currentDate}.xlsx`;
+
+      // Download the file
+      XLSX.writeFile(workbook, filename);
+
+      toast({
+        title: "Download Successful",
+        description: `Excel file "${filename}" has been downloaded.`,
+      });
+    } catch (error) {
+      console.error('Error downloading Excel file:', error);
+      toast({
+        title: "Download Failed",
+        description: "Failed to generate Excel file. Please try again.",
+        variant: "destructive"
+      });
+    }
+  }, [uploadedData, eventDetails, toast]);
+
+  // Restore scroll position after render (only when ref has data)
+  useLayoutEffect(() => {
+    if (scrollRestoreRef.current) {
+      // Use a small delay to ensure DOM is ready
+      const timeoutId = setTimeout(() => {
+        restoreScrollAndFocus();
+      }, 0);
+      return () => clearTimeout(timeoutId);
+    }
+  });
+
+  // Fetch event details and participants on component mount
   useEffect(() => {
     fetchEventDetails();
+    fetchParticipants();
   }, [eventId]);
+
 
   // Before Event Phase Components
   const DataCollectionTab = () => (
@@ -198,10 +637,26 @@ export const EventManagementDashboard = () => {
             <div className="space-y-4">
               <FileUploadButton 
                 eventId={eventId}
-                onDataProcessed={(data) => {
+                onDataProcessed={async (data) => {
                   console.log('Guest data processed:', data);
-                  setUploadedData(data.guests || []);
-                  setApiSuccess(true); // API call was successful
+                  // Set the uploaded data immediately so the table shows up
+                  if (data.guests && data.guests.length > 0) {
+                    setUploadedData(data.guests);
+                    setApiSuccess(true);
+                  }
+                  
+                  // Then refetch participants to get IDs from the API
+                  try {
+                    const participants = await fetchParticipants();
+                    if (participants && participants.length > 0) {
+                      // Update with data that has IDs
+                      setUploadedData(participants);
+                    }
+                  } catch (error) {
+                    console.error('Error refetching participants:', error);
+                    // Keep the uploaded data even if refetch fails
+                  }
+                  
                   toast({
                     title: "Success",
                     description: `Successfully uploaded ${data.totalProcessed} guest records to the server`,
@@ -209,6 +664,7 @@ export const EventManagementDashboard = () => {
                 }}
                 onError={(error) => {
                   setApiSuccess(false); // Reset API success state on error
+                  setUploadedData([]); // Clear uploaded data on error
                   console.error('Upload error:', error);
                 }}
               />
@@ -238,7 +694,7 @@ export const EventManagementDashboard = () => {
           {/* Uploaded Data Table - Show when data is uploaded */}
           {uploadedData && uploadedData.length > 0 && (
             <div className="mt-6 space-y-4">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">Uploaded Guest Data</h3>
                   <p className="text-sm text-gray-600 mt-1">Review and edit guest information</p>
@@ -249,13 +705,21 @@ export const EventManagementDashboard = () => {
                     </div>
                   )}
                 </div>
-                <div className="text-sm text-gray-500">
-                  {uploadedData.length} records loaded
+                <div className="flex items-center gap-3">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={downloadAsExcel}
+                    className="flex items-center gap-2 bg-green-50 hover:bg-green-100 border-green-200 text-green-700"
+                  >
+                    <Download className="h-4 w-4" />
+                    Download Excel
+                  </Button>
                 </div>
               </div>
               
               <div className="border rounded-lg overflow-hidden">
-                <div className="max-h-96 overflow-x-auto overflow-y-auto">
+                <div ref={tableScrollContainerRef} className="max-h-96 overflow-x-auto overflow-y-auto">
                   <div className="min-w-full inline-block">
                     <table className="w-full text-sm">
                     <thead className="bg-gray-50 sticky top-0">
@@ -274,7 +738,7 @@ export const EventManagementDashboard = () => {
                         <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Check-in</th>
                         <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Check-out</th>
                         <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Attending</th>
-                        <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Actions</th>
+                        <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs min-w-[120px]">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
@@ -288,11 +752,7 @@ export const EventManagementDashboard = () => {
                             <input
                               type="text"
                               value={guest.name || ''}
-                              onChange={(e) => {
-                                const newData = [...uploadedData];
-                                newData[index].name = e.target.value;
-                                setUploadedData(newData);
-                              }}
+                              onChange={(e) => updateField(index, 'name', e.target.value)}
                               className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
                             />
                           </td>
@@ -302,11 +762,7 @@ export const EventManagementDashboard = () => {
                             <input
                               type="text"
                               value={guest.category || ''}
-                              onChange={(e) => {
-                                const newData = [...uploadedData];
-                                newData[index].category = e.target.value;
-                                setUploadedData(newData);
-                              }}
+                              onChange={(e) => updateField(index, 'category', e.target.value)}
                               className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
                             />
                           </td>
@@ -316,11 +772,7 @@ export const EventManagementDashboard = () => {
                             <input
                               type="text"
                               value={guest.phoneNumber || ''}
-                              onChange={(e) => {
-                                const newData = [...uploadedData];
-                                newData[index].phoneNumber = e.target.value;
-                                setUploadedData(newData);
-                              }}
+                              onChange={(e) => updateField(index, 'phoneNumber', e.target.value)}
                               className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs min-w-[100px]"
                               placeholder="10-digit number"
                             />
@@ -331,27 +783,22 @@ export const EventManagementDashboard = () => {
                             <input
                               type="text"
                               value={guest.city || ''}
-                              onChange={(e) => {
-                                const newData = [...uploadedData];
-                                newData[index].city = e.target.value;
-                                setUploadedData(newData);
-                              }}
+                              onChange={(e) => updateField(index, 'city', e.target.value)}
                               className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
                             />
                           </td>
                           
                           {/* Date of Arrival */}
                           <td className="px-2 py-2">
-                            <input
-                              type="text"
-                              value={guest.arrivalDate || ''}
-                              onChange={(e) => {
-                                const newData = [...uploadedData];
-                                newData[index].arrivalDate = e.target.value;
-                                setUploadedData(newData);
-                              }}
-                              className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
-                            />
+                            <div className="flex items-center gap-1">
+                              <Calendar className="h-3 w-3 text-gray-400 flex-shrink-0" />
+                              <input
+                                type="date"
+                                value={formatDateForInput(guest.arrivalDate)}
+                                onChange={(e) => updateField(index, 'arrivalDate', e.target.value)}
+                                className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
+                              />
+                            </div>
                           </td>
                           
                           {/* Mode of Arrival */}
@@ -359,11 +806,7 @@ export const EventManagementDashboard = () => {
                             <input
                               type="text"
                               value={guest.modeOfArrival || ''}
-                              onChange={(e) => {
-                                const newData = [...uploadedData];
-                                newData[index].modeOfArrival = e.target.value;
-                                setUploadedData(newData);
-                              }}
+                              onChange={(e) => updateField(index, 'modeOfArrival', e.target.value)}
                               className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
                             />
                           </td>
@@ -373,11 +816,7 @@ export const EventManagementDashboard = () => {
                             <input
                               type="text"
                               value={guest.trainFlightNumber || ''}
-                              onChange={(e) => {
-                                const newData = [...uploadedData];
-                                newData[index].trainFlightNumber = e.target.value;
-                                setUploadedData(newData);
-                              }}
+                              onChange={(e) => updateField(index, 'trainFlightNumber', e.target.value)}
                               className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
                             />
                           </td>
@@ -387,11 +826,7 @@ export const EventManagementDashboard = () => {
                             <input
                               type="text"
                               value={guest.time || ''}
-                              onChange={(e) => {
-                                const newData = [...uploadedData];
-                                newData[index].time = e.target.value;
-                                setUploadedData(newData);
-                              }}
+                              onChange={(e) => updateField(index, 'time', e.target.value)}
                               className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
                             />
                           </td>
@@ -401,11 +836,7 @@ export const EventManagementDashboard = () => {
                             <input
                               type="text"
                               value={guest.hotelName || ''}
-                              onChange={(e) => {
-                                const newData = [...uploadedData];
-                                newData[index].hotelName = e.target.value;
-                                setUploadedData(newData);
-                              }}
+                              onChange={(e) => updateField(index, 'hotelName', e.target.value)}
                               className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
                             />
                           </td>
@@ -415,11 +846,7 @@ export const EventManagementDashboard = () => {
                             <input
                               type="text"
                               value={guest.roomType || ''}
-                              onChange={(e) => {
-                                const newData = [...uploadedData];
-                                newData[index].roomType = e.target.value;
-                                setUploadedData(newData);
-                              }}
+                              onChange={(e) => updateField(index, 'roomType', e.target.value)}
                               className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
                             />
                           </td>
@@ -428,11 +855,7 @@ export const EventManagementDashboard = () => {
                           <td className="px-2 py-2">
                             <select
                               value={guest.checkIn || 'No'}
-                              onChange={(e) => {
-                                const newData = [...uploadedData];
-                                newData[index].checkIn = e.target.value;
-                                setUploadedData(newData);
-                              }}
+                              onChange={(e) => updateField(index, 'checkIn', e.target.value)}
                               className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
                             >
                               <option value="No">No</option>
@@ -444,11 +867,7 @@ export const EventManagementDashboard = () => {
                           <td className="px-2 py-2">
                             <select
                               value={guest.checkOut || 'No'}
-                              onChange={(e) => {
-                                const newData = [...uploadedData];
-                                newData[index].checkOut = e.target.value;
-                                setUploadedData(newData);
-                              }}
+                              onChange={(e) => updateField(index, 'checkOut', e.target.value)}
                               className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
                             >
                               <option value="No">No</option>
@@ -460,11 +879,7 @@ export const EventManagementDashboard = () => {
                           <td className="px-2 py-2">
                             <select
                               value={guest.attending || 'No'}
-                              onChange={(e) => {
-                                const newData = [...uploadedData];
-                                newData[index].attending = e.target.value;
-                                setUploadedData(newData);
-                              }}
+                              onChange={(e) => updateField(index, 'attending', e.target.value)}
                               className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
                             >
                               <option value="No">No</option>
@@ -473,8 +888,8 @@ export const EventManagementDashboard = () => {
                           </td>
                           
                           {/* Actions */}
-                          <td className="px-2 py-2">
-                            <div className="flex gap-1">
+                          <td className="px-2 py-2 min-w-[120px]">
+                            <div className="flex gap-1 flex-wrap">
                               <Button
                                 size="sm"
                                 variant="outline"
@@ -495,14 +910,82 @@ export const EventManagementDashboard = () => {
                               <Button
                                 size="sm"
                                 variant="outline"
+                                onClick={async () => {
+                                  if (!eventId) {
+                                    toast({
+                                      title: "Error",
+                                      description: "Event ID is missing.",
+                                      variant: "destructive"
+                                    });
+                                    return;
+                                  }
+
+                                  // If guest has ID, navigate directly
+                                  if (guest.id) {
+                                    navigate(`/document-upload/${eventId}/${guest.id}`);
+                                    return;
+                                  }
+
+                                  // If ID is missing, try to refetch participants to get the ID
+                                  try {
+                                    toast({
+                                      title: "Loading...",
+                                      description: "Fetching participant information...",
+                                    });
+                                    
+                                    const participants = await fetchParticipants();
+                                    
+                                    if (participants && participants.length > 0) {
+                                      // Find the participant by matching name and phone number
+                                      const updatedGuest = participants.find((g: any) => 
+                                        g.name === guest.name && 
+                                        g.phoneNumber === guest.phoneNumber &&
+                                        g.id
+                                      );
+
+                                      console.log({updatedGuest})
+                                      
+                                      if (updatedGuest && updatedGuest.id) {
+                                        navigate(`/document-upload/${eventId}/${updatedGuest.id}`);
+                                      } else {
+                                        toast({
+                                          title: "Cannot Upload Documents",
+                                          description: "Participant ID not found. Please refresh the page and try again.",
+                                          variant: "destructive"
+                                        });
+                                      }
+                                    } else {
+                                      toast({
+                                        title: "Cannot Upload Documents",
+                                        description: "Participant not found. Please refresh the page and try again.",
+                                        variant: "destructive"
+                                      });
+                                    }
+                                  } catch (error) {
+                                    toast({
+                                      title: "Error",
+                                      description: "Failed to fetch participant information. Please refresh the page.",
+                                      variant: "destructive"
+                                    });
+                                  }
+                                }}
+                                className="bg-purple-50 hover:bg-purple-100 border-purple-200 text-purple-700 flex items-center justify-center"
+                                title="Upload ID Documents"
+                                disabled={!eventId}
+                              >
+                                <FileText className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
                                 onClick={() => {
-                                  const newData = uploadedData.filter((_, i) => i !== index);
-                                  setUploadedData(newData);
+                                  // Edit button - just visual indicator, fields are already editable
                                   toast({
-                                    title: "Guest Removed",
-                                    description: `${guest.name} has been removed from the list`,
+                                    title: "Edit Mode",
+                                    description: "You can edit the fields directly in the table. Click Save to save changes.",
                                   });
                                 }}
+                                title="Fields are editable - Click Save to save changes"
                               >
                                 <Edit className="h-3 w-3" />
                               </Button>
@@ -601,13 +1084,7 @@ export const EventManagementDashboard = () => {
               </div>
             </div>
             <div className="space-y-3">
-              <div className="p-3 border rounded-lg bg-blue-50">
-                <div className="flex items-center gap-2 mb-1">
-                  <Upload className="h-4 w-4 text-blue-600" />
-                  <span className="font-medium text-blue-800">Guest ID Mapping</span>
-                </div>
-                <div className="text-sm text-blue-700">150 unique IDs generated</div>
-              </div>
+
               <div className="p-3 border rounded-lg">
                 <div className="flex justify-between items-center">
                   <span className="text-sm">Status:</span>
@@ -896,14 +1373,8 @@ export const EventManagementDashboard = () => {
           <CardContent>
             <div className="space-y-3">
               <Button className="w-full">Send Complete Itinerary</Button>
-              <Button variant="outline">Bride's Side Schedule</Button>
-              <Button variant="outline">Groom's Side Schedule</Button>
-              <div className="p-3 border rounded-lg bg-blue-50">
-                <div className="text-sm text-blue-700">
-                  ✓ Sent to all confirmed guests<br/>
-                  ⏳ 2 schedules pending review
-                </div>
-              </div>
+              {/* <Button variant="outline">Bride's Side Schedule</Button>
+              <Button variant="outline">Groom's Side Schedule</Button> */}
             </div>
           </CardContent>
         </Card>
@@ -920,47 +1391,18 @@ export const EventManagementDashboard = () => {
               <Button className="w-full">Bride's Side Messages</Button>
               <Button variant="outline">Groom's Side Messages</Button>
               <Button variant="outline">VIP Special Messages</Button>
-              <div className="p-3 border rounded-lg bg-green-50">
+              {/* <div className="p-3 border rounded-lg bg-green-50">
                 <div className="text-sm text-green-700">
                   ✓ 45 personalized messages sent<br/>
                   ⏳ 5 custom messages pending
                 </div>
-              </div>
+              </div> */}
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Message Templates */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Message Templates</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {[
-              { title: "Welcome Message - Bride's Side", content: "Welcome to Sarah's side! Enjoy...", recipients: 45 },
-              { title: "Welcome Message - Groom's Side", content: "Welcome to Michael's side! Let's...", recipients: 32 },
-              { title: "VIP Accommodation Message", content: "Your VIP suite is ready with...", recipients: 12 },
-              { title: "Transportation Reminder", content: "Your pickup is scheduled for...", recipients: 28 }
-            ].map((template, index) => (
-              <div key={index} className="border rounded-lg p-4">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <div className="font-medium">{template.title}</div>
-                    <div className="text-sm text-muted-foreground mt-1">{template.content}</div>
-                    <div className="text-xs text-muted-foreground mt-1">{template.recipients} recipients</div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm">Edit</Button>
-                    <Button variant="outline" size="sm">Send</Button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+
     </div>
   );
 
@@ -1087,7 +1529,7 @@ export const EventManagementDashboard = () => {
         <CardContent className="p-4 sm:p-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
             <div className="flex-1">
-              <h1 className="text-xl sm:text-2xl font-bold">Event Management Dashboard</h1>
+              {/* <h1 className="text-xl sm:text-2xl font-bold">Event Management Dashboard</h1> */}
               <p className="text-blue-100 text-sm sm:text-base mt-1">Complete Event Management Workflow</p>
               {eventDetails && (
                 <p className="text-blue-200 text-xs sm:text-sm mt-2 break-words">

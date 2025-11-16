@@ -81,9 +81,9 @@ export const EventCompanyHeader = ({ weddingData, eventId }: EventCompanyHeaderP
             )}
             <div>
               <CardTitle className="text-2xl text-slate-800 mb-1">Event Management Dashboard</CardTitle>
-              <CardDescription className="text-slate-600">
+              {/* <CardDescription className="text-slate-600">
                 Managing: <span className="font-semibold text-blue-600">{weddingData?.coupleNames || 'Event Management'}</span>
-              </CardDescription>
+              </CardDescription> */}
             </div>
           </div>
           
@@ -135,7 +135,7 @@ export const EventCompanyHeader = ({ weddingData, eventId }: EventCompanyHeaderP
           </div>
         )}
         
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <div className="flex items-center space-x-3 p-4 bg-white rounded-lg shadow-sm">
             <div className="p-2 bg-blue-100 rounded-lg">
               <Calendar className="h-5 w-5 text-blue-600" />
@@ -206,7 +206,7 @@ export const EventCompanyHeader = ({ weddingData, eventId }: EventCompanyHeaderP
               <Badge variant="secondary" className="bg-blue-100 text-blue-800">In Progress</Badge>
             </div>
           </div>
-        </div>
+        </div> */}
       </CardContent>
     </Card>
   );

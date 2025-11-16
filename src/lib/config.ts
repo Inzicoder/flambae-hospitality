@@ -25,8 +25,9 @@ export const API_CONFIG = {
     },
     // Event participants endpoints
     PARTICIPANTS: {
-      LIST: (eventId: string) => `/event-participants/${eventId}`,
+      LIST: (eventId: string) => `/event-participants/?eventId=${eventId}`,
       CREATE: (eventId: string) => `/event-participants/${eventId}`,
+      GET_BY_ID: (participantId: string) => `/event-participants/${participantId}`,
       GET_BY_EVENT: (eventId: string) => `/event-participants?eventId=${eventId}`,
       UPDATE: (id: string) => `/event-participants/${id}`,
       DELETE: (id: string) => `/event-participants/${id}`,
