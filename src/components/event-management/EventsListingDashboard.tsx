@@ -532,14 +532,14 @@ export const EventsListingDashboard = ({ weddingData }: { weddingData: any }) =>
               <div className="text-sm text-blue-100">Total Guests</div>
             </CardContent>
           </Card>
-
+{/* 
           <Card className="bg-white/10 backdrop-blur-sm border-white/20">
             <CardContent className="p-4 text-center">
               <Star className="h-8 w-8 mx-auto mb-2 text-white" />
               <div className="text-2xl font-bold text-white">${totalStats.totalRevenue.toLocaleString()}</div>
               <div className="text-sm text-blue-100">Revenue</div>
             </CardContent>
-          </Card>
+          </Card> */}
 
           <Card className="bg-white/10 backdrop-blur-sm border-white/20">
             <CardContent className="p-4 text-center">
