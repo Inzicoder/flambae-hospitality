@@ -63,10 +63,9 @@ interface Event {
   declinedGuests: number;
   location: string;
   phase: string;
-  progress: number;
+
   tags: string[];
   createdDate: string;
-  lastActivity: string;
   urgentTasks: number;
   revenue: number;
 }
@@ -112,13 +111,9 @@ export const EventsListingDashboard = ({ weddingData }: { weddingData: any }) =>
           pendingGuests: 0,
           declinedGuests: 0,
           location: event.venue,
-          phase: 'Before Event', // Default phase
-          progress: 0, // Default progress
           tags: [event.food], // Use food preference as tag
           createdDate: event.createdAt,
-          lastActivity: 'Recently',
           urgentTasks: 0,
-          revenue: 0
         }));
         
         setEvents(transformedEvents);
@@ -235,6 +230,14 @@ export const EventsListingDashboard = ({ weddingData }: { weddingData: any }) =>
 
   // Handle create event
   const handleCreateEvent = async () => {
+    let foodType =''
+    if(formData.food.length > 1) {
+      foodType = 'both'
+    }
+    else{
+      foodType = formData.food[0]
+    }
+    console.log(foodType,'foodType')
     try {
       setIsCreating(true);
       
@@ -258,11 +261,13 @@ export const EventsListingDashboard = ({ weddingData }: { weddingData: any }) =>
         return;
       }
 
+
+
       const response = await axios.post(getApiUrl(API_CONFIG.ENDPOINTS.EVENTS.CREATE), {
         eventName: formData.eventName.trim(),
         eventDateTime: formData.eventDateTime,
         venue: formData.venue.trim(),
-        food: formData.food.join(', ') // Join array into comma-separated string
+        food: foodType 
       }, {
         headers: getAuthHeaders()
       });
@@ -359,15 +364,7 @@ export const EventsListingDashboard = ({ weddingData }: { weddingData: any }) =>
     }
   };
 
-  // Get phase badge variant  
-  const getPhaseBadgeVariant = (phase: string) => {
-    switch (phase) {
-      case "Before Event": return "default";
-      case "During Event": return "secondary"; 
-      case "Completed": return "outline";
-      default: return "outline";
-    }
-  };
+
 
   // Calculate total statistics
   const totalStats = {
@@ -379,7 +376,7 @@ export const EventsListingDashboard = ({ weddingData }: { weddingData: any }) =>
     urgentTasks: events.reduce((sum, e) => sum + e.urgentTasks, 0)
   };
 
-  console.log(error,'error')
+
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
@@ -628,52 +625,50 @@ export const EventsListingDashboard = ({ weddingData }: { weddingData: any }) =>
                         <MapPin className="h-4 w-4" />
                         <span className="truncate">{event.location}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-gray-600">
+                      {/* <div className="flex items-center gap-2 text-gray-600">
                         <Users className="h-4 w-4" />
                         <span>{event.guestCount} guests ({event.confirmedGuests} confirmed)</span>
-                      </div>
+                      </div> */}
                     </div>
                   </CardHeader>
 
                   <CardContent className="pt-0">
                     {/* Progress Bar */}
-                    <div className="mb-4">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm font-medium text-gray-600">{event.phase}</span>
-                        <span className="text-sm text-gray-500">{event.progress}%</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
-                          className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                          style={{ width: `${event.progress}%` }}
-                        ></div>
-                      </div>
-                    </div>
+
 
                     {/* Tags */}
                     <div className="flex gap-1 mb-4 flex-wrap">
-                      {event.tags.map((tag, index) => {
-                        const isVeg = tag.toLowerCase() === 'veg';
-                        const isNonVeg = tag.toLowerCase() === 'non-veg' || tag.toLowerCase() === 'nonveg';
-                        
+                    {event.tags.flatMap((tag) => {
+                      const lower = tag.toLowerCase();
+
+                      // If backend returns "both" → expand into ["veg", "non-veg"]
+                      const expandedTags =
+                        lower === "both" ? ["veg", "non-veg"] : [tag];
+
+                      return expandedTags.map((t, index) => {
+                        const tl = t.toLowerCase();
+                        const isVeg = tl === "veg";
+                        const isNonVeg = tl === "non-veg" || tl === "nonveg";
+
                         return (
-                          <Badge 
-                            key={index} 
-                            variant="outline" 
+                          <Badge
+                            key={`${tag}-${index}`}
+                            variant="outline"
                             className={`text-xs flex items-center gap-1 ${
                               isVeg
-                                ? 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100' 
+                                ? "bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
                                 : isNonVeg
-                                ? 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100'
-                                : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
+                                ? "bg-red-50 text-red-700 border-red-200 hover:bg-red-100"
+                                : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100"
                             }`}
                           >
                             {isVeg && <Leaf className="h-3 w-3" />}
                             {isNonVeg && <Beef className="h-3 w-3" />}
-                            {tag}
+                            {t}
                           </Badge>
                         );
-                      })}
+                      });
+                    })}
                     </div>
 
                     {/* Action Buttons */}
@@ -715,10 +710,7 @@ export const EventsListingDashboard = ({ weddingData }: { weddingData: any }) =>
 
                     {/* Additional Info */}
                     <div className="mt-3 pt-3 border-t border-gray-100">
-                      <div className="flex justify-between items-center text-xs text-gray-500">
-                        <span>Revenue: ${event.revenue.toLocaleString()}</span>
-                        <span>{event.lastActivity}</span>
-                      </div>
+
                       {event.urgentTasks > 0 && (
                         <div className="mt-1">
                           <Badge variant="destructive" className="text-xs">

@@ -144,6 +144,8 @@ export const HelpDeskTab = ({ eventId }: { eventId: string }) => {
     ? tickets 
     : tickets.filter(ticket => ticket.priority === filterPriority);
 
+
+
   const openTickets = tickets.filter(t => t.status === 'open').length;
   const inProgressTickets = tickets.filter(t => t.status === 'inProgress').length;
   const resolvedTickets = tickets.filter(t => t.status === 'resolved').length;

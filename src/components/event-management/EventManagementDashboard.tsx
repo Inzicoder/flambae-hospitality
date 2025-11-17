@@ -577,7 +577,8 @@ export const EventManagementDashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-lg font-bold text-green-600 capitalize">
-              {eventDetails?.food || 'Loading...'}
+              {eventDetails?.food === "both" ? ["Veg", "Non-Veg"].join(", ") : eventDetails?.food || 'Loading...'}
+
             </div>
             <p className="text-xs text-muted-foreground">Catering Type</p>
           </CardContent>
@@ -943,7 +944,6 @@ export const EventManagementDashboard = () => {
                                         g.id
                                       );
 
-                                      console.log({updatedGuest})
                                       
                                       if (updatedGuest && updatedGuest.id) {
                                         navigate(`/document-upload/${eventId}/${updatedGuest.id}`);
@@ -1581,7 +1581,7 @@ export const EventManagementDashboard = () => {
       {/* Tab Navigation */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className={`grid mb-6 overflow-x-auto ${
-          activePhase === "before-event" ? "grid-cols-5" : "grid-cols-3"
+          activePhase === "before-event" ? "grid-cols-3" : "grid-cols-2"
         } w-full`}>
           {activePhase === "before-event" ? (
             <>
@@ -1589,29 +1589,29 @@ export const EventManagementDashboard = () => {
                 <Upload className="h-4 w-4" />
                 <span className="hidden sm:inline">Collect Data</span>
               </TabsTrigger>
-              <TabsTrigger value="invites" className="flex items-center gap-2">
+              {/* <TabsTrigger value="invites" className="flex items-center gap-2">
                 <Send className="h-4 w-4" />
                 <span className="hidden sm:inline">Broadcast Invites</span>
-              </TabsTrigger>
+              </TabsTrigger> */}
               <TabsTrigger value="hotel" className="flex items-center gap-2">
                 <Hotel className="h-4 w-4" />
-                <span className="hidden sm:inline">Hotel</span>
+                <span className="hidden sm:inline">Hotel Management</span>
               </TabsTrigger>
               <TabsTrigger value="logistics" className="flex items-center gap-2">
                 <Truck className="h-4 w-4" />
                 <span className="hidden sm:inline">Logistics</span>
               </TabsTrigger>
-              <TabsTrigger value="pre-event" className="flex items-center gap-2">
+              {/* <TabsTrigger value="pre-event" className="flex items-center gap-2">
                 <Bell className="h-4 w-4" />
                 <span className="hidden sm:inline">Pre-Event</span>
-              </TabsTrigger>
+              </TabsTrigger> */}
             </>
           ) : (
             <>
-              <TabsTrigger value="communication" className="flex items-center gap-2">
+              {/* <TabsTrigger value="communication" className="flex items-center gap-2">
                 <MessageCircle className="h-4 w-4" />
                 <span className="hidden sm:inline">Communication</span>
-              </TabsTrigger>
+              </TabsTrigger> */}
               <TabsTrigger value="helpdesk" className="flex items-center gap-2">
                 <HelpCircle className="h-4 w-4" />
                 <span className="hidden sm:inline">Help Desk</span>
