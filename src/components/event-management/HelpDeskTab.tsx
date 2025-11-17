@@ -59,7 +59,6 @@ export const HelpDeskTab = ({ eventId }: { eventId: string }) => {
 
   const handleTicketSubmit = (ticket: HelpDeskTicket) => {
     setTickets(prev => [ticket, ...prev]);
-    console.log(tickets,'tickets')
     setActiveTab('tickets'); // Switch to tickets view after submission
   };
 
@@ -144,8 +143,6 @@ export const HelpDeskTab = ({ eventId }: { eventId: string }) => {
   const filteredTickets = filterPriority === 'all' 
     ? tickets 
     : tickets.filter(ticket => ticket.priority === filterPriority);
-
-    console.log({filteredTickets})
 
 
 
