@@ -4,12 +4,12 @@ import { DocumentUpload } from '@/components/DocumentUpload';
 import { useToast } from '@/hooks/use-toast';
 
 export const DocumentUploadPage = () => {
-  const params = useParams<{ eventId: string; participantId: string }>();
-  const { eventId, participantId } = params;
+  const params = useParams<{  participantId: string }>();
+  const {  participantId } = params;
 
   const { toast } = useToast();
 
-  if (!eventId || !participantId) {
+  if (!participantId) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -23,7 +23,7 @@ export const DocumentUploadPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 py-8">
       <DocumentUpload 
-        eventId={eventId}
+        
         participantId={participantId}
         onUploadSuccess={() => {
           console.log('Documents uploaded successfully');

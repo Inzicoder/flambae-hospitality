@@ -295,7 +295,7 @@ const App = () => {
             <Route path="/" element={<LandingPage onGetStarted={handleGetStarted} />} />
             <Route path="/features/guest" element={<GuestFeaturesPage onGetStarted={handleGetStarted} />} />
             <Route path="/features/company" element={<EventCompanyFeaturesPage onGetStarted={handleGetStarted} />} />
-            <Route path="/document-upload/:eventId/:participantId" element={<DocumentUploadPage />} />
+            <Route path="/document-upload/:participantId" element={<DocumentUploadPage />} />
             
             {/* Auth Route */}
             <Route path="/auth" element={

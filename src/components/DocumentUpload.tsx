@@ -29,7 +29,6 @@ import {
 } from "@/lib/config";
 
 interface DocumentUploadProps {
-  eventId: string;
   participantId: string;
   onUploadSuccess?: () => void;
 }
