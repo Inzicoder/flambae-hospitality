@@ -182,52 +182,7 @@ const App = () => {
 
   });
 
-  // const toggleTodo = (id: number) => {
-  //   setWeddingData(prev => ({
-  //     ...prev,
-  //     todos: prev.todos.map(todo => 
-  //       todo.id === id ? { ...todo, completed: !todo.completed } : todo
-  //     )
-  //   }));
-  // };
 
-  // const addTodo = (task: string) => {
-  //   const newTask = {
-  //     id: Date.now(),
-  //     task,
-  //     completed: false,
-  //     urgent: false,
-  //     dueDate: new Date().toISOString().split('T')[0]
-  //   };
-  //   setWeddingData(prev => ({
-  //     ...prev,
-  //     todos: [...prev.todos, newTask]
-  //   }));
-  // };
-
-  // const deleteTodo = (id: number) => {
-  //   setWeddingData(prev => ({
-  //     ...prev,
-  //     todos: prev.todos.filter(todo => todo.id !== id)
-  //   }));
-  // };
-
-  // const addBudgetCategory = (category: { name: string; estimated: number }) => {
-  //   const newCategory = {
-  //     id: Date.now(),
-  //     name: category.name,
-  //     estimated: category.estimated,
-  //     actual: 0,
-  //     status: "pending"
-  //   };
-  //   setWeddingData(prev => ({
-  //     ...prev,
-  //     budget: {
-  //       ...prev.budget,
-  //       categories: [...prev.budget.categories, newCategory]
-  //     }
-  //   }));
-  // };
 
   const handleGetStarted = () => {
     console.log('Get started clicked - navigating to auth');
@@ -260,7 +215,7 @@ const App = () => {
   };
 
   const handleBackToAuth = () => {
-    console.log('App - Back to auth');
+
     setShowPayment(false);
   };
 
@@ -270,10 +225,12 @@ const App = () => {
     setShowPayment(false);
     setUserType('guest');
     setEventCode('');
+
     // Clear authentication state from localStorage
     localStorage.removeItem('authState');
     localStorage.removeItem('token'); // Also clear any stored token
     localStorage.removeItem('userRole');
+
   };
 
   // Common layout component for authenticated pages
@@ -296,11 +253,11 @@ const App = () => {
       </div>
       
       <DashboardHeader onLogout={handleLogout} userType={userType} />
-      <Navigation 
+      {/* <Navigation 
         coupleNames={''}
         onLogout={handleLogout}
         userType={userType}
-      />
+      /> */}
       
       {/* Common Back Button */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 relative z-10">
@@ -400,36 +357,7 @@ const App = () => {
               )
             } />
             
-            {/* Simplified guest-only routes for personal planning */}
-            {/* <Route path="/budget" element={
-              isLoggedIn && userType === 'guest' ? (
-                <DashboardLayout>
-                  <BudgetPage budget={weddingData.budget} onAddCategory={addBudgetCategory} />
-                </DashboardLayout>
-              ) : (
-                <Navigate to="/auth" replace />
-              )
-            } />
-{/*              */}
-            {/* <Route path="/todos" element={
-              isLoggedIn && userType === 'guest' ? (
-                <DashboardLayout>
-                  <TodoPage todos={weddingData.todos} onToggleTodo={toggleTodo} onAddTodo={addTodo} onDeleteTodo={deleteTodo} />
-                </DashboardLayout>
-              ) : (
-                <Navigate to="/auth" replace />
-              )
-            } /> */} 
-            
-            {/* <Route path="/gallery" element={
-              isLoggedIn && userType === 'guest' ? (
-                <DashboardLayout>
-                  <GalleryPage gallery={weddingData.gallery} />
-                </DashboardLayout>
-              ) : (
-                <Navigate to="/auth" replace />
-              )
-            } /> */}
+
             
             {/* 404 Route */}
             <Route path="*" element={<NotFound />} />

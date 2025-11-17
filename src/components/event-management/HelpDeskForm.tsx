@@ -30,6 +30,7 @@ interface HelpDeskFormProps {
 export const HelpDeskForm = ({ eventId, onSubmit }: HelpDeskFormProps) => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [ticket,setTicket] = useState({})
   const [formData, setFormData] = useState<CreateTicketRequest>({
     name: '',
     roomNumber: '',
@@ -75,16 +76,16 @@ export const HelpDeskForm = ({ eventId, onSubmit }: HelpDeskFormProps) => {
     try {
       // Create ticket via API
       const createdTicket = await createHelpDeskTicket(formData);
-
-      // Call onSubmit callback if provided
+      
+      // // Call onSubmit callback if provided
       if (onSubmit) {
-        onSubmit(createdTicket);
+        onSubmit(createdTicket[0]);
       }
 
       // Show success message
       toast({
         title: "Ticket Created Successfully",
-        description: `Ticket ${createdTicket.id} has been submitted with ${formData.priority} priority`,
+        description: `Ticket ${createdTicket[0].id} has been submitted with ${formData.priority} priority`,
       });
 
       // Reset form

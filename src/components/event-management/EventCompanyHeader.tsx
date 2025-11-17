@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FileUploadButton } from './FileUploadButton';
 import { Building2, Calendar, Users, MapPin, Phone, Mail, Settings, Upload, LogOut, Edit, Check, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface EventCompanyHeaderProps {
   weddingData?: any;
@@ -21,6 +22,7 @@ export const EventCompanyHeader = ({ weddingData, eventId }: EventCompanyHeaderP
     totalGuests: weddingData?.guestStats?.totalInvited || 0,
     venueStatus: 'Confirmed'
   });
+  const navigate = useNavigate();
 
   const handleDataProcessed = (data: any) => {
     console.log('Processed data:', data);
@@ -30,9 +32,12 @@ export const EventCompanyHeader = ({ weddingData, eventId }: EventCompanyHeaderP
 
   const handleLogout = () => {
     // This would typically call a logout function from your auth system
-    console.log('Logging out...');
+
+    localStorage.removeItem('authState');
+    localStorage.removeItem('token'); // Also clear any stored token
+    localStorage.removeItem('userRole');
     // For now, we'll just reload the page which should trigger the auth flow
-    window.location.reload();
+    navigate('/auth', { replace: true });
   };
 
   const toggleEditMode = () => {
@@ -90,7 +95,7 @@ export const EventCompanyHeader = ({ weddingData, eventId }: EventCompanyHeaderP
           <div className="flex items-center space-x-3">
             <FileUploadButton onDataProcessed={handleDataProcessed} eventId={eventId} />
             
-            <Button 
+            {/* <Button 
               variant="outline" 
               size="sm" 
               className="flex items-center gap-2"
@@ -98,7 +103,7 @@ export const EventCompanyHeader = ({ weddingData, eventId }: EventCompanyHeaderP
             >
               <Edit className="h-4 w-4" />
               {isEditMode ? 'View Mode' : 'Edit Mode'}
-            </Button>
+            </Button> */}
             
             <Button 
               variant="destructive" 
