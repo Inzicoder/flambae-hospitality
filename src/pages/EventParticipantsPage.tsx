@@ -375,7 +375,7 @@ export const EventParticipantsPage = () => {
             <CardContent className="p-4 text-center">
               <XCircle className="h-8 w-8 text-red-300 mx-auto mb-2" />
               <div className="text-2xl font-bold text-white">
-                {participants.filter(p => p.attending === 'No').length}
+                {participants.filter(p => p.attending !== 'Yes').length}
               </div>
               <div className="text-blue-100 text-sm">Not Attending</div>
             </CardContent>
