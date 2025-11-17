@@ -1,21 +1,32 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState, useRef, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { 
-  Upload, 
-  CheckCircle, 
-  AlertCircle, 
+import {
+  Upload,
+  CheckCircle,
+  AlertCircle,
   X,
   FileImage,
   FileText,
-  Loader2
-} from 'lucide-react';
+  Loader2,
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import axios from 'axios';
-import { API_CONFIG, getApiUrl, getAuthHeaders, getAuthHeadersForFormData } from '@/lib/config';
+import axios from "axios";
+import {
+  API_CONFIG,
+  getApiUrl,
+  getAuthHeaders,
+  getAuthHeadersForFormData,
+} from "@/lib/config";
 
 interface DocumentUploadProps {
   eventId: string;
@@ -24,19 +35,18 @@ interface DocumentUploadProps {
 }
 
 export const DocumentUpload: React.FC<DocumentUploadProps> = ({
-  eventId,
   participantId,
-  onUploadSuccess
+  onUploadSuccess,
 }) => {
   const [frontIdFile, setFrontIdFile] = useState<File | null>(null);
   const [backIdFile, setBackIdFile] = useState<File | null>(null);
   const [frontIdPreview, setFrontIdPreview] = useState<string | null>(null);
   const [backIdPreview, setBackIdPreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [error, setError] = useState<string>('');
-  const [participantName, setParticipantName] = useState<string>('');
+  const [error, setError] = useState<string>("");
+  const [participantName, setParticipantName] = useState<string>("");
   const [isLoadingParticipant, setIsLoadingParticipant] = useState(true);
-  
+
   const frontIdInputRef = useRef<HTMLInputElement>(null);
   const backIdInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -46,43 +56,40 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({
     const fetchParticipantDetails = async () => {
       if (!participantId) return;
 
-      console.log({participantId})
+      console.log({ participantId });
 
-      
       try {
         setIsLoadingParticipant(true);
-        const url = getApiUrl(API_CONFIG.ENDPOINTS.PARTICIPANTS.GET_BY_ID(participantId));
-        const response = await axios.get(
-          url,
-          {
-            headers: getAuthHeaders()
-          }
+        const url = getApiUrl(
+          API_CONFIG.ENDPOINTS.PARTICIPANTS.GET_BY_ID(participantId)
         );
+        const response = await axios.get(url, {
+          headers: getAuthHeaders(),
+        });
 
-        console.log('Participant API Response:', response.data);
-        
-        if (response.data && response.data.status === 'success') {
-          const participantData = Array.isArray(response.data.data) 
-            ? response.data.data[0] 
+        console.log("Participant API Response:", response.data);
+
+        if (response.data && response.data.status === "success") {
+          const participantData = Array.isArray(response.data.data)
+            ? response.data.data[0]
             : response.data.data;
-          
-          console.log('Participant Data:', participantData);
-          
+
+          console.log("Participant Data:", participantData);
+
           if (participantData && participantData.name) {
             setParticipantName(participantData.name);
           }
         }
       } catch (err: any) {
-        console.error('Error fetching participant details:', err);
+        console.error("Error fetching participant details:", err);
 
-        
         // Log detailed error information
         if (err.response) {
-          console.error('Response status:', err.response.status);
-          console.error('Response data:', err.response.data);
-          console.error('Response headers:', err.response.headers);
+          console.error("Response status:", err.response.status);
+          console.error("Response data:", err.response.data);
+          console.error("Response headers:", err.response.headers);
         }
-        
+
         // Don't set error state or show toast - just log it
         // The user can still upload documents even if name fetch fails
       } finally {
@@ -97,23 +104,26 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({
     const file = e.target.files?.[0];
     if (file) {
       // Validate file type (images or PDF)
-      const isValidType = file.type.startsWith('image/') || file.type === 'application/pdf';
+      const isValidType =
+        file.type.startsWith("image/") || file.type === "application/pdf";
       if (!isValidType) {
-        setError('Please upload an image file (PNG, JPG, JPEG) or PDF for front ID');
+        setError(
+          "Please upload an image file (PNG, JPG, JPEG) or PDF for front ID"
+        );
         return;
       }
-      
+
       // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        setError('File size must be less than 5MB');
+        setError("File size must be less than 5MB");
         return;
       }
 
       setFrontIdFile(file);
-      setError('');
-      
+      setError("");
+
       // Create preview only for images
-      if (file.type.startsWith('image/')) {
+      if (file.type.startsWith("image/")) {
         const reader = new FileReader();
         reader.onloadend = () => {
           setFrontIdPreview(reader.result as string);
@@ -130,23 +140,26 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({
     const file = e.target.files?.[0];
     if (file) {
       // Validate file type (images or PDF)
-      const isValidType = file.type.startsWith('image/') || file.type === 'application/pdf';
+      const isValidType =
+        file.type.startsWith("image/") || file.type === "application/pdf";
       if (!isValidType) {
-        setError('Please upload an image file (PNG, JPG, JPEG) or PDF for back ID');
+        setError(
+          "Please upload an image file (PNG, JPG, JPEG) or PDF for back ID"
+        );
         return;
       }
-      
+
       // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        setError('File size must be less than 5MB');
+        setError("File size must be less than 5MB");
         return;
       }
 
       setBackIdFile(file);
-      setError('');
-      
+      setError("");
+
       // Create preview only for images
-      if (file.type.startsWith('image/')) {
+      if (file.type.startsWith("image/")) {
         const reader = new FileReader();
         reader.onloadend = () => {
           setBackIdPreview(reader.result as string);
@@ -163,7 +176,7 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({
     setFrontIdFile(null);
     setFrontIdPreview(null);
     if (frontIdInputRef.current) {
-      frontIdInputRef.current.value = '';
+      frontIdInputRef.current.value = "";
     }
   };
 
@@ -171,7 +184,7 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({
     setBackIdFile(null);
     setBackIdPreview(null);
     if (backIdInputRef.current) {
-      backIdInputRef.current.value = '';
+      backIdInputRef.current.value = "";
     }
   };
 
@@ -181,32 +194,34 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({
 
   const handleSubmit = async () => {
     if (!isFormValid()) {
-      setError('Please upload both front and back ID documents');
+      setError("Please upload both front and back ID documents");
       return;
     }
 
     if (!frontIdFile || !backIdFile) {
-      setError('Please upload both documents');
+      setError("Please upload both documents");
       return;
     }
 
     setIsUploading(true);
-    setError('');
+    setError("");
 
     try {
       const formData = new FormData();
-      formData.append('front', frontIdFile);
-      formData.append('back', backIdFile);
+      formData.append("front", frontIdFile);
+      formData.append("back", backIdFile);
 
       const response = await axios.post(
-        getApiUrl(API_CONFIG.ENDPOINTS.PARTICIPANTS.UPLOAD_DOCUMENT(eventId, participantId)),
+        getApiUrl(
+          API_CONFIG.ENDPOINTS.PARTICIPANTS.UPLOAD_DOCUMENT(participantId)
+        ),
         formData,
         {
-          headers: getAuthHeadersForFormData()
+          headers: getAuthHeadersForFormData(),
         }
       );
 
-      if (response.data && response.data.status === 'success') {
+      if (response.data && response.data.status === "success") {
         toast({
           title: "Documents uploaded successfully!",
           description: "Your ID documents have been uploaded successfully.",
@@ -217,23 +232,26 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({
         setBackIdFile(null);
         setFrontIdPreview(null);
         setBackIdPreview(null);
-        if (frontIdInputRef.current) frontIdInputRef.current.value = '';
-        if (backIdInputRef.current) backIdInputRef.current.value = '';
+        if (frontIdInputRef.current) frontIdInputRef.current.value = "";
+        if (backIdInputRef.current) backIdInputRef.current.value = "";
 
         if (onUploadSuccess) {
           onUploadSuccess();
         }
       } else {
-        throw new Error(response.data?.message || 'Failed to upload documents');
+        throw new Error(response.data?.message || "Failed to upload documents");
       }
     } catch (err: any) {
-      console.error('Error uploading documents:', err);
-      const errorMessage = err.response?.data?.message || err.message || 'Failed to upload documents. Please try again.';
+      console.error("Error uploading documents:", err);
+      const errorMessage =
+        err.response?.data?.message ||
+        err.message ||
+        "Failed to upload documents. Please try again.";
       setError(errorMessage);
       toast({
         title: "Upload failed",
         description: errorMessage,
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setIsUploading(false);
@@ -244,9 +262,12 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({
     <div className="max-w-4xl mx-auto p-4 sm:p-6">
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">Upload ID Documents</CardTitle>
+          <CardTitle className="text-2xl font-bold">
+            Upload ID Documents
+          </CardTitle>
           <CardDescription>
-            Please upload both front and back of your ID document (Images or PDF)
+            Please upload both front and back of your ID document (Images or
+            PDF)
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -260,13 +281,16 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({
 
           {/* Participant Name - Autofilled */}
           <div className="space-y-2">
-            <Label htmlFor="participantName" className="text-base font-semibold">
+            <Label
+              htmlFor="participantName"
+              className="text-base font-semibold"
+            >
               Participant Name
             </Label>
             <Input
               id="participantName"
               type="text"
-              value={isLoadingParticipant ? 'Loading...' : participantName}
+              value={isLoadingParticipant ? "Loading..." : participantName}
               readOnly
               disabled={isLoadingParticipant}
               className="bg-gray-50 cursor-not-allowed"
@@ -284,16 +308,18 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({
                 <div className="space-y-4">
                   <div className="relative">
                     {frontIdPreview ? (
-                      <img 
-                        src={frontIdPreview} 
-                        alt="Front ID Preview" 
+                      <img
+                        src={frontIdPreview}
+                        alt="Front ID Preview"
                         className="w-full h-64 object-contain rounded-lg border"
                       />
                     ) : (
                       <div className="w-full h-64 flex items-center justify-center bg-gray-50 rounded-lg border">
                         <div className="text-center">
                           <FileText className="h-16 w-16 mx-auto text-gray-400 mb-2" />
-                          <p className="text-sm text-gray-600 font-medium">PDF Document</p>
+                          <p className="text-sm text-gray-600 font-medium">
+                            PDF Document
+                          </p>
                         </div>
                       </div>
                     )}
@@ -354,16 +380,18 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({
                 <div className="space-y-4">
                   <div className="relative">
                     {backIdPreview ? (
-                      <img 
-                        src={backIdPreview} 
-                        alt="Back ID Preview" 
+                      <img
+                        src={backIdPreview}
+                        alt="Back ID Preview"
                         className="w-full h-64 object-contain rounded-lg border"
                       />
                     ) : (
                       <div className="w-full h-64 flex items-center justify-center bg-gray-50 rounded-lg border">
                         <div className="text-center">
                           <FileText className="h-16 w-16 mx-auto text-gray-400 mb-2" />
-                          <p className="text-sm text-gray-600 font-medium">PDF Document</p>
+                          <p className="text-sm text-gray-600 font-medium">
+                            PDF Document
+                          </p>
                         </div>
                       </div>
                     )}
@@ -443,9 +471,9 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({
                 setBackIdFile(null);
                 setFrontIdPreview(null);
                 setBackIdPreview(null);
-                setError('');
-                if (frontIdInputRef.current) frontIdInputRef.current.value = '';
-                if (backIdInputRef.current) backIdInputRef.current.value = '';
+                setError("");
+                if (frontIdInputRef.current) frontIdInputRef.current.value = "";
+                if (backIdInputRef.current) backIdInputRef.current.value = "";
               }}
               disabled={isUploading}
             >
@@ -475,4 +503,3 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({
     </div>
   );
 };
-

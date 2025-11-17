@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef, useLayoutEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +8,7 @@ import {
   Hotel, Car, Gift, Calendar, MessageCircle, HelpCircle,
   CheckCircle, Clock, AlertCircle, Star, Truck, 
   Settings, Download, Eye, Edit, Plus, Phone,
-  Loader2, FileText, Save
+  Loader2, FileText
 } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
@@ -16,6 +16,7 @@ import axios from 'axios';
 import { useToast } from "@/hooks/use-toast";
 import { FileUploadButton } from './FileUploadButton';
 import { HelpDeskTab } from './HelpDeskTab';
+import { GuestDetailsDialog } from './GuestDetailsDialog';
 import { API_CONFIG, getApiUrl, getAuthHeaders } from '@/lib/config';
 import * as XLSX from 'xlsx';
 
@@ -49,15 +50,9 @@ export const EventManagementDashboard = () => {
   const [error, setError] = useState<string | null>(null);
   const [uploadedData, setUploadedData] = useState<any[]>([]);
   const [apiSuccess, setApiSuccess] = useState(false);
-  const scrollRestoreRef = useRef<{
-    scrollTop: number;
-    scrollLeft: number;
-    element: HTMLElement | null;
-    activeElement: HTMLElement | null;
-    selectionStart: number | null;
-    selectionEnd: number | null;
-  } | null>(null);
-  const tableScrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedGuest, setSelectedGuest] = useState<any | null>(null);
+  const [isEditMode, setIsEditMode] = useState(false);
 
   // Fetch event details from API
   const fetchEventDetails = async () => {
@@ -162,31 +157,6 @@ export const EventManagementDashboard = () => {
     return null;
   };
 
-  // Helper function to restore scroll position and focus
-  const restoreScrollAndFocus = useCallback(() => {
-    if (!scrollRestoreRef.current) return;
-
-    const { scrollTop, scrollLeft, element, activeElement, selectionStart, selectionEnd } = scrollRestoreRef.current;
-
-    // Restore scroll position
-    if (element) {
-      element.scrollTop = scrollTop;
-      element.scrollLeft = scrollLeft;
-    } else {
-      window.scrollTo(scrollLeft, scrollTop);
-    }
-
-    // Restore focus and cursor position
-    if (activeElement) {
-      activeElement.focus();
-      if (activeElement.tagName === 'INPUT' && selectionStart !== null && selectionEnd !== null) {
-        (activeElement as HTMLInputElement).setSelectionRange(selectionStart, selectionEnd);
-      }
-    }
-
-    // Clear the ref after restoring
-    scrollRestoreRef.current = null;
-  }, []);
 
   // Helper function to convert UTC date string to local date for input (YYYY-MM-DD)
   const formatDateForInput = (dateString: string | undefined): string => {
@@ -286,69 +256,46 @@ export const EventManagementDashboard = () => {
     return timeString;
   };
 
-  // Helper function to update field value while preserving scroll position and focus
-  const updateField = useCallback((index: number, field: string, value: string) => {
-    // Save current scroll position and active element BEFORE state update
-    const activeElement = document.activeElement as HTMLInputElement | HTMLSelectElement | null;
-    
-    // Use the ref to the scroll container if available, otherwise try to find it
-    let scrollContainer: HTMLElement | null = tableScrollContainerRef.current;
-    
-    if (!scrollContainer && activeElement) {
-      // Fallback: try to find scroll container
-      scrollContainer = activeElement.closest('.overflow-x-auto') as HTMLElement | null;
-      if (!scrollContainer) {
-        scrollContainer = activeElement.closest('.overflow-y-auto') as HTMLElement | null;
-      }
-      if (!scrollContainer) {
-        scrollContainer = activeElement.closest('.max-h-96') as HTMLElement | null;
-      }
-    }
+  // Open modal for viewing/editing guest
+  const openGuestModal = (guest: any, editMode: boolean = false) => {
+    setSelectedGuest(guest);
+    setIsEditMode(editMode);
+    setIsModalOpen(true);
+  };
 
-    const scrollTop = scrollContainer?.scrollTop ?? window.scrollY;
-    const scrollLeft = scrollContainer?.scrollLeft ?? window.scrollX;
-    
-    // Only get selection for input elements (not select)
-    let selectionStart: number | null = null;
-    let selectionEnd: number | null = null;
-    if (activeElement && activeElement.tagName === 'INPUT') {
-      const inputElement = activeElement as HTMLInputElement;
-      selectionStart = inputElement.selectionStart;
-      selectionEnd = inputElement.selectionEnd;
-    }
+  // Close modal
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedGuest(null);
+    setIsEditMode(false);
+  };
 
-    // Store scroll info in ref
-    scrollRestoreRef.current = {
-      scrollTop,
-      scrollLeft,
-      element: scrollContainer,
-      activeElement: activeElement as HTMLElement | null,
-      selectionStart,
-      selectionEnd
-    };
+  // Save guest from modal
+  const saveGuestFromModal = async (guestToSave: any) => {
+    if (!guestToSave) return;
 
-    // Update state
-    setUploadedData((prevData) => {
-      const newData = [...prevData];
-      if (newData[index]) {
-        (newData[index] as any)[field] = value;
-      }
-      return newData;
-    });
+    const guestIndex = uploadedData.findIndex((g: any) => 
+      g.id === guestToSave.id || 
+      (g.name === guestToSave.name && g.phoneNumber === guestToSave.phoneNumber)
+    );
 
-    // Restore scroll position and focus using multiple strategies
-    // Use setTimeout to ensure it happens after React's render cycle
-    setTimeout(() => {
-      restoreScrollAndFocus();
-    }, 0);
-    
-    // Also use requestAnimationFrame as backup
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        restoreScrollAndFocus();
+    if (guestIndex !== -1) {
+      await saveParticipant(guestToSave, guestIndex);
+      // Update the uploadedData with the edited guest
+      setUploadedData((prevData) => {
+        const newData = [...prevData];
+        newData[guestIndex] = { ...guestToSave };
+        return newData;
       });
-    });
-  }, [restoreScrollAndFocus]);
+    }
+
+    closeModal();
+  };
+
+  // Handle edit button in view mode
+  const handleEditClick = () => {
+    setIsEditMode(true);
+  };
 
   // Save participant function
   const saveParticipant = async (guest: any, index: number) => {
@@ -388,10 +335,19 @@ export const EventManagementDashboard = () => {
 
       if (guest.id) {
         // Update existing participant
-        const url = getApiUrl(API_CONFIG.ENDPOINTS.PARTICIPANTS.UPDATE(guest.id));
+        if (!eventId) {
+          toast({
+            title: "Error",
+            description: "Event ID is missing. Cannot update participant.",
+            variant: "destructive"
+          });
+          return;
+        }
+        
+        const url = getApiUrl(API_CONFIG.ENDPOINTS.PARTICIPANTS.UPDATE(eventId, guest.id));
         console.log('Updating participant at:', url);
         
-        const response = await axios.patch(
+        const response = await axios.put(
           url,
           participantData,
           {
@@ -512,17 +468,6 @@ export const EventManagementDashboard = () => {
       });
     }
   }, [uploadedData, eventDetails, toast]);
-
-  // Restore scroll position after render (only when ref has data)
-  useLayoutEffect(() => {
-    if (scrollRestoreRef.current) {
-      // Use a small delay to ensure DOM is ready
-      const timeoutId = setTimeout(() => {
-        restoreScrollAndFocus();
-      }, 0);
-      return () => clearTimeout(timeoutId);
-    }
-  });
 
   // Fetch event details and participants on component mount
   useEffect(() => {
@@ -720,7 +665,7 @@ export const EventManagementDashboard = () => {
               </div>
               
               <div className="border rounded-lg overflow-hidden">
-                <div ref={tableScrollContainerRef} className="max-h-96 overflow-x-auto overflow-y-auto">
+                <div className="max-h-96 overflow-x-auto overflow-y-auto">
                   <div className="min-w-full inline-block">
                     <table className="w-full text-sm">
                     <thead className="bg-gray-50 sticky top-0">
@@ -730,15 +675,6 @@ export const EventManagementDashboard = () => {
                         <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Category</th>
                         <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs min-w-[120px]">Mobile No.</th>
                         <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">City</th>
-                        <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Date of Arrival</th>
-                        <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Mode of Arrival</th>
-                        <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Train/Flight No.</th>
-                        <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Time</th>
-                        <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Hotel Name</th>
-                        <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Room Type</th>
-                        <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Check-in</th>
-                        <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Check-out</th>
-                        <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs">Attending</th>
                         <th className="px-2 py-2 text-left font-medium text-gray-700 text-xs min-w-[120px]">Actions</th>
                       </tr>
                     </thead>
@@ -749,144 +685,16 @@ export const EventManagementDashboard = () => {
                           <td className="px-2 py-2 text-xs">{index + 1}</td>
                           
                           {/* Name */}
-                          <td className="px-2 py-2">
-                            <input
-                              type="text"
-                              value={guest.name || ''}
-                              onChange={(e) => updateField(index, 'name', e.target.value)}
-                              className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
-                            />
-                          </td>
+                          <td className="px-2 py-2 text-xs">{guest.name || '-'}</td>
                           
                           {/* Category */}
-                          <td className="px-2 py-2">
-                            <input
-                              type="text"
-                              value={guest.category || ''}
-                              onChange={(e) => updateField(index, 'category', e.target.value)}
-                              className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
-                            />
-                          </td>
+                          <td className="px-2 py-2 text-xs">{guest.category || '-'}</td>
                           
                           {/* Mobile No. */}
-                          <td className="px-2 py-2 min-w-[120px]">
-                            <input
-                              type="text"
-                              value={guest.phoneNumber || ''}
-                              onChange={(e) => updateField(index, 'phoneNumber', e.target.value)}
-                              className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs min-w-[100px]"
-                              placeholder="10-digit number"
-                            />
-                          </td>
+                          <td className="px-2 py-2 text-xs min-w-[120px]">{guest.phoneNumber || '-'}</td>
                           
                           {/* City */}
-                          <td className="px-2 py-2">
-                            <input
-                              type="text"
-                              value={guest.city || ''}
-                              onChange={(e) => updateField(index, 'city', e.target.value)}
-                              className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
-                            />
-                          </td>
-                          
-                          {/* Date of Arrival */}
-                          <td className="px-2 py-2">
-                            <div className="flex items-center gap-1">
-                              <Calendar className="h-3 w-3 text-gray-400 flex-shrink-0" />
-                              <input
-                                type="date"
-                                value={formatDateForInput(guest.arrivalDate)}
-                                onChange={(e) => updateField(index, 'arrivalDate', e.target.value)}
-                                className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
-                              />
-                            </div>
-                          </td>
-                          
-                          {/* Mode of Arrival */}
-                          <td className="px-2 py-2">
-                            <input
-                              type="text"
-                              value={guest.modeOfArrival || ''}
-                              onChange={(e) => updateField(index, 'modeOfArrival', e.target.value)}
-                              className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
-                            />
-                          </td>
-                          
-                          {/* Train/Flight Number */}
-                          <td className="px-2 py-2">
-                            <input
-                              type="text"
-                              value={guest.trainFlightNumber || ''}
-                              onChange={(e) => updateField(index, 'trainFlightNumber', e.target.value)}
-                              className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
-                            />
-                          </td>
-                          
-                          {/* Time */}
-                          <td className="px-2 py-2">
-                            <input
-                              type="text"
-                              value={guest.time || ''}
-                              onChange={(e) => updateField(index, 'time', e.target.value)}
-                              className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
-                            />
-                          </td>
-                          
-                          {/* Hotel Name */}
-                          <td className="px-2 py-2">
-                            <input
-                              type="text"
-                              value={guest.hotelName || ''}
-                              onChange={(e) => updateField(index, 'hotelName', e.target.value)}
-                              className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
-                            />
-                          </td>
-                          
-                          {/* Room Type */}
-                          <td className="px-2 py-2">
-                            <input
-                              type="text"
-                              value={guest.roomType || ''}
-                              onChange={(e) => updateField(index, 'roomType', e.target.value)}
-                              className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
-                            />
-                          </td>
-                          
-                          {/* Check-in */}
-                          <td className="px-2 py-2">
-                            <select
-                              value={guest.checkIn || 'No'}
-                              onChange={(e) => updateField(index, 'checkIn', e.target.value)}
-                              className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
-                            >
-                              <option value="No">No</option>
-                              <option value="Yes">Yes</option>
-                            </select>
-                          </td>
-                          
-                          {/* Check-out */}
-                          <td className="px-2 py-2">
-                            <select
-                              value={guest.checkOut || 'No'}
-                              onChange={(e) => updateField(index, 'checkOut', e.target.value)}
-                              className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
-                            >
-                              <option value="No">No</option>
-                              <option value="Yes">Yes</option>
-                            </select>
-                          </td>
-                          
-                          {/* Attending */}
-                          <td className="px-2 py-2">
-                            <select
-                              value={guest.attending || 'No'}
-                              onChange={(e) => updateField(index, 'attending', e.target.value)}
-                              className="w-full border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 py-0.5 text-xs"
-                            >
-                              <option value="No">No</option>
-                              <option value="Yes">Yes</option>
-                            </select>
-                          </td>
+                          <td className="px-2 py-2 text-xs">{guest.city || '-'}</td>
                           
                           {/* Actions */}
                           <td className="px-2 py-2 min-w-[120px]">
@@ -894,19 +702,18 @@ export const EventManagementDashboard = () => {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => {
-                                  if (guest.phoneNumber && guest.phoneNumber.length === 10) {
-                                    window.open(`tel:${guest.phoneNumber}`, '_self');
-                                  } else {
-                                    toast({
-                                      title: "Invalid Phone Number",
-                                      description: "Please enter a valid 10-digit phone number",
-                                      variant: "destructive"
-                                    });
-                                  }
-                                }}
+                                onClick={() => openGuestModal(guest, false)}
+                                title="View Guest Details"
                               >
-                                <Phone className="h-3 w-3" />
+                                <Eye className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => openGuestModal(guest, true)}
+                                title="Edit Guest Details"
+                              >
+                                <Edit className="h-3 w-3" />
                               </Button>
                               <Button
                                 size="sm"
@@ -975,20 +782,6 @@ export const EventManagementDashboard = () => {
                               >
                                 <FileText className="h-3 w-3" />
                               </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => {
-                                  // Edit button - just visual indicator, fields are already editable
-                                  toast({
-                                    title: "Edit Mode",
-                                    description: "You can edit the fields directly in the table. Click Save to save changes.",
-                                  });
-                                }}
-                                title="Fields are editable - Click Save to save changes"
-                              >
-                                <Edit className="h-3 w-3" />
-                              </Button>
                             </div>
                           </td>
                         </tr>
@@ -1036,6 +829,16 @@ export const EventManagementDashboard = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Guest Details Modal */}
+      <GuestDetailsDialog
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        guest={selectedGuest}
+        isEditMode={isEditMode}
+        onSave={saveGuestFromModal}
+        onEdit={handleEditClick}
+      />
 
     </div>
   );
