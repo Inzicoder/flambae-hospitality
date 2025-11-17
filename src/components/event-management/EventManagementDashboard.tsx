@@ -730,7 +730,7 @@ export const EventManagementDashboard = () => {
 
                                   // If guest has ID, navigate directly
                                   if (guest.id) {
-                                    navigate(`/document-upload/${eventId}/${guest.id}`);
+                                    navigate(`/document-upload/${guest.id}`);
                                     return;
                                   }
 
@@ -753,7 +753,7 @@ export const EventManagementDashboard = () => {
 
                                       
                                       if (updatedGuest && updatedGuest.id) {
-                                        navigate(`/document-upload/${eventId}/${updatedGuest.id}`);
+                                        navigate(`/document-upload/${updatedGuest.id}`);
                                       } else {
                                         toast({
                                           title: "Cannot Upload Documents",
